@@ -1,0 +1,20 @@
+program = statement*
+
+# TODO: add empty statements
+statement = expression ';'
+
+-- expression --
+
+expression = term | varSet
+
+varSet = IDENTIFIER '=' expression
+
+term = factor ( ('+' | '-') factor )*
+
+factor = unary ( ('*' | '/') unary )*
+
+# TODO: maybe add unlimited unary operations
+unary = ('+' | '-')? literal
+
+literal = NUMBER | '(' expression ')' | IDENTIFIER
+
