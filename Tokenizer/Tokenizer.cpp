@@ -27,14 +27,21 @@ std::map<char, Token::tokenType> one_symbol = {
         {'+', Token::ADD},
         {'*', Token::MUL},
         {'/', Token::DIV},
-        {'=', Token::EQUALS},
+        {'=', Token::ASSIGNMENT},
         {';', Token::DELIMITER},
         {'(', Token::BRACKET_OPEN},
         {')', Token::BRACKET_CLOSE},
+        {'{', Token::BLOCK_OPEN},
+        {'}', Token::BLOCK_CLOSE},
+};
+
+std::map<std::string, Token::tokenType> reserved = {
+        {"True",  Token::BOOL},
+        {"False", Token::BOOL},
 };
 
 Token Tokenizer::nextToken() {
-    while (position != text.end() and *position == ' ')
+    while (position != text.end() and (*position == ' ' or *position == '\n' or *position == '\r'))
         position++;
 
     if (position == text.end())
@@ -47,10 +54,14 @@ Token Tokenizer::nextToken() {
             position++;
         return tk(Token::NUMBER);
     }
-//    identifier
+//    identifier or reserved
     if (isalpha(*position) or *position == '_') {
         while (isalnum(*position) or *position == '_')
             position++;
+        auto result = std::string(begin, position);
+        if (reserved.find(result) != reserved.end()) {
+            return tk(reserved[result]);
+        }
         return tk(Token::IDENTIFIER);
     }
 //    TODO: soon here will be double-symbol operators

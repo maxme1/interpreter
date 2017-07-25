@@ -1,7 +1,9 @@
 program = statement*
 
 # TODO: add empty statements
-statement = expression ';'
+statement = (expression ';') | block
+
+block = '{' statement* '}'
 
 -- expression --
 

@@ -7,11 +7,12 @@
 
 struct Token {
     enum tokenType {
-        NUMBER,
+        NUMBER, BOOL,
         ADD, SUB, MUL, DIV,
-        IDENTIFIER, EQUALS,
+        IDENTIFIER, ASSIGNMENT,
         DELIMITER,
         BRACKET_OPEN, BRACKET_CLOSE, BRACKET,
+        BLOCK_OPEN, BLOCK_CLOSE,
         PROGRAM_END, ERROR
     };
 

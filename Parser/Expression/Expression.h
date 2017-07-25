@@ -2,6 +2,7 @@
 #define INTERPRETER_EXPRESSION_H
 
 #include <string>
+#include <iostream>
 #include "../../Object/Object.h"
 #include "../../Tokenizer/Token.h"
 #include "../../Interpreter/Interpreter.h"
@@ -18,6 +19,9 @@ public:
     Expression(const std::string &body);
     Expression(const std::string &body, Token::tokenType type);
 
+    virtual ~Expression() {};
+
+
     bool ofType(Token::tokenType _type) { return _type == type; }
 
     virtual std::string str() { return body; };
@@ -31,6 +35,7 @@ class Binary : public Expression {
 
 public:
     Binary(const std::string &body, Token::tokenType type, Expression *left, Expression *right);
+    ~Binary();
 
     std::string str() override;
     Object *evaluate(Interpreter *interpreter);
@@ -43,18 +48,17 @@ class Unary : public Expression {
 
 public:
     Unary(const std::string &body, Token::tokenType type, Expression *argument);
-
+    virtual ~Unary();
     std::string str() override;
     Object *evaluate(Interpreter *interpreter);
 };
 
-class NumberToken : public Expression {
+class Number : public Expression {
     friend class Interpreter;
 
     int value;
 public:
-    NumberToken(const std::string &body, int value);
-
+    Number(const std::string &body, int value);
     std::string str() override;
 
     Object *evaluate(Interpreter *interpreter);
@@ -75,9 +79,10 @@ class SetVariable : public Expression {
     Expression *value;
 
 public:
+    SetVariable(const std::string &name, Expression *value);
+    ~SetVariable();
     Object *evaluate(Interpreter *interpreter) override;
     std::string str() override;
-    SetVariable(const std::string &name, Expression *value);
 };
 
 #endif //INTERPRETER_EXPRESSION_H

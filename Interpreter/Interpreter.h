@@ -2,29 +2,36 @@
 #define INTERPRETER_INTERPRETER_H
 
 #include <string>
+#include <stack>
 #include "../Object/Object.h"
 #include "../Tokenizer/Token.h"
 
 class Binary;
 class Unary;
-class NumberToken;
+class Number;
 class SetVariable;
 class Variable;
 
+class Statement;
 class ExpressionStatement;
+class Block;
 
 class Interpreter {
     Object globalScope;
+    std::stack<Object *> garbage;
+
+    void evaluateStatements(std::vector<Statement *> &statements);
 public:
     void interpret(std::string text);
 
     Object *evaluate(Binary *expression);
     Object *evaluate(Unary *expression);
-    Object *evaluate(NumberToken *expression);
+    Object *evaluate(Number *expression);
     Object *evaluate(SetVariable *expression);
     Object *evaluate(Variable *expression);
 
-    void evaluate(ExpressionStatement *expression);
+    void evaluate(ExpressionStatement *statement);
+    void evaluate(Block *block);
 };
 
 #endif //INTERPRETER_INTERPRETER_H

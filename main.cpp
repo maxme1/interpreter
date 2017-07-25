@@ -1,9 +1,15 @@
 #include <iostream>
+#include <fstream>
 #include "Interpreter/Interpreter.h"
 
 int main() {
     Interpreter interpreter = Interpreter();
-    interpreter.interpret("a = (1 + 6) / -2;");
-    interpreter.interpret("a + 8; b = a = 1; a + b;");
+    std::ifstream source("../source.txt");
+    if (source.good()) {
+        std::string text((std::istreambuf_iterator<char>(source)),
+                         (std::istreambuf_iterator<char>()));
+        interpreter.interpret(text);
+        source.close();
+    } else std::cout << "Cannot open source file";
     return 0;
 }

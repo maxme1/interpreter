@@ -2,6 +2,7 @@
 #include "Interpreter.h"
 #include "../Tokenizer/Tokenizer.h"
 #include "../Parser/Parser.h"
+#include "../Object/Int.h"
 
 void Interpreter::interpret(std::string text) {
     Tokenizer t = Tokenizer(text);
@@ -11,14 +12,34 @@ void Interpreter::interpret(std::string text) {
 
     Parser p = Parser(tokens);
     auto statements = p.build();
-    for (auto &&statement : statements) {
-        std::cout << statement->str() << "\n";
+    std::cout << statements[0]->str();
+    evaluateStatements(statements);
+    statements.clear();
+}
+
+void Interpreter::evaluateStatements(std::vector<Statement *> &statements) {
+    for (auto statement : statements) {
         statement->evaluate(this);
+
+        if (!garbage.empty()) {
+            std::cout << "garbage: ";
+            while (!garbage.empty()) {
+                auto obj = garbage.top();
+                garbage.pop();
+                if (obj and obj->zombie()) {
+                    std::cout << obj->str() << " ";
+                    delete obj;
+                }
+            }
+            std::cout << "\n";
+        }
     }
 }
 
 Object *Interpreter::evaluate(Binary *expression) {
     Object *left = expression->left->evaluate(this), *right = expression->right->evaluate(this);
+    garbage.push(left);
+    garbage.push(right);
     if (expression->type == Token::ADD)
         return left->add(right);
     if (expression->type == Token::SUB)
@@ -32,6 +53,7 @@ Object *Interpreter::evaluate(Binary *expression) {
 
 Object *Interpreter::evaluate(Unary *expression) {
     Object *argument = expression->argument->evaluate(this);
+    garbage.push(argument);
     if (expression->type == Token::ADD)
         return argument->uadd();
     if (expression->type == Token::SUB)
@@ -41,8 +63,8 @@ Object *Interpreter::evaluate(Unary *expression) {
     return nullptr;
 }
 
-Object *Interpreter::evaluate(NumberToken *expression) {
-    return new Number(expression->value);
+Object *Interpreter::evaluate(Number *expression) {
+    return new Int(expression->value);
 }
 
 Object *Interpreter::evaluate(SetVariable *expression) {
@@ -51,12 +73,18 @@ Object *Interpreter::evaluate(SetVariable *expression) {
     return value;
 }
 
-void Interpreter::evaluate(ExpressionStatement *expression) {
-    auto expr = expression->expression->evaluate(this);
-    std::cout << expr->str() << "\n";
-}
-
 Object *Interpreter::evaluate(Variable *expression) {
     return globalScope.getAttribute(expression->body);
+}
+
+void Interpreter::evaluate(ExpressionStatement *statement) {
+//    TODO: probably can collect all here
+    auto obj = statement->expression->evaluate(this);
+    garbage.push(obj);
+    std::cout << obj->str() << "\n";
+}
+
+void Interpreter::evaluate(Block *block) {
+    evaluateStatements(block->statements);
 }
 

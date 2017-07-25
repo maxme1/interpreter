@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Expression.h"
 
 Expression::Expression(const std::string &body) : body(body) {}
@@ -15,6 +16,10 @@ Object *Binary::evaluate(Interpreter *interpreter) {
     return interpreter->evaluate(this);
 }
 
+Binary::~Binary() {
+    delete left, right;
+}
+
 Unary::Unary(const std::string &body, Token::tokenType type,
              Expression *argument) : Expression(body, type), argument(argument) {}
 
@@ -28,13 +33,17 @@ Object *Unary::evaluate(Interpreter *interpreter) {
     return interpreter->evaluate(this);
 }
 
-NumberToken::NumberToken(const std::string &body, int value) : Expression(body), value(value) {}
+Unary::~Unary() {
+    delete argument;
+}
 
-std::string NumberToken::str() {
+Number::Number(const std::string &body, int value) : Expression(body), value(value) {}
+
+std::string Number::str() {
     return std::to_string(value);
 }
 
-Object *NumberToken::evaluate(Interpreter *interpreter) {
+Object *Number::evaluate(Interpreter *interpreter) {
     return interpreter->evaluate(this);
 }
 
@@ -52,4 +61,8 @@ std::string SetVariable::str() {
 
 Object *SetVariable::evaluate(Interpreter *interpreter) {
     return interpreter->evaluate(this);
+}
+
+SetVariable::~SetVariable() {
+    delete value;
 }

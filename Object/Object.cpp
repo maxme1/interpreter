@@ -1,8 +1,39 @@
+#include <iostream>
 #include "Object.h"
+#include "Bool.h"
 
 
-// TODO: need garbage collection
+Object::~Object() {
+    for (auto attribute : attributes) {
+        if (attribute.second->canDelete())
+            delete attribute.second;
+    }
+}
+
+bool Object::zombie() {
+    return mentions <= 0;
+}
+
+bool Object::canDelete() {
+    mentions--;
+    return zombie();
+}
+
+Bool *Object::__bool__() {
+    return new Bool(false);
+}
+
 void Object::setAttribute(std::string name, Object *value) {
+    auto pair = attributes.find(name);
+    if (pair != attributes.end()) {
+//    remove the old object
+        if (pair->second != value) {
+            if (pair->second->canDelete())
+                delete pair->second;
+            value->mentions++;
+        }
+    } else
+        value->mentions++;
     attributes[name] = value;
 }
 
@@ -10,53 +41,5 @@ Object *Object::getAttribute(std::string name) {
     auto value = attributes.find(name);
     if (value != attributes.end())
         return value->second;
-    return nullptr;
-}
-
-Number::Number(int value) : value(value) {}
-
-std::string Number::str() {
-    return std::to_string(value);
-}
-
-Object *Number::add(Object *other) {
-    Number *local = dynamic_cast<Number *>(other);
-    if (local != NULL) {
-        return new Number(value + local->value);
-    }
-//    TODO: also raise
-    return nullptr;
-}
-
-Object *Number::uadd() {
-    return this;
-}
-
-Object *Number::usub() {
-    return new Number(-value);
-}
-
-Object *Number::sub(Object *other) {
-    Number *local = dynamic_cast<Number *>(other);
-    if (local != NULL) {
-        return new Number(value - local->value);
-    }
-//    TODO: also raise
-    return nullptr;
-}
-
-Object *Number::mul(Object *other) {
-    Number *local = dynamic_cast<Number *>(other);
-    if (local != NULL) {
-        return new Number(value * local->value);
-    }
-    return nullptr;
-}
-
-Object *Number::div(Object *other) {
-    Number *local = dynamic_cast<Number *>(other);
-    if (local != NULL) {
-        return new Number(value / local->value);
-    }
     return nullptr;
 }

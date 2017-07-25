@@ -8,16 +8,10 @@
 class Expression;
 
 class Statement {
-//    friend class Interpreter;
-
-//    std::string body;
-protected:
-//    Token::tokenType type;
 public:
-//    Statement(const std::string &body, Token::tokenType type);
+    virtual ~Statement() {};
 
-    virtual std::string str() = 0; // { return ""; };
-
+    virtual std::string str() = 0;
     virtual void evaluate(Interpreter *interpreter) = 0;
 };
 
@@ -28,8 +22,20 @@ class ExpressionStatement : public Statement {
 
 public:
     ExpressionStatement(Expression *expression);
+    ~ExpressionStatement();
     void evaluate(Interpreter *interpreter) override;
     std::string str() override;
+};
+
+class Block : public Statement {
+    friend class Interpreter;
+
+    std::vector<Statement *> statements;
+public:
+    Block(const std::vector<Statement *> &statements);
+    ~Block();
+    std::string str() override;
+    void evaluate(Interpreter *interpreter) override;
 };
 
 #endif //INTERPRETER_STATEMENT_H

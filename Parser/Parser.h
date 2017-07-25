@@ -19,14 +19,25 @@ class Parser {
     Token require(std::initializer_list<Token::tokenType> types);
 
     Statement *statement() {
+        if (matches({Token::BLOCK_OPEN}))
+            return new Block(block());
         auto expr = expression();
         require({Token::DELIMITER});
         return new ExpressionStatement(expr);
     };
 
+    std::vector<Statement *> block() {
+        advance();
+        auto statements = std::vector<Statement *>();
+        while (position != tokens.end() and !matches({Token::BLOCK_CLOSE}))
+            statements.push_back(statement());
+        require({Token::BLOCK_CLOSE});
+        return statements;
+    };
+
     Expression *expression() {
         Expression *left = term();
-        if (matches({Token::EQUALS})) {
+        if (matches({Token::ASSIGNMENT})) {
             Token previous = *(position - 1);
             advance();
             Expression *right = expression();
@@ -71,7 +82,7 @@ class Parser {
         if (matches({Token::NUMBER})) {
 //            TODO: create constructor with token
             auto current = advance();
-            return new NumberToken(current.body, std::atoi(current.body.c_str()));
+            return new Number(current.body, std::atoi(current.body.c_str()));
         }
         if (matches({Token::IDENTIFIER})) {
             auto current = advance();
@@ -87,6 +98,7 @@ class Parser {
 public:
     Parser(const std::vector<Token> &tokens);
 
+//    TODO: combine build and block
     std::vector<Statement *> build() {
         auto statements = std::vector<Statement *>();
         while (position != tokens.end())
