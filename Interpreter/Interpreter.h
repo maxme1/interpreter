@@ -21,6 +21,7 @@ class Interpreter {
     Object globalScope;
     std::stack<Object *> garbage;
 
+    void collect();
     void evaluateStatements(std::vector<Statement *> &statements);
 public:
     void interpret(std::string text);

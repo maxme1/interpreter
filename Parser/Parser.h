@@ -8,9 +8,9 @@
 #include "Expression/Expression.h"
 
 class Parser {
+    typedef std::initializer_list<Token::tokenType> TokenTypes;
     std::vector<Token> tokens;
     std::vector<Token>::iterator position;
-    bool error = false;
 
     bool matches(std::initializer_list<Token::tokenType> types);
 
@@ -67,7 +67,7 @@ class Parser {
                 return new SetVariable(previous.body, right);
             }
 
-            return nullptr;
+            throw "Bad assignment";
         }
         return left;
     }
@@ -110,7 +110,6 @@ class Parser {
             auto current = advance();
             return new Variable(current.body, current.type);
         }
-//        TODO: raise something
         require({Token::BRACKET_OPEN});
         auto result = expression();
         require({Token::BRACKET_CLOSE});
@@ -118,13 +117,25 @@ class Parser {
     }
 
 public:
+    bool error = false;
+
     Parser(const std::vector<Token> &tokens);
 
 //    TODO: combine build and block
     std::vector<Statement *> build() {
         auto statements = std::vector<Statement *>();
-        while (position != tokens.end())
-            statements.push_back(statement());
+        try {
+            while (position != tokens.end())
+                statements.push_back(statement());
+        } catch (TokenTypes types) {
+            error = true;
+//            TODO: no memory is being freed whatsoever
+//            TODO: more specific
+            std::cout << "Expected something else instead of " << position->body;
+        } catch (char const *message) {
+            error = true;
+            std::cout << message;
+        }
         return statements;
     };
 };

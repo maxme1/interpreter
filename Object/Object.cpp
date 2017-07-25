@@ -41,5 +41,6 @@ Object *Object::getAttribute(std::string name) {
     auto value = attributes.find(name);
     if (value != attributes.end())
         return value->second;
-    return nullptr;
+//    TODO: need custom exceptions
+    throw "AttributeError";
 }

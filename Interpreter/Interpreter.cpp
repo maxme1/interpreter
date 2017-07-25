@@ -7,32 +7,45 @@
 void Interpreter::interpret(std::string text) {
     Tokenizer t = Tokenizer(text);
     auto tokens = t.tokenize();
-    if (t.error)
-        std::cout << "ERROR!";
+    if (t.error) {
+        //    TODO: it would be better to know the position in the text on error
+        std::cout << "Undefined token";
+        return;
+    }
 
     Parser p = Parser(tokens);
     auto statements = p.build();
+    if (p.error) {
+        return;
+    }
     std::cout << statements[0]->str();
-    evaluateStatements(statements);
-    statements.clear();
+    try {
+        evaluateStatements(statements);
+    } catch (const char *exception) {
+        std::cout << exception;
+        collect();
+    }
+}
+
+void Interpreter::collect() {
+    if (!garbage.empty()) {
+        std::cout << "garbage: ";
+        while (!garbage.empty()) {
+            auto obj = garbage.top();
+            garbage.pop();
+            if (obj and obj->zombie()) {
+                std::cout << obj->str() << " ";
+                delete obj;
+            }
+        }
+        std::cout << "\n";
+    }
 }
 
 void Interpreter::evaluateStatements(std::vector<Statement *> &statements) {
     for (auto statement : statements) {
         statement->evaluate(this);
-
-        if (!garbage.empty()) {
-            std::cout << "garbage: ";
-            while (!garbage.empty()) {
-                auto obj = garbage.top();
-                garbage.pop();
-                if (obj and obj->zombie()) {
-                    std::cout << obj->str() << " ";
-                    delete obj;
-                }
-            }
-            std::cout << "\n";
-        }
+        collect();
     }
 }
 
@@ -70,12 +83,12 @@ Object *Interpreter::evaluate(Literal *expression) {
         return new Int(std::atoi(body.c_str()));
     if (type == Token::BOOL)
         return new Bool(body == "True");
-
     return nullptr;
 }
 
 Object *Interpreter::evaluate(SetVariable *expression) {
     auto value = expression->value->evaluate(this);
+    garbage.push(value);
     globalScope.setAttribute(expression->name, value);
     return value;
 }
@@ -104,5 +117,6 @@ void Interpreter::evaluate(IfStatement *statement) {
 void Interpreter::evaluate(Block *block) {
     evaluateStatements(block->statements);
 }
+
 
 

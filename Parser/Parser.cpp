@@ -21,11 +21,8 @@ Token Parser::advance() {
 }
 
 Token Parser::require(std::initializer_list<Token::tokenType> types) {
-//    TODO: need to raise here something
-    if (!matches(types)){
-        error = true;
-        std::cout << "requirement not satisfied\n";
-    }
+    if (!matches(types))
+        throw types;
 
     return advance();
 }
