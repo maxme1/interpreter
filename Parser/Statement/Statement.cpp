@@ -31,7 +31,24 @@ std::string IfStatement::str() {
     if (left)
         result += left->str();
     if (right)
-        result += right->str();
+        result += " else " + right->str();
+    return result;
+}
+
+WhileStatement::WhileStatement(Expression *condition, Statement *body) : condition(condition), body(body) {}
+
+WhileStatement::~WhileStatement() {
+    delete condition, body;
+}
+
+void WhileStatement::evaluate(Interpreter *interpreter) {
+    interpreter->evaluate(this);
+}
+
+std::string WhileStatement::str() {
+    std::string result = "while(" + condition->str() + ")";
+    if (body)
+        result += body->str();
     return result;
 }
 

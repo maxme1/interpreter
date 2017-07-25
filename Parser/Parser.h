@@ -23,6 +23,8 @@ class Parser {
             return new Block(block());
         if (matches({Token::IF}))
             return ifStatement();
+        if (matches({Token::WHILE}))
+            return whileStatement();
         auto expr = expression();
         require({Token::DELIMITER});
         return new ExpressionStatement(expr);
@@ -46,6 +48,20 @@ class Parser {
         advance();
         auto right = statement();
         return new IfStatement(condition, left, right);
+    }
+
+    Statement *whileStatement() {
+        advance();
+        require({Token::BRACKET_OPEN});
+        auto condition = expression();
+        require({Token::BRACKET_CLOSE});
+//        empty body
+        if (matches({Token::DELIMITER})) {
+            advance();
+            return new WhileStatement(condition);
+        }
+        auto body = statement();
+        return new WhileStatement(condition, body);
     }
 
     std::vector<Statement *> block() {

@@ -114,9 +114,21 @@ void Interpreter::evaluate(IfStatement *statement) {
         statement->right->evaluate(this);
 }
 
+void Interpreter::evaluate(WhileStatement *statement) {
+    auto cond = statement->condition->evaluate(this);
+    garbage.push(cond);
+    while (cond->asBool()) {
+        if (statement->body)
+            statement->body->evaluate(this);
+        cond = statement->condition->evaluate(this);
+        garbage.push(cond);
+    }
+}
+
 void Interpreter::evaluate(Block *block) {
     evaluateStatements(block->statements);
 }
+
 
 
 

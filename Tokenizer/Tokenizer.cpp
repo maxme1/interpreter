@@ -40,6 +40,7 @@ std::map<std::string, Token::tokenType> reserved = {
         {"False", Token::BOOL},
         {"if",    Token::IF},
         {"else",  Token::ELSE},
+        {"while", Token::WHILE},
 };
 
 Token Tokenizer::nextToken() {

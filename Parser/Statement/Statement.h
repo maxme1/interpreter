@@ -51,5 +51,18 @@ public:
     std::string str() override;
 };
 
+class WhileStatement : public Statement {
+    friend class Interpreter;
+
+    Expression *condition;
+    Statement *body;
+
+public:
+    WhileStatement(Expression *condition, Statement *body = nullptr);
+    ~WhileStatement();
+    void evaluate(Interpreter *interpreter) override;
+    std::string str() override;
+};
+
 
 #endif //INTERPRETER_STATEMENT_H

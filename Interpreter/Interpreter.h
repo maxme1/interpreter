@@ -15,6 +15,7 @@ class Variable;
 class Statement;
 class ExpressionStatement;
 class IfStatement;
+class WhileStatement;
 class Block;
 
 class Interpreter {
@@ -34,6 +35,7 @@ public:
 
     void evaluate(ExpressionStatement *statement);
     void evaluate(IfStatement *statement);
+    void evaluate(WhileStatement *statement);
     void evaluate(Block *block);
 };
 

@@ -1,10 +1,12 @@
 program = statement*
 
 # TODO: add empty statements consisting just of a semicolon
-statement = (expression DELIMITER) | block | ifStmt
+statement = (expression DELIMITER) | block | ifStmt | whileStmt
 
 # TODO: possibly optional first statement
 ifStmt = 'if' '(' expression ')' (statement ('else' statement)? )?
+
+whileStmt = 'while' '(' expression ')' statement
 
 block = '{' statement* '}'
 
