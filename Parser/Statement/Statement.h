@@ -15,6 +15,17 @@ public:
     virtual void evaluate(Interpreter *interpreter) = 0;
 };
 
+class Block : public Statement {
+    friend class Interpreter;
+
+    std::vector<Statement *> statements;
+public:
+    Block(const std::vector<Statement *> &statements);
+    ~Block();
+    std::string str() override;
+    void evaluate(Interpreter *interpreter) override;
+};
+
 class ExpressionStatement : public Statement {
     friend class Interpreter;
 
@@ -27,15 +38,18 @@ public:
     std::string str() override;
 };
 
-class Block : public Statement {
+class IfStatement : public Statement {
     friend class Interpreter;
 
-    std::vector<Statement *> statements;
+    Expression *condition;
+    Statement *left, *right;
+
 public:
-    Block(const std::vector<Statement *> &statements);
-    ~Block();
-    std::string str() override;
+    IfStatement(Expression *condition, Statement *left = nullptr, Statement *right = nullptr);
+    ~IfStatement();
     void evaluate(Interpreter *interpreter) override;
+    std::string str() override;
 };
+
 
 #endif //INTERPRETER_STATEMENT_H

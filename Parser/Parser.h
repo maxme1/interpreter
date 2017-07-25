@@ -21,10 +21,32 @@ class Parser {
     Statement *statement() {
         if (matches({Token::BLOCK_OPEN}))
             return new Block(block());
+        if (matches({Token::IF}))
+            return ifStatement();
         auto expr = expression();
         require({Token::DELIMITER});
         return new ExpressionStatement(expr);
     };
+
+    Statement *ifStatement() {
+        advance();
+        require({Token::BRACKET_OPEN});
+        auto condition = expression();
+        require({Token::BRACKET_CLOSE});
+//        empty if
+        if (matches({Token::DELIMITER})) {
+            advance();
+            return new IfStatement(condition);
+        }
+        auto left = statement();
+//        only left block
+        if (!matches({Token::ELSE}))
+            return new IfStatement(condition, left);
+//        both blocks
+        advance();
+        auto right = statement();
+        return new IfStatement(condition, left, right);
+    }
 
     std::vector<Statement *> block() {
         advance();

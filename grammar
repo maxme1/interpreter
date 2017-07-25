@@ -1,7 +1,10 @@
 program = statement*
 
-# TODO: add empty statements
-statement = (expression ';') | block
+# TODO: add empty statements consisting just of a semicolon
+statement = (expression ';') | block | ifStmt
+
+# TODO: possibly optional first statement
+ifStmt = 'if' '(' expression ')' (statement ('else' statement)? )?
 
 block = '{' statement* '}'
 
@@ -18,5 +21,5 @@ factor = unary ( ('*' | '/') unary )*
 # TODO: maybe add unlimited unary operations
 unary = ('+' | '-')? literal
 
-literal = NUMBER | '(' expression ')' | IDENTIFIER
+literal = NUMBER | '(' expression ')' | IDENTIFIER | BOOL
 

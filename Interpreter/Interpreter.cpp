@@ -91,7 +91,18 @@ void Interpreter::evaluate(ExpressionStatement *statement) {
     std::cout << obj->str() << "\n";
 }
 
+void Interpreter::evaluate(IfStatement *statement) {
+    auto cond = statement->condition->evaluate(this);
+    garbage.push(cond);
+    if (cond->asBool()) {
+        if (statement->left)
+            statement->left->evaluate(this);
+    } else if (statement->right)
+        statement->right->evaluate(this);
+}
+
 void Interpreter::evaluate(Block *block) {
     evaluateStatements(block->statements);
 }
+
 

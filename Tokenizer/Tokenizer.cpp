@@ -38,6 +38,8 @@ std::map<char, Token::tokenType> one_symbol = {
 std::map<std::string, Token::tokenType> reserved = {
         {"True",  Token::BOOL},
         {"False", Token::BOOL},
+        {"if", Token::IF},
+        {"else", Token::ELSE},
 };
 
 Token Tokenizer::nextToken() {

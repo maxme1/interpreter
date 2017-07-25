@@ -14,6 +14,7 @@ class Variable;
 
 class Statement;
 class ExpressionStatement;
+class IfStatement;
 class Block;
 
 class Interpreter {
@@ -31,6 +32,7 @@ public:
     Object *evaluate(Variable *expression);
 
     void evaluate(ExpressionStatement *statement);
+    void evaluate(IfStatement *statement);
     void evaluate(Block *block);
 };
 

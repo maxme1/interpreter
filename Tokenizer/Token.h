@@ -13,6 +13,7 @@ struct Token {
         DELIMITER,
         BRACKET_OPEN, BRACKET_CLOSE, BRACKET,
         BLOCK_OPEN, BLOCK_CLOSE,
+        IF, ELSE,
         PROGRAM_END, ERROR
     };
 
