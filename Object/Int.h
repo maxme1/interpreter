@@ -5,7 +5,12 @@
 #include "Bool.h"
 
 class Int : public Object {
+
 public:
+    bool asBool() override {
+        return value != 0;
+    }
+
     int value;
 
     Int(int value) : value(value) {}
@@ -54,10 +59,6 @@ public:
             return new Int(value / local->value);
         }
         return nullptr;
-    }
-
-    Bool *__bool__() override {
-        return new Bool(value != 0);
     }
 };
 

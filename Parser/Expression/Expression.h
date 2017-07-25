@@ -53,13 +53,11 @@ public:
     Object *evaluate(Interpreter *interpreter);
 };
 
-class Number : public Expression {
+class Literal : public Expression {
     friend class Interpreter;
 
-    int value;
 public:
-    Number(const std::string &body, int value);
-    std::string str() override;
+    Literal(const std::string &body, Token::tokenType type);
 
     Object *evaluate(Interpreter *interpreter);
 };

@@ -63,8 +63,15 @@ Object *Interpreter::evaluate(Unary *expression) {
     return nullptr;
 }
 
-Object *Interpreter::evaluate(Number *expression) {
-    return new Int(expression->value);
+Object *Interpreter::evaluate(Literal *expression) {
+    auto body = expression->body;
+    auto type = expression->type;
+    if (type == Token::NUMBER)
+        return new Int(std::atoi(body.c_str()));
+    if (type == Token::BOOL)
+        return new Bool(body == "True");
+
+    return nullptr;
 }
 
 Object *Interpreter::evaluate(SetVariable *expression) {

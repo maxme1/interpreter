@@ -20,7 +20,7 @@ bool Object::canDelete() {
 }
 
 Bool *Object::__bool__() {
-    return new Bool(false);
+    return new Bool(asBool());
 }
 
 void Object::setAttribute(std::string name, Object *value) {

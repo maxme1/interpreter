@@ -79,10 +79,10 @@ class Parser {
     }
 
     Expression *literal() {
-        if (matches({Token::NUMBER})) {
+        if (matches({Token::NUMBER, Token::BOOL})) {
 //            TODO: create constructor with token
             auto current = advance();
-            return new Number(current.body, std::atoi(current.body.c_str()));
+            return new Literal(current.body, current.type);
         }
         if (matches({Token::IDENTIFIER})) {
             auto current = advance();

@@ -8,7 +8,7 @@
 
 class Binary;
 class Unary;
-class Number;
+class Literal;
 class SetVariable;
 class Variable;
 
@@ -26,7 +26,7 @@ public:
 
     Object *evaluate(Binary *expression);
     Object *evaluate(Unary *expression);
-    Object *evaluate(Number *expression);
+    Object *evaluate(Literal *expression);
     Object *evaluate(SetVariable *expression);
     Object *evaluate(Variable *expression);
 

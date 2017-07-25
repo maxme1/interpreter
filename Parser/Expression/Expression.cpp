@@ -37,13 +37,10 @@ Unary::~Unary() {
     delete argument;
 }
 
-Number::Number(const std::string &body, int value) : Expression(body), value(value) {}
-
-std::string Number::str() {
-    return std::to_string(value);
+Literal::Literal(const std::string &body, Token::tokenType type) : Expression(body, type) {
 }
 
-Object *Number::evaluate(Interpreter *interpreter) {
+Object *Literal::evaluate(Interpreter *interpreter) {
     return interpreter->evaluate(this);
 }
 

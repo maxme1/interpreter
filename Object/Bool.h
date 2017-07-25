@@ -6,6 +6,10 @@
 
 class Bool : public Object {
 public:
+    bool asBool() override {
+        return value;
+    }
+
     bool value;
 
     Bool(bool value) : value(value) {}

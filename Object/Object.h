@@ -10,6 +10,7 @@ class Object {
 
     bool canDelete();
 public:
+    virtual bool asBool() { return false; };
     bool zombie();
 
     virtual ~Object();
