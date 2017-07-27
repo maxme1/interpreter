@@ -115,10 +115,21 @@ class Parser {
 
     Expression *unary() {
         if (!matches({Token::ADD, Token::SUB}))
-            return literal();
+            return primary();
         auto current = advance();
-        Expression *argument = literal();
+        Expression *argument = primary();
         return new Unary(current.body, current.type, argument);
+    }
+
+    Expression *primary() {
+        auto left = literal();
+        while (matches({Token::BRACKET_OPEN})) {
+            advance();
+            auto argument = expression();
+            require({Token::BRACKET_CLOSE});
+            left = new FunctionExpression(left, argument);
+        }
+        return left;
     }
 
     Expression *literal() {

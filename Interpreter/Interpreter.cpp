@@ -2,7 +2,12 @@
 #include "Interpreter.h"
 #include "../Tokenizer/Tokenizer.h"
 #include "../Parser/Parser.h"
-#include "../Object/Int.h"
+#include "../Object/Types/Int.h"
+#include "../Object/native.h"
+
+Interpreter::Interpreter() {
+    globalScope.setAttribute("print", new Print());
+}
 
 void Interpreter::interpret(std::string text) {
     Tokenizer t = Tokenizer(text);
@@ -18,7 +23,7 @@ void Interpreter::interpret(std::string text) {
     if (p.error) {
         return;
     }
-    std::cout << statements[0]->str();
+//    std::cout << statements[0]->str();
     try {
         evaluateStatements(statements);
     } catch (const char *exception) {
@@ -31,16 +36,16 @@ void Interpreter::interpret(std::string text) {
 
 void Interpreter::collect() {
     if (!garbage.empty()) {
-        std::cout << "garbage: ";
+//        std::cout << "\ngarbage: ";
         while (!garbage.empty()) {
             auto obj = garbage.top();
             garbage.pop();
             if (obj and obj->zombie()) {
-                std::cout << obj->str() << " ";
+//                std::cout << obj->str() << " ";
                 delete obj;
             }
         }
-        std::cout << "\n";
+//        std::cout << "\n";
     }
 }
 
@@ -99,11 +104,17 @@ Object *Interpreter::evaluate(Variable *expression) {
     return globalScope.getAttribute(expression->body);
 }
 
+Object *Interpreter::evaluate(FunctionExpression *expression) {
+    Object *obj = expression->target->evaluate(this), *arg = expression->argument->evaluate(this);
+    garbage.push(obj);
+    garbage.push(arg);
+    return obj->__call__(arg);
+}
+
 void Interpreter::evaluate(ExpressionStatement *statement) {
 //    TODO: probably can collect all here
     auto obj = statement->expression->evaluate(this);
     garbage.push(obj);
-    std::cout << obj->str() << "\n";
 }
 
 void Interpreter::evaluate(IfStatement *statement) {
@@ -139,7 +150,3 @@ void Interpreter::evaluate(ControlFlow *statement) {
 void Interpreter::evaluate(Block *block) {
     evaluateStatements(block->statements);
 }
-
-
-
-

@@ -1,19 +1,11 @@
 #include <iostream>
 #include "Expression.h"
 
-Expression::Expression(const std::string &body) : body(body) {}
-
-Expression::Expression(const std::string &body, Token::tokenType type) : body(body), type(type) {}
-
 Binary::Binary(const std::string &body, Token::tokenType type,
                Expression *left, Expression *right) : Expression(body, type), left(left), right(right) {}
 
 std::string Binary::str() {
     return "(" + left->str() + " " + Expression::str() + " " + right->str() + ")";
-}
-
-Object *Binary::evaluate(Interpreter *interpreter) {
-    return interpreter->evaluate(this);
 }
 
 Binary::~Binary() {
@@ -29,35 +21,20 @@ std::string Unary::str() {
     return Expression::str() + argument->str();
 }
 
-Object *Unary::evaluate(Interpreter *interpreter) {
-    return interpreter->evaluate(this);
-}
-
 Unary::~Unary() {
     delete argument;
 }
 
-Literal::Literal(const std::string &body, Token::tokenType type) : Expression(body, type) {
-}
+FunctionExpression::FunctionExpression(Expression *target, Expression *argument) : target(target), argument(argument) {}
 
-Object *Literal::evaluate(Interpreter *interpreter) {
-    return interpreter->evaluate(this);
-}
-
-Variable::Variable(const std::string &body, Token::tokenType type) : Expression(body, type) {}
-
-Object *Variable::evaluate(Interpreter *interpreter) {
-    return interpreter->evaluate(this);
+std::string FunctionExpression::str() {
+    return target->str() + "(" + argument->str() + ")";
 }
 
 SetVariable::SetVariable(const std::string &name, Expression *value) : name(name), value(value) {}
 
 std::string SetVariable::str() {
     return "(" + name + " = " + value->str() + ")";
-}
-
-Object *SetVariable::evaluate(Interpreter *interpreter) {
-    return interpreter->evaluate(this);
 }
 
 SetVariable::~SetVariable() {

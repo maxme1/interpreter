@@ -10,26 +10,28 @@
 
 class Expression {
     friend class Interpreter;
+    virtual Object *evaluate(Interpreter *interpreter) = 0;
 
     std::string body;
 protected:
     Token::tokenType type;
 public:
-    Expression() {};
-    Expression(const std::string &body);
-    Expression(const std::string &body, Token::tokenType type);
+    Expression() = default;
+    virtual ~Expression() = default;;
 
-    virtual ~Expression() {};
-
+    Expression(const std::string &body, Token::tokenType type) : body(body), type(type) {};
 
     bool ofType(Token::tokenType _type) { return _type == type; }
 
     virtual std::string str() { return body; };
-    virtual Object *evaluate(Interpreter *interpreter) = 0;
 };
 
 class Binary : public Expression {
     friend class Interpreter;
+
+    Object *evaluate(Interpreter *interpreter) override {
+        return interpreter->evaluate(this);
+    }
 
     Expression *left, *right;
 
@@ -38,40 +40,64 @@ public:
     ~Binary();
 
     std::string str() override;
-    Object *evaluate(Interpreter *interpreter);
 };
 
 class Unary : public Expression {
     friend class Interpreter;
 
-    Expression *argument;
+    Object *evaluate(Interpreter *interpreter) override {
+        return interpreter->evaluate(this);
+    }
 
+    Expression *argument;
 public:
+
     Unary(const std::string &body, Token::tokenType type, Expression *argument);
     virtual ~Unary();
     std::string str() override;
-    Object *evaluate(Interpreter *interpreter);
 };
 
 class Literal : public Expression {
     friend class Interpreter;
 
-public:
-    Literal(const std::string &body, Token::tokenType type);
+    Object *evaluate(Interpreter *interpreter) override {
+        return interpreter->evaluate(this);
+    }
 
-    Object *evaluate(Interpreter *interpreter);
+public:
+    Literal(const std::string &body, Token::tokenType type) : Expression(body, type) {}
 };
 
 class Variable : public Expression {
     friend class Interpreter;
 
+    Object *evaluate(Interpreter *interpreter) override {
+        return interpreter->evaluate(this);
+    }
+
 public:
-    Variable(const std::string &body, Token::tokenType type);
-    Object *evaluate(Interpreter *interpreter) override;
+    Variable(const std::string &body, Token::tokenType type) : Expression(body, type) {}
+};
+
+class FunctionExpression : public Expression {
+    friend class Interpreter;
+
+    Object *evaluate(Interpreter *interpreter) override {
+        return interpreter->evaluate(this);
+    }
+
+    Expression *target, *argument;
+public:
+    FunctionExpression(Expression *target, Expression *argument);
+    std::string str() override;
 };
 
 class SetVariable : public Expression {
     friend class Interpreter;
+
+    Object *evaluate(Interpreter *interpreter) override {
+        return interpreter->evaluate(this);
+    }
 
     std::string name;
     Expression *value;
@@ -79,7 +105,6 @@ class SetVariable : public Expression {
 public:
     SetVariable(const std::string &name, Expression *value);
     ~SetVariable();
-    Object *evaluate(Interpreter *interpreter) override;
     std::string str() override;
 };
 

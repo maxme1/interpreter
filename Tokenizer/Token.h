@@ -10,7 +10,7 @@ struct Token {
         NUMBER, BOOL,
         ADD, SUB, MUL, DIV,
         IDENTIFIER, ASSIGNMENT,
-        DELIMITER,
+        DELIMITER, SEPARATOR,
         BRACKET_OPEN, BRACKET_CLOSE, BRACKET,
         BLOCK_OPEN, BLOCK_CLOSE,
         IF, ELSE, WHILE,

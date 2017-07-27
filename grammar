@@ -23,9 +23,15 @@ term = factor ( ('+' | '-') factor )*
 factor = unary ( ('*' | '/') unary )*
 
 # TODO: maybe add unlimited unary operations
-unary = ('+' | '-')? literal
+unary = ('+' | '-')? primary
+
+primary = literal call*
 
 literal = NUMBER | '(' expression ')' | IDENTIFIER | BOOL
+
+# call = '(' ( expression (SEPARATOR expression)* )? ')'
+# a simpler version for now
+call = '(' expression ')'
 
 -- literals --
 
@@ -33,3 +39,4 @@ NUMBER = '\d+'
 IDENTIFIER = '[^a-zA-Z_]\w*'
 BOOL = 'True' | 'False'
 DELIMITER = ';'
+SEPARATOR = ','

@@ -35,6 +35,8 @@ public:
 
     virtual Object *div(Object *other) { return nullptr; };
 
+    virtual Object *__call__(Object *other) { return nullptr; };
+
     virtual Bool *__bool__();
 };
 

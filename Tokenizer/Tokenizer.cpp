@@ -29,6 +29,7 @@ std::map<char, Token::tokenType> one_symbol = {
         {'/', Token::DIV},
         {'=', Token::ASSIGNMENT},
         {';', Token::DELIMITER},
+        {',', Token::SEPARATOR},
         {'(', Token::BRACKET_OPEN},
         {')', Token::BRACKET_CLOSE},
         {'{', Token::BLOCK_OPEN},

@@ -2,7 +2,7 @@
 #define INTERPRETER_BOOL_H
 
 #include <string>
-#include "Object.h"
+#include "../Object.h"
 
 class Bool : public Object {
 public:

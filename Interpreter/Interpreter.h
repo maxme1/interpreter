@@ -11,6 +11,7 @@ class Unary;
 class Literal;
 class SetVariable;
 class Variable;
+class FunctionExpression;
 
 class Statement;
 class ExpressionStatement;
@@ -26,6 +27,7 @@ class Interpreter {
     void collect();
     void evaluateStatements(std::vector<Statement *> &statements);
 public:
+    Interpreter();
     void interpret(std::string text);
 
     Object *evaluate(Binary *expression);
@@ -33,6 +35,7 @@ public:
     Object *evaluate(Literal *expression);
     Object *evaluate(SetVariable *expression);
     Object *evaluate(Variable *expression);
+    Object *evaluate(FunctionExpression *expression);
 
     void evaluate(ExpressionStatement *statement);
     void evaluate(IfStatement *statement);

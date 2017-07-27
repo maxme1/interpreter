@@ -1,7 +1,7 @@
 #ifndef INTERPRETER_INT_H
 #define INTERPRETER_INT_H
 
-#include "Object.h"
+#include "../Object.h"
 #include "Bool.h"
 
 class Int : public Object {

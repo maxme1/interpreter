@@ -1,6 +1,6 @@
 #include <iostream>
 #include "Object.h"
-#include "Bool.h"
+#include "Types/Bool.h"
 
 
 Object::~Object() {
