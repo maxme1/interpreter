@@ -36,11 +36,13 @@ std::map<char, Token::tokenType> one_symbol = {
 };
 
 std::map<std::string, Token::tokenType> reserved = {
-        {"True",  Token::BOOL},
-        {"False", Token::BOOL},
-        {"if",    Token::IF},
-        {"else",  Token::ELSE},
-        {"while", Token::WHILE},
+        {"True",     Token::BOOL},
+        {"False",    Token::BOOL},
+        {"if",       Token::IF},
+        {"else",     Token::ELSE},
+        {"while",    Token::WHILE},
+        {"break",    Token::BREAK},
+        {"continue", Token::CONTINUE},
 };
 
 Token Tokenizer::nextToken() {

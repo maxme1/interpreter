@@ -5,7 +5,6 @@
 #include "Bool.h"
 
 class Int : public Object {
-
 public:
     bool asBool() override {
         return value != 0;
@@ -13,7 +12,7 @@ public:
 
     int value;
 
-    Int(int value) : value(value) {}
+    explicit Int(int value) : value(value) {}
 
     std::string str() {
         return std::to_string(value);
@@ -21,11 +20,11 @@ public:
 
     Object *add(Object *other) {
         Int *local = dynamic_cast<Int *>(other);
-        if (local != NULL) {
+        if (local) {
             return new Int(value + local->value);
         }
-//    TODO: also raise
-        return nullptr;
+//        TODO: add types
+        throw "Operator undefined for these types";
     }
 
     Object *uadd() {
@@ -38,27 +37,26 @@ public:
 
     Object *sub(Object *other) {
         Int *local = dynamic_cast<Int *>(other);
-        if (local != NULL) {
+        if (local) {
             return new Int(value - local->value);
         }
-//    TODO: also raise
-        return nullptr;
+        throw "Operator undefined for these types";
     }
 
     Object *mul(Object *other) {
         Int *local = dynamic_cast<Int *>(other);
-        if (local != NULL) {
+        if (local) {
             return new Int(value * local->value);
         }
-        return nullptr;
+        throw "Operator undefined for these types";
     }
 
     Object *div(Object *other) {
         Int *local = dynamic_cast<Int *>(other);
-        if (local != NULL) {
+        if (local) {
             return new Int(value / local->value);
         }
-        return nullptr;
+        throw "Operator undefined for these types";
     }
 };
 

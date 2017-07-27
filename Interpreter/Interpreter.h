@@ -16,6 +16,7 @@ class Statement;
 class ExpressionStatement;
 class IfStatement;
 class WhileStatement;
+class ControlFlow;
 class Block;
 
 class Interpreter {
@@ -36,6 +37,7 @@ public:
     void evaluate(ExpressionStatement *statement);
     void evaluate(IfStatement *statement);
     void evaluate(WhileStatement *statement);
+    void evaluate(ControlFlow *statement);
     void evaluate(Block *block);
 };
 

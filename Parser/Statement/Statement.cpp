@@ -52,6 +52,16 @@ std::string WhileStatement::str() {
     return result;
 }
 
+ControlFlow::ControlFlow(Token::tokenType type, const std::string &body) : type(type), body(body) {}
+
+std::string ControlFlow::str() {
+    return body;
+}
+
+void ControlFlow::evaluate(Interpreter *interpreter) {
+    interpreter->evaluate(this);
+}
+
 Block::Block(const std::vector<Statement *> &statements) : statements(statements) {}
 
 std::string Block::str() {

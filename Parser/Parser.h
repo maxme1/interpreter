@@ -25,6 +25,11 @@ class Parser {
             return ifStatement();
         if (matches({Token::WHILE}))
             return whileStatement();
+        if (matches({Token::BREAK, Token::CONTINUE})) {
+            auto control = advance();
+            require({Token::DELIMITER});
+            return new ControlFlow(control.type, control.body);
+        }
         auto expr = expression();
         require({Token::DELIMITER});
         return new ExpressionStatement(expr);

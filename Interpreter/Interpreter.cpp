@@ -23,8 +23,10 @@ void Interpreter::interpret(std::string text) {
         evaluateStatements(statements);
     } catch (const char *exception) {
         std::cout << exception;
-        collect();
+    } catch (Token::tokenType type) {
+        std::cout << "Control flow outside loop";
     }
+    collect();
 }
 
 void Interpreter::collect() {
@@ -118,11 +120,20 @@ void Interpreter::evaluate(WhileStatement *statement) {
     auto cond = statement->condition->evaluate(this);
     garbage.push(cond);
     while (cond->asBool()) {
-        if (statement->body)
-            statement->body->evaluate(this);
+        try {
+            if (statement->body)
+                statement->body->evaluate(this);
+        } catch (Token::tokenType type) {
+            if (type == Token::BREAK)
+                break;
+        }
         cond = statement->condition->evaluate(this);
         garbage.push(cond);
     }
+}
+
+void Interpreter::evaluate(ControlFlow *statement) {
+    throw statement->type;
 }
 
 void Interpreter::evaluate(Block *block) {

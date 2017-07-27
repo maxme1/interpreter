@@ -12,7 +12,7 @@ public:
 
     bool value;
 
-    Bool(bool value) : value(value) {}
+    explicit Bool(bool value) : value(value) {}
 
     std::string str() {
         if (value)

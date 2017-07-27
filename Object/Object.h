@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 
+// TODO: throw 'Operator not defined here'
 class Bool;
 class Object {
     int mentions = 0;

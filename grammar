@@ -1,7 +1,9 @@
 program = statement*
 
 # TODO: add empty statements consisting just of a semicolon
-statement = (expression DELIMITER) | block | ifStmt | whileStmt
+statement = (StmtBody DELIMITER) | block | ifStmt | whileStmt
+
+StmtBody = expression | 'break' | 'continue'
 
 # TODO: possibly optional first statement
 ifStmt = 'if' '(' expression ')' (statement ('else' statement)? )?
@@ -25,7 +27,9 @@ unary = ('+' | '-')? literal
 
 literal = NUMBER | '(' expression ')' | IDENTIFIER | BOOL
 
+-- literals --
+
 NUMBER = '\d+'
-IDENTIFIER = '[^a-zA-Z0-9_]\w*
+IDENTIFIER = '[^a-zA-Z_]\w*'
 BOOL = 'True' | 'False'
 DELIMITER = ';'

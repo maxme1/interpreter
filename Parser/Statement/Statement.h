@@ -64,5 +64,15 @@ public:
     std::string str() override;
 };
 
+class ControlFlow: public Statement {
+    friend class Interpreter;
+    Token::tokenType type;
+    std::string body;
+public:
+    ControlFlow(Token::tokenType type, const std::string &body);
+    std::string str() override;
+    void evaluate(Interpreter *interpreter) override;
+};
+
 
 #endif //INTERPRETER_STATEMENT_H
