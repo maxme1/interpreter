@@ -60,14 +60,28 @@ Object *Interpreter::evaluate(Binary *expression) {
     Object *left = expression->left->evaluate(this), *right = expression->right->evaluate(this);
     garbage.push(left);
     garbage.push(right);
+//    arithmetic
     if (expression->type == Token::ADD)
         return left->add(right);
     if (expression->type == Token::SUB)
-        return left->sub(right);
+        return left->subtract(right);
     if (expression->type == Token::MUL)
-        return left->mul(right);
+        return left->multiply(right);
     if (expression->type == Token::DIV)
-        return left->div(right);
+        return left->divide(right);
+//    comparison
+    if (expression->type == Token::EQUAL)
+        return left->equal(right);
+    if (expression->type == Token::NOT_EQUAL)
+        return left->not_equal(right);
+    if (expression->type == Token::GREATER_OR_EQUAL)
+        return left->greater_or_equal(right);
+    if (expression->type == Token::GREATER)
+        return left->greater(right);
+    if (expression->type == Token::LESS)
+        return left->less(right);
+    if (expression->type == Token::LESS_OR_EQUAL)
+        return left->less_or_equal(right);
     return nullptr;
 }
 
@@ -75,9 +89,9 @@ Object *Interpreter::evaluate(Unary *expression) {
     Object *argument = expression->argument->evaluate(this);
     garbage.push(argument);
     if (expression->type == Token::ADD)
-        return argument->uadd();
+        return argument->unary_add();
     if (expression->type == Token::SUB)
-        return argument->usub();
+        return argument->unary_subtract();
     if (expression->type == Token::BRACKET)
         return argument;
     return nullptr;

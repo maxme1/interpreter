@@ -14,9 +14,11 @@ block = '{' statement* '}'
 
 -- expression --
 
-expression = term | varSet
+expression = comparison | assignment
 
-varSet = IDENTIFIER '=' expression
+assignment = IDENTIFIER '=' expression
+
+comparison = term (( '==' | '>=' | '<=' | '<' | '>' | '!=' ) term )*
 
 term = factor ( ('+' | '-') factor )*
 

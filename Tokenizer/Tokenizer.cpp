@@ -34,6 +34,15 @@ std::map<char, Token::tokenType> one_symbol = {
         {')', Token::BRACKET_CLOSE},
         {'{', Token::BLOCK_OPEN},
         {'}', Token::BLOCK_CLOSE},
+        {'>', Token::GREATER},
+        {'<', Token::LESS},
+};
+
+std::map<std::string, Token::tokenType> two_symbols = {
+        {"==", Token::EQUAL},
+        {"<=", Token::LESS_OR_EQUAL},
+        {">=", Token::GREATER_OR_EQUAL},
+        {"!=", Token::NOT_EQUAL},
 };
 
 std::map<std::string, Token::tokenType> reserved = {
@@ -70,7 +79,15 @@ Token Tokenizer::nextToken() {
         }
         return tk(Token::IDENTIFIER);
     }
-//    TODO: soon here will be double-symbol operators
+//    two symbols
+    if ((position + 1) != text.end()) {
+        auto two = std::string(begin, position + 2);
+        if (two_symbols.find(two) != two_symbols.end()) {
+            position += 2;
+            return tk(two_symbols[two]);
+        }
+    }
+//    one symbol
     if (one_symbol.find(*position) != one_symbol.end()) {
         position++;
         return tk(one_symbol[*begin]);

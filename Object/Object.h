@@ -25,15 +25,27 @@ public:
 
     virtual Object *add(Object *other) { return nullptr; };
 
-    virtual Object *uadd() { return nullptr; };
+    virtual Object *unary_add() { return nullptr; };
 
-    virtual Object *sub(Object *other) { return nullptr; };
+    virtual Object *subtract(Object *other) { return nullptr; };
 
-    virtual Object *usub() { return nullptr; };
+    virtual Object *unary_subtract() { return nullptr; };
 
-    virtual Object *mul(Object *other) { return nullptr; };
+    virtual Object *multiply(Object *other) { return nullptr; };
 
-    virtual Object *div(Object *other) { return nullptr; };
+    virtual Object *divide(Object *other) { return nullptr; };
+
+    virtual Object *equal(Object *other) { return nullptr; };
+
+    virtual Object *greater(Object *other) { return nullptr; };
+
+    virtual Object *less(Object *other) { return nullptr; };
+
+    virtual Object *greater_or_equal(Object *other) { return nullptr; };
+
+    virtual Object *less_or_equal(Object *other) { return nullptr; };
+
+    virtual Object *not_equal(Object *other) { return nullptr; };
 
     virtual Object *__call__(Object *other) { return nullptr; };
 

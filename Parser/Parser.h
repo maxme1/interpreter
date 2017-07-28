@@ -79,7 +79,7 @@ class Parser {
     };
 
     Expression *expression() {
-        Expression *left = term();
+        Expression *left = comparison();
         if (matches({Token::ASSIGNMENT})) {
             Token previous = *(position - 1);
             advance();
@@ -89,6 +89,17 @@ class Parser {
             }
 
             throw "Bad assignment";
+        }
+        return left;
+    }
+
+    Expression *comparison() {
+        Expression *left = term();
+        while (matches({Token::EQUAL, Token::GREATER, Token::GREATER_OR_EQUAL, Token::LESS, Token::LESS_OR_EQUAL,
+                        Token::NOT_EQUAL})) {
+            auto current = advance();
+            Expression *right = term();
+            left = new Binary(current.body, current.type, left, right);
         }
         return left;
     }
