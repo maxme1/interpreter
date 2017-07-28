@@ -123,13 +123,24 @@ class Parser {
 
     Expression *primary() {
         auto left = literal();
+//        function
         while (matches({Token::BRACKET_OPEN})) {
             advance();
-            auto argument = expression();
-            require({Token::BRACKET_CLOSE});
-            left = new FunctionExpression(left, argument);
+            auto arguments = arguments();
+            left = new FunctionExpression(left, arguments);
         }
         return left;
+    }
+
+    std::vector<Expression *> arguments() {
+        auto result = std::vector<Expression *>();
+        while (!matches({Token::BRACKET_CLOSE})) {
+            result.push_back(expression());
+            if (!matches({Token::BRACKET_CLOSE}))
+                require({Token::SEPARATOR});
+        }
+        advance();
+        return result;
     }
 
     Expression *literal() {

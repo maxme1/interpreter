@@ -5,6 +5,7 @@
 #include <stack>
 #include "../Object/Object.h"
 #include "../Tokenizer/Token.h"
+#include "../Parser/Expression/Expression.h"
 
 class Binary;
 class Unary;

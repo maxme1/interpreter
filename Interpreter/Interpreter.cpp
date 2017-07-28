@@ -105,10 +105,14 @@ Object *Interpreter::evaluate(Variable *expression) {
 }
 
 Object *Interpreter::evaluate(FunctionExpression *expression) {
-    Object *obj = expression->target->evaluate(this), *arg = expression->argument->evaluate(this);
+    Object *obj = expression->target->evaluate(this);
     garbage.push(obj);
-    garbage.push(arg);
-    return obj->__call__(arg);
+    for (auto argument :expression->argsList) {
+        auto arg = argument->evaluate(this);
+        garbage.push(arg);
+    }
+//    TODO: need some design decisions
+//    return obj->__call__(arg);
 }
 
 void Interpreter::evaluate(ExpressionStatement *statement) {

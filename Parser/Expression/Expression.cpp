@@ -25,10 +25,15 @@ Unary::~Unary() {
     delete argument;
 }
 
-FunctionExpression::FunctionExpression(Expression *target, Expression *argument) : target(target), argument(argument) {}
+FunctionExpression::FunctionExpression(Expression *target, const std::vector<Expression *> &argsList)
+        : target(target), argsList(argsList) {}
 
 std::string FunctionExpression::str() {
-    return target->str() + "(" + argument->str() + ")";
+    std::string result = target->str() + "(";
+    for (auto argument : argsList) {
+        result += argument->str();
+    }
+    return result + ")";
 }
 
 SetVariable::SetVariable(const std::string &name, Expression *value) : name(name), value(value) {}
