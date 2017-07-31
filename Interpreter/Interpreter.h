@@ -3,7 +3,6 @@
 
 #include <string>
 #include <stack>
-#include "../Object/Object.h"
 #include "../Tokenizer/Token.h"
 
 class Binary;
@@ -17,14 +16,22 @@ class Statement;
 class ExpressionStatement;
 class IfStatement;
 class WhileStatement;
+class FunctionDefinition;
+class ReturnStatement;
 class ControlFlow;
 class Block;
 
+class Object;
 class Interpreter {
-    Object globalScope;
+    std::vector<Object *> scopes;
     std::stack<Object *> garbage;
 
+    void addScope();
+    void deleteScope();
+    Object *getVariable(const std::string &name);
+    void setVariable(const std::string &name, Object *value);
     void collect();
+    void track(std::initializer_list<Object *> objects);
     void evaluateStatements(std::vector<Statement *> &statements);
 public:
     Interpreter();
@@ -40,6 +47,8 @@ public:
     void evaluate(ExpressionStatement *statement);
     void evaluate(IfStatement *statement);
     void evaluate(WhileStatement *statement);
+    void evaluate(FunctionDefinition *statement);
+    void evaluate(ReturnStatement *statement);
     void evaluate(ControlFlow *statement);
     void evaluate(Block *block);
 };

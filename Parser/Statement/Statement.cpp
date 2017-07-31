@@ -7,10 +7,6 @@ std::string ExpressionStatement::str() {
     return expression->str() + ";";
 }
 
-void ExpressionStatement::evaluate(Interpreter *interpreter) {
-    interpreter->evaluate(this);
-}
-
 ExpressionStatement::~ExpressionStatement() {
     delete expression;
 }
@@ -20,10 +16,6 @@ IfStatement::IfStatement(Expression *condition, Statement *left, Statement *righ
 
 IfStatement::~IfStatement() {
     delete condition, left, right;
-}
-
-void IfStatement::evaluate(Interpreter *interpreter) {
-    interpreter->evaluate(this);
 }
 
 std::string IfStatement::str() {
@@ -41,10 +33,6 @@ WhileStatement::~WhileStatement() {
     delete condition, body;
 }
 
-void WhileStatement::evaluate(Interpreter *interpreter) {
-    interpreter->evaluate(this);
-}
-
 std::string WhileStatement::str() {
     std::string result = "while(" + condition->str() + ")";
     if (body)
@@ -54,12 +42,32 @@ std::string WhileStatement::str() {
 
 ControlFlow::ControlFlow(Token::tokenType type, const std::string &body) : type(type), body(body) {}
 
-std::string ControlFlow::str() {
-    return body;
+std::string ControlFlow::str() { return body; }
+
+ReturnStatement::ReturnStatement(Expression *expression) : expression(expression) {}
+
+ReturnStatement::~ReturnStatement() { delete expression; }
+
+std::string ReturnStatement::str() {
+    std::string result = "return ";
+    if (expression)
+        result += expression->str();
+    return result;
 }
 
-void ControlFlow::evaluate(Interpreter *interpreter) {
-    interpreter->evaluate(this);
+FunctionDefinition::FunctionDefinition(const std::string &name, const std::vector<std::string> &arguments,
+                                       Statement *body) : body(body), arguments(arguments), name(name) {}
+
+std::string FunctionDefinition::str() {
+    std::string result = "def " + name + "(";
+    bool first = true;
+    for (auto &&argument : arguments) {
+        if (!first)
+            result += ", ";
+        result += argument;
+        first = false;
+    }
+    return result + ")" + body->str();
 }
 
 Block::Block(const std::vector<Statement *> &statements) : statements(statements) {}
@@ -70,10 +78,6 @@ std::string Block::str() {
         result += "    " + statement->str() + "\n";
     }
     return result + "}\n";
-}
-
-void Block::evaluate(Interpreter *interpreter) {
-    interpreter->evaluate(this);
 }
 
 Block::~Block() {

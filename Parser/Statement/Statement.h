@@ -9,21 +9,24 @@ class Expression;
 
 class Statement {
 public:
-    virtual ~Statement() {};
-
-    virtual std::string str() = 0;
     virtual void evaluate(Interpreter *interpreter) = 0;
+    virtual ~Statement() = default;
+    virtual std::string str() = 0;
 };
 
 class Block : public Statement {
     friend class Interpreter;
 
     std::vector<Statement *> statements;
+
+    void evaluate(Interpreter *interpreter) override {
+        interpreter->evaluate(this);
+    }
+
 public:
-    Block(const std::vector<Statement *> &statements);
-    ~Block();
+    explicit Block(const std::vector<Statement *> &statements);
+    ~Block() override;
     std::string str() override;
-    void evaluate(Interpreter *interpreter) override;
 };
 
 class ExpressionStatement : public Statement {
@@ -31,10 +34,13 @@ class ExpressionStatement : public Statement {
 
     Expression *expression;
 
+    void evaluate(Interpreter *interpreter) override {
+        interpreter->evaluate(this);
+    }
+
 public:
-    ExpressionStatement(Expression *expression);
-    ~ExpressionStatement();
-    void evaluate(Interpreter *interpreter) override;
+    explicit ExpressionStatement(Expression *expression);
+    ~ExpressionStatement() override;
     std::string str() override;
 };
 
@@ -44,10 +50,13 @@ class IfStatement : public Statement {
     Expression *condition;
     Statement *left, *right;
 
+    void evaluate(Interpreter *interpreter) override {
+        interpreter->evaluate(this);
+    }
+
 public:
-    IfStatement(Expression *condition, Statement *left = nullptr, Statement *right = nullptr);
-    ~IfStatement();
-    void evaluate(Interpreter *interpreter) override;
+    explicit IfStatement(Expression *condition, Statement *left = nullptr, Statement *right = nullptr);
+    ~IfStatement() override;
     std::string str() override;
 };
 
@@ -57,21 +66,57 @@ class WhileStatement : public Statement {
     Expression *condition;
     Statement *body;
 
+    void evaluate(Interpreter *interpreter) override {
+        interpreter->evaluate(this);
+    }
+
 public:
-    WhileStatement(Expression *condition, Statement *body = nullptr);
-    ~WhileStatement();
-    void evaluate(Interpreter *interpreter) override;
+    explicit WhileStatement(Expression *condition, Statement *body = nullptr);
+    ~WhileStatement() override;
     std::string str() override;
 };
 
-class ControlFlow: public Statement {
+class ControlFlow : public Statement {
     friend class Interpreter;
     Token::tokenType type;
     std::string body;
+
+    void evaluate(Interpreter *interpreter) override {
+        interpreter->evaluate(this);
+    }
+
 public:
     ControlFlow(Token::tokenType type, const std::string &body);
     std::string str() override;
-    void evaluate(Interpreter *interpreter) override;
+};
+
+class ReturnStatement : public Statement {
+    friend class Interpreter;
+    Expression *expression;
+
+    void evaluate(Interpreter *interpreter) override {
+        interpreter->evaluate(this);
+    }
+
+public:
+    ReturnStatement(Expression *expression = nullptr);
+    ~ReturnStatement() override;
+    std::string str() override;
+};
+
+class FunctionDefinition : public Statement {
+    friend class Interpreter;
+    Statement *body;
+    std::vector<std::string> arguments;
+    std::string name;
+
+    void evaluate(Interpreter *interpreter) override {
+        interpreter->evaluate(this);
+    }
+
+public:
+    FunctionDefinition(const std::string &name, const std::vector<std::string> &arguments, Statement *body);
+    std::string str() override;
 };
 
 

@@ -4,9 +4,11 @@
 #include "../Parser/Parser.h"
 #include "../Object/Types/Int.h"
 #include "../Object/native.h"
+#include "../Object/Types/Function.h"
 
 Interpreter::Interpreter() {
-    globalScope.setAttribute("print", new Print());
+    addScope();
+    setVariable("print", new Print());
 }
 
 void Interpreter::interpret(std::string text) {
@@ -34,6 +36,36 @@ void Interpreter::interpret(std::string text) {
     collect();
 }
 
+void Interpreter::addScope() {
+    scopes.push_back(new Object());
+}
+
+void Interpreter::deleteScope() {
+    delete scopes.back();
+    scopes.pop_back();
+}
+
+Object *Interpreter::getVariable(const std::string &name) {
+    for (auto it = scopes.rbegin(); it != scopes.rend(); it++) {
+        auto result = (*it)->attributes.find(name);
+        if (result != (*it)->attributes.end())
+            return result->second;
+    }
+    throw "No variable named " + name;
+}
+
+void Interpreter::setVariable(const std::string &name, Object *value) {
+    scopes.back()->setAttribute(name, value);
+}
+
+//TODO: probably too sugary
+void Interpreter::track(std::initializer_list<Object *> objects) {
+    for (auto &&object : objects) {
+        if (object->zombie())
+            garbage.push(object);
+    }
+}
+
 void Interpreter::collect() {
     if (!garbage.empty()) {
 //        std::cout << "\ngarbage: ";
@@ -58,9 +90,7 @@ void Interpreter::evaluateStatements(std::vector<Statement *> &statements) {
 
 Object *Interpreter::evaluate(Binary *expression) {
     Object *left = expression->left->evaluate(this), *right = expression->right->evaluate(this);
-    garbage.push(left);
-    garbage.push(right);
-//    arithmetic
+    track({left, right});
     if (expression->type == Token::ADD)
         return left->add(right);
     if (expression->type == Token::SUB)
@@ -87,7 +117,7 @@ Object *Interpreter::evaluate(Binary *expression) {
 
 Object *Interpreter::evaluate(Unary *expression) {
     Object *argument = expression->argument->evaluate(this);
-    garbage.push(argument);
+    track({argument});
     if (expression->type == Token::ADD)
         return argument->unary_add();
     if (expression->type == Token::SUB)
@@ -109,31 +139,64 @@ Object *Interpreter::evaluate(Literal *expression) {
 
 Object *Interpreter::evaluate(SetVariable *expression) {
     auto value = expression->value->evaluate(this);
-    garbage.push(value);
-    globalScope.setAttribute(expression->name, value);
+    track({value});
+    setVariable(expression->name, value);
     return value;
 }
 
 Object *Interpreter::evaluate(Variable *expression) {
-    return globalScope.getAttribute(expression->body);
+    return getVariable(expression->body);
 }
 
 Object *Interpreter::evaluate(FunctionExpression *expression) {
-    Object *obj = expression->target->evaluate(this), *arg = expression->argument->evaluate(this);
-    garbage.push(obj);
-    garbage.push(arg);
-    return obj->__call__(arg);
+    Object *obj = expression->target->evaluate(this);
+    track({obj});
+    if (expression->argsList.size() != obj->functionArguments.size())
+        throw "Number of arguments doesn't match";
+
+    addScope();
+    for (int i = 0; i < obj->functionArguments.size(); i++) {
+        auto arg = expression->argsList[i]->evaluate(this);
+        setVariable(obj->functionArguments[i], arg);
+    }
+    Object *returnObject = nullptr;
+    try {
+        if (obj->functionBody)
+            obj->functionBody->evaluate(this);
+        else
+            returnObject = obj->__call__(scopes.back());
+    } catch (Object *object) {
+        returnObject = object;
+    } catch (Token::tokenType type) {
+//        TODO: move to syntactic errors
+//        TODO: now the function still return none on this exception
+        std::cout << "Control flow outside loop";
+    } catch (const char *other) {
+        deleteScope();
+        throw other;
+    }
+    if (!returnObject)
+        returnObject = new None;
+    deleteScope();
+    return returnObject;
+}
+
+void Interpreter::evaluate(ReturnStatement *statement) {
+    if (statement->expression)
+        throw statement->expression->evaluate(this);
+    throw new None;
 }
 
 void Interpreter::evaluate(ExpressionStatement *statement) {
 //    TODO: probably can collect all here
     auto obj = statement->expression->evaluate(this);
-    garbage.push(obj);
+    track({obj});
+//    std::cout << obj->str() << "\n";
 }
 
 void Interpreter::evaluate(IfStatement *statement) {
     auto cond = statement->condition->evaluate(this);
-    garbage.push(cond);
+    track({cond});
     if (cond->asBool()) {
         if (statement->left)
             statement->left->evaluate(this);
@@ -143,7 +206,7 @@ void Interpreter::evaluate(IfStatement *statement) {
 
 void Interpreter::evaluate(WhileStatement *statement) {
     auto cond = statement->condition->evaluate(this);
-    garbage.push(cond);
+    track({cond});
     while (cond->asBool()) {
         try {
             if (statement->body)
@@ -153,7 +216,7 @@ void Interpreter::evaluate(WhileStatement *statement) {
                 break;
         }
         cond = statement->condition->evaluate(this);
-        garbage.push(cond);
+        track({cond});
     }
 }
 
@@ -163,4 +226,8 @@ void Interpreter::evaluate(ControlFlow *statement) {
 
 void Interpreter::evaluate(Block *block) {
     evaluateStatements(block->statements);
+}
+
+void Interpreter::evaluate(FunctionDefinition *statement) {
+    setVariable(statement->name, new Function(statement->arguments, statement->body));
 }

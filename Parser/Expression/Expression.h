@@ -8,6 +8,8 @@
 #include "../../Interpreter/Interpreter.h"
 #include "../Statement/Statement.h"
 
+
+class Object;
 class Expression {
     friend class Interpreter;
     virtual Object *evaluate(Interpreter *interpreter) = 0;
@@ -86,9 +88,10 @@ class FunctionExpression : public Expression {
         return interpreter->evaluate(this);
     }
 
-    Expression *target, *argument;
+    Expression *target;
+    std::vector<Expression *> argsList;
 public:
-    FunctionExpression(Expression *target, Expression *argument);
+    FunctionExpression(Expression *target, const std::vector<Expression *> &argsList);
     std::string str() override;
 };
 
