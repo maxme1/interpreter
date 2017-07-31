@@ -21,7 +21,6 @@ expression = comparison | assignment
 assignment = IDENTIFIER '=' expression
 
 comparison = term (( '==' | '>=' | '<=' | '<' | '>' | '!=' ) term )*
-
 term = factor ( ('+' | '-') factor )*
 factor = unary ( ('*' | '/') unary )*
 # TODO: maybe add unlimited unary operations

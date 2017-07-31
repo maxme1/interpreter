@@ -11,6 +11,11 @@ Interpreter::Interpreter() {
     setVariable("print", new Print());
 }
 
+Interpreter::~Interpreter() {
+    deleteScope();
+    collect();
+}
+
 void Interpreter::interpret(std::string text) {
     Tokenizer t = Tokenizer(text);
     auto tokens = t.tokenize();
@@ -58,26 +63,19 @@ void Interpreter::setVariable(const std::string &name, Object *value) {
     scopes.back()->setAttribute(name, value);
 }
 
-//TODO: probably too sugary
-void Interpreter::track(std::initializer_list<Object *> objects) {
-    for (auto &&object : objects) {
-        if (object->zombie())
-            garbage.push(object);
-    }
+Object *Interpreter::track(Object *object) {
+//    whenever the interpreter _might_ create a new object we store it
+    object->mentions++;
+    garbage.push(object);
+    return object;
 }
 
 void Interpreter::collect() {
-    if (!garbage.empty()) {
-//        std::cout << "\ngarbage: ";
-        while (!garbage.empty()) {
-            auto obj = garbage.top();
-            garbage.pop();
-            if (obj and obj->zombie()) {
-//                std::cout << obj->str() << " ";
-                delete obj;
-            }
-        }
-//        std::cout << "\n";
+    while (!garbage.empty()) {
+        auto obj = garbage.top();
+        garbage.pop();
+        if (obj and obj->canDelete())
+            delete obj;
     }
 }
 
@@ -89,39 +87,37 @@ void Interpreter::evaluateStatements(std::vector<Statement *> &statements) {
 }
 
 Object *Interpreter::evaluate(Binary *expression) {
-    Object *left = expression->left->evaluate(this), *right = expression->right->evaluate(this);
-    track({left, right});
+    Object *left = expression->left->evaluate(this), *right = expression->right->evaluate(this), *result;
     if (expression->type == Token::ADD)
-        return left->add(right);
+        return track(left->add(right));
     if (expression->type == Token::SUB)
-        return left->subtract(right);
+        return track(left->subtract(right));
     if (expression->type == Token::MUL)
-        return left->multiply(right);
+        return track(left->multiply(right));
     if (expression->type == Token::DIV)
-        return left->divide(right);
+        return track(left->divide(right));
 //    comparison
     if (expression->type == Token::EQUAL)
-        return left->equal(right);
+        return track(left->equal(right));
     if (expression->type == Token::NOT_EQUAL)
-        return left->not_equal(right);
+        return track(left->not_equal(right));
     if (expression->type == Token::GREATER_OR_EQUAL)
-        return left->greater_or_equal(right);
+        return track(left->greater_or_equal(right));
     if (expression->type == Token::GREATER)
-        return left->greater(right);
+        return track(left->greater(right));
     if (expression->type == Token::LESS)
-        return left->less(right);
+        return track(left->less(right));
     if (expression->type == Token::LESS_OR_EQUAL)
-        return left->less_or_equal(right);
+        return track(left->less_or_equal(right));
     return nullptr;
 }
 
 Object *Interpreter::evaluate(Unary *expression) {
     Object *argument = expression->argument->evaluate(this);
-    track({argument});
     if (expression->type == Token::ADD)
-        return argument->unary_add();
+        return track(argument->unary_add());
     if (expression->type == Token::SUB)
-        return argument->unary_subtract();
+        return track(argument->unary_subtract());
     if (expression->type == Token::BRACKET)
         return argument;
     return nullptr;
@@ -131,26 +127,27 @@ Object *Interpreter::evaluate(Literal *expression) {
     auto body = expression->body;
     auto type = expression->type;
     if (type == Token::NUMBER)
-        return new Int(std::atoi(body.c_str()));
+        return track(new Int(std::atoi(body.c_str())));
     if (type == Token::BOOL)
-        return new Bool(body == "True");
+        return track(new Bool(body == "True"));
     return nullptr;
 }
 
 Object *Interpreter::evaluate(SetVariable *expression) {
     auto value = expression->value->evaluate(this);
-    track({value});
     setVariable(expression->name, value);
     return value;
 }
 
 Object *Interpreter::evaluate(Variable *expression) {
+//    leaks here?
     return getVariable(expression->body);
 }
 
+//TODO: closures don't work for now
+//TODO: needs refactoring
 Object *Interpreter::evaluate(FunctionExpression *expression) {
     Object *obj = expression->target->evaluate(this);
-    track({obj});
     if (expression->argsList.size() != obj->functionArguments.size())
         throw "Number of arguments doesn't match";
 
@@ -177,26 +174,23 @@ Object *Interpreter::evaluate(FunctionExpression *expression) {
     }
     if (!returnObject)
         returnObject = new None;
+    track(returnObject);
     deleteScope();
     return returnObject;
 }
 
 void Interpreter::evaluate(ReturnStatement *statement) {
     if (statement->expression)
-        throw statement->expression->evaluate(this);
-    throw new None;
+        throw track(statement->expression->evaluate(this));
+    throw track(new None);
 }
 
 void Interpreter::evaluate(ExpressionStatement *statement) {
-//    TODO: probably can collect all here
-    auto obj = statement->expression->evaluate(this);
-    track({obj});
-//    std::cout << obj->str() << "\n";
+    statement->expression->evaluate(this);
 }
 
 void Interpreter::evaluate(IfStatement *statement) {
     auto cond = statement->condition->evaluate(this);
-    track({cond});
     if (cond->asBool()) {
         if (statement->left)
             statement->left->evaluate(this);
@@ -206,7 +200,6 @@ void Interpreter::evaluate(IfStatement *statement) {
 
 void Interpreter::evaluate(WhileStatement *statement) {
     auto cond = statement->condition->evaluate(this);
-    track({cond});
     while (cond->asBool()) {
         try {
             if (statement->body)
@@ -216,7 +209,6 @@ void Interpreter::evaluate(WhileStatement *statement) {
                 break;
         }
         cond = statement->condition->evaluate(this);
-        track({cond});
     }
 }
 

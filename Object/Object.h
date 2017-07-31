@@ -19,7 +19,6 @@ protected:
 public:
 //    TODO: replace bool  with asBool
     virtual bool asBool() { return false; };
-    bool zombie();
 
     virtual ~Object();
 
@@ -54,7 +53,6 @@ public:
 
     virtual Object *not_equal(Object *other) { return nullptr; };
 
-//    TODO: probably add a function to call from interpreter
     virtual Object *__call__(Object *args) { throw "Object is not callable"; };
 
     virtual Bool *__bool__();

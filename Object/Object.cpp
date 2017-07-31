@@ -10,13 +10,8 @@ Object::~Object() {
     delete functionBody;
 }
 
-bool Object::zombie() {
-    return mentions <= 0;
-}
-
 bool Object::canDelete() {
-    mentions--;
-    return zombie();
+    return mentions <= 0;
 }
 
 Bool *Object::__bool__() {

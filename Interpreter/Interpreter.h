@@ -28,13 +28,14 @@ class Interpreter {
 
     void addScope();
     void deleteScope();
+    void collect();
+    Object * track(Object *object);
     Object *getVariable(const std::string &name);
     void setVariable(const std::string &name, Object *value);
-    void collect();
-    void track(std::initializer_list<Object *> objects);
     void evaluateStatements(std::vector<Statement *> &statements);
 public:
     Interpreter();
+    ~Interpreter();
     void interpret(std::string text);
 
     Object *evaluate(Binary *expression);
