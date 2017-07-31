@@ -8,6 +8,8 @@
 #include "../../Interpreter/Interpreter.h"
 #include "../Statement/Statement.h"
 
+
+class Object;
 class Expression {
     friend class Interpreter;
     virtual Object *evaluate(Interpreter *interpreter) = 0;

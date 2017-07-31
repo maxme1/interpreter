@@ -44,6 +44,8 @@ std::map<std::string, Token::tokenType> reserved = {
         {"while",    Token::WHILE},
         {"break",    Token::BREAK},
         {"continue", Token::CONTINUE},
+        {"return",   Token::RETURN},
+        {"def",      Token::FUNCTION},
 };
 
 Token Tokenizer::nextToken() {

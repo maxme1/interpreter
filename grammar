@@ -1,16 +1,18 @@
 program = statement*
 
 # TODO: add empty statements consisting just of a semicolon
-statement = (StmtBody DELIMITER) | block | ifStmt | whileStmt
+statement = (StmtBody DELIMITER) | block | ifStmt | whileStmt | funcDef
 
-StmtBody = expression | 'break' | 'continue'
+StmtBody = expression | 'break' | 'continue' | returnStmt
+returnStmt = 'return' expression?
 
 # TODO: possibly optional first statement
 ifStmt = 'if' '(' expression ')' (statement ('else' statement)? )?
-
 whileStmt = 'while' '(' expression ')' statement
-
 block = '{' statement* '}'
+
+funcDef = 'def' IDENTIFIER '(' argsList? ')' block
+argsList = IDENTIFIER (SEPARATOR IDENTIFIER)*
 
 -- expression --
 
@@ -19,19 +21,14 @@ expression = term | varSet
 varSet = IDENTIFIER '=' expression
 
 term = factor ( ('+' | '-') factor )*
-
 factor = unary ( ('*' | '/') unary )*
-
 # TODO: maybe add unlimited unary operations
 unary = ('+' | '-')? primary
 
-primary = literal call*
-
+primary = literal ( '(' call? ')' )*
 literal = NUMBER | '(' expression ')' | IDENTIFIER | BOOL
 
-# call = '(' ( expression (SEPARATOR expression)* )? ')'
-# a simpler version for now
-call = '(' expression ')'
+call = expression (SEPARATOR expression)*
 
 -- literals --
 

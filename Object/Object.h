@@ -3,14 +3,21 @@
 
 #include <string>
 #include <map>
+#include <vector>
+#include "../Parser/Statement/Statement.h"
 
 // TODO: throw 'Operator not defined here'
 class Bool;
 class Object {
+    friend class Interpreter;
     int mentions = 0;
-
     bool canDelete();
+protected:
+//    TODO: think of a better way
+    Statement *functionBody = nullptr;
+    std::vector<std::string> functionArguments;
 public:
+//    TODO: replace bool  with asBool
     virtual bool asBool() { return false; };
     bool zombie();
 
@@ -20,8 +27,8 @@ public:
 
     virtual std::string str() { return "Object"; };
 
-    void setAttribute(std::string name, Object *value);
-    Object *getAttribute(std::string name);
+    void setAttribute(const std::string &name, Object *value);
+    Object *getAttribute(const std::string &name);
 
     virtual Object *add(Object *other) { return nullptr; };
 
@@ -35,7 +42,8 @@ public:
 
     virtual Object *div(Object *other) { return nullptr; };
 
-    virtual Object *__call__(Object *other) { return nullptr; };
+//    TODO: probably add a function to call from interpreter
+    virtual Object *__call__(Object *args) { throw "Object is not callable"; };
 
     virtual Bool *__bool__();
 };

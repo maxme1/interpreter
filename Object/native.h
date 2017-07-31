@@ -7,11 +7,15 @@
 
 class Print : public Object {
 public:
-    Object *__call__(Object *other) override {
-        std::cout << other->str() << std::endl;
-        return new None();
+    Print() {
+        functionArguments.push_back("arg");
+    }
+
+    Object *__call__(Object *args) override {
+        auto arg = args->getAttribute("arg");
+        std::cout << arg->str() << std::endl;
+        return nullptr;
     }
 };
-
 
 #endif //INTERPRETER_NATIVE_H

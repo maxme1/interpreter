@@ -13,30 +13,43 @@ class Parser {
     std::vector<Token>::iterator position;
 
     bool matches(std::initializer_list<Token::tokenType> types);
-
     Token advance();
-
     Token require(std::initializer_list<Token::tokenType> types);
 
     Statement *statement() {
         if (matches({Token::BLOCK_OPEN}))
-            return new Block(block());
+            return block();
         if (matches({Token::IF}))
             return ifStatement();
         if (matches({Token::WHILE}))
             return whileStatement();
-        if (matches({Token::BREAK, Token::CONTINUE})) {
-            auto control = advance();
-            require({Token::DELIMITER});
-            return new ControlFlow(control.type, control.body);
-        }
-        auto expr = expression();
+        if (matches({Token::FUNCTION}))
+            return functionDefinition();
+
+        auto body = statementBody();
         require({Token::DELIMITER});
-        return new ExpressionStatement(expr);
+        return body;
     };
 
+    Statement *statementBody() {
+        if (matches({Token::RETURN}))
+            return returnStatement();
+        if (matches({Token::BREAK, Token::CONTINUE})) {
+            auto control = advance();
+            return new ControlFlow(control.type, control.body);
+        }
+        return new ExpressionStatement(expression());
+    }
+
+    Statement *returnStatement() {
+        require({Token::RETURN});
+        if (!matches({Token::DELIMITER}))
+            return new ReturnStatement(expression());
+        return new ReturnStatement();
+    }
+
     Statement *ifStatement() {
-        advance();
+        require({Token::IF});
         require({Token::BRACKET_OPEN});
         auto condition = expression();
         require({Token::BRACKET_CLOSE});
@@ -56,7 +69,7 @@ class Parser {
     }
 
     Statement *whileStatement() {
-        advance();
+        require({Token::WHILE});
         require({Token::BRACKET_OPEN});
         auto condition = expression();
         require({Token::BRACKET_CLOSE});
@@ -69,13 +82,31 @@ class Parser {
         return new WhileStatement(condition, body);
     }
 
-    std::vector<Statement *> block() {
-        advance();
+    Statement *functionDefinition() {
+        require({Token::FUNCTION});
+        auto name = require({Token::IDENTIFIER}).body;
+        require({Token::BRACKET_OPEN});
+        auto arguments = std::vector<std::string>();
+        bool first = true;
+        while (!matches({Token::BRACKET_CLOSE})) {
+            if (!first)
+                require({Token::SEPARATOR});
+            auto local = require({Token::IDENTIFIER});
+            arguments.push_back(local.body);
+            first = false;
+        }
+        require({Token::BRACKET_CLOSE});
+        auto body = block();
+        return new FunctionDefinition(name, arguments, body);
+    }
+
+    Statement *block() {
+        require({Token::BLOCK_OPEN});
         auto statements = std::vector<Statement *>();
         while (position != tokens.end() and !matches({Token::BLOCK_CLOSE}))
             statements.push_back(statement());
         require({Token::BLOCK_CLOSE});
-        return statements;
+        return new Block(statements);
     };
 
     Expression *expression() {
@@ -126,8 +157,8 @@ class Parser {
 //        function
         while (matches({Token::BRACKET_OPEN})) {
             advance();
-            auto arguments = arguments();
-            left = new FunctionExpression(left, arguments);
+            auto args = arguments();
+            left = new FunctionExpression(left, args);
         }
         return left;
     }
