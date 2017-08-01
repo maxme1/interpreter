@@ -4,14 +4,13 @@
 #include <iostream>
 #include "Object.h"
 #include "Types/None.h"
+#include "Types/Callable.h"
 
-class Print : public Object {
+class Print : public Callable {
 public:
-    Print() {
-        functionArguments.push_back("arg");
-    }
+    Print() : Callable({"arg"}) {}
 
-    Object *__call__(Object *args) override {
+    Object *call(Object *args) {
         auto arg = args->getAttribute("arg");
         std::cout << arg->str() << std::endl;
         return nullptr;

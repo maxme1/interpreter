@@ -3,6 +3,7 @@
 
 #include "../Object.h"
 #include "Bool.h"
+#include "Exception.h"
 
 class Int : public Object {
     Int *getInt(Object *target) {
@@ -10,8 +11,7 @@ class Int : public Object {
         if (local) {
             return local;
         }
-//        TODO: add types
-        throw "Operator undefined for these types";
+        throw Exception("Operator undefined for these types");
     }
 
 public:
@@ -37,8 +37,12 @@ public:
 
     Object *multiply(Object *other) { return new Int(value * getInt(other)->value); }
 
-//    TODO: division by zero
-    Object *divide(Object *other) { return new Int(value / getInt(other)->value); }
+    Object *divide(Object *other) {
+        int val = getInt(other)->value;
+        if (val == 0)
+            throw Exception("Division by zero");
+        return new Int(value / val);
+    }
 
     Object *equal(Object *other) { return new Int(value == getInt(other)->value); }
 

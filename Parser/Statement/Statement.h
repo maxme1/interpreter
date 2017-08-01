@@ -4,6 +4,7 @@
 
 #include <string>
 #include "../../Interpreter/Interpreter.h"
+#include "../../Tokenizer/Token.h"
 
 class Expression;
 

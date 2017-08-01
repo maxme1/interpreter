@@ -4,7 +4,9 @@
 #include "../Parser/Parser.h"
 #include "../Object/Types/Int.h"
 #include "../Object/native.h"
-#include "../Object/Types/Function.h"
+#include "../Object/Types/Exception.h"
+#include "../Object/Types/Callable.h"
+
 
 Interpreter::Interpreter() {
     addScope();
@@ -30,13 +32,10 @@ void Interpreter::interpret(std::string text) {
     if (p.error) {
         return;
     }
-//    std::cout << statements[0]->str();
     try {
         evaluateStatements(statements);
-    } catch (const char *exception) {
-        std::cout << exception;
-    } catch (Token::tokenType type) {
-        std::cout << "Control flow outside loop";
+    } catch (Exception &e) {
+        std::cout << e.str();
     }
     collect();
 }
@@ -56,7 +55,7 @@ Object *Interpreter::getVariable(const std::string &name) {
         if (result != (*it)->attributes.end())
             return result->second;
     }
-    throw "No variable named " + name;
+    throw Exception("No variable named " + name);
 }
 
 void Interpreter::setVariable(const std::string &name, Object *value) {
@@ -87,7 +86,7 @@ void Interpreter::evaluateStatements(std::vector<Statement *> &statements) {
 }
 
 Object *Interpreter::evaluate(Binary *expression) {
-    Object *left = expression->left->evaluate(this), *right = expression->right->evaluate(this), *result;
+    Object *left = expression->left->evaluate(this), *right = expression->right->evaluate(this);
     if (expression->type == Token::ADD)
         return track(left->add(right));
     if (expression->type == Token::SUB)
@@ -148,29 +147,32 @@ Object *Interpreter::evaluate(Variable *expression) {
 //TODO: needs refactoring
 Object *Interpreter::evaluate(FunctionExpression *expression) {
     Object *obj = expression->target->evaluate(this);
-    if (expression->argsList.size() != obj->functionArguments.size())
-        throw "Number of arguments doesn't match";
+    Callable *callable = dynamic_cast<Callable *>(obj);
+    if (!callable)
+        throw Exception("Object is not callable");
+
+    if (expression->argsList.size() != callable->arguments.size())
+        throw Exception("Number of arguments doesn't match");
 
     addScope();
-    for (int i = 0; i < obj->functionArguments.size(); i++) {
+    for (int i = 0; i < callable->arguments.size(); i++) {
         auto arg = expression->argsList[i]->evaluate(this);
-        setVariable(obj->functionArguments[i], arg);
+        setVariable(callable->arguments[i], arg);
     }
     Object *returnObject = nullptr;
     try {
-        if (obj->functionBody)
-            obj->functionBody->evaluate(this);
+        if (callable->body)
+            callable->body->evaluate(this);
         else
-            returnObject = obj->__call__(scopes.back());
-    } catch (Object *object) {
-        returnObject = object;
-    } catch (Token::tokenType type) {
+            returnObject = callable->call(scopes.back());
+    } catch (ReturnException &e) {
+        returnObject = e.content;
+    } catch (FlowException &e) {
 //        TODO: move to syntactic errors
-//        TODO: now the function still return none on this exception
-        std::cout << "Control flow outside loop";
-    } catch (const char *other) {
+        throw Exception("Control flow outside loop");
+    } catch (Exception &e) {
         deleteScope();
-        throw other;
+        throw e;
     }
     if (!returnObject)
         returnObject = new None;
@@ -181,8 +183,8 @@ Object *Interpreter::evaluate(FunctionExpression *expression) {
 
 void Interpreter::evaluate(ReturnStatement *statement) {
     if (statement->expression)
-        throw track(statement->expression->evaluate(this));
-    throw track(new None);
+        throw ReturnException(statement->expression->evaluate(this));
+    throw ReturnException();
 }
 
 void Interpreter::evaluate(ExpressionStatement *statement) {
@@ -204,16 +206,17 @@ void Interpreter::evaluate(WhileStatement *statement) {
         try {
             if (statement->body)
                 statement->body->evaluate(this);
-        } catch (Token::tokenType type) {
-            if (type == Token::BREAK)
-                break;
-        }
+        } catch (BreakException) {
+            break;
+        } catch (ContinueException) {}
         cond = statement->condition->evaluate(this);
     }
 }
 
 void Interpreter::evaluate(ControlFlow *statement) {
-    throw statement->type;
+    if (statement->type == Token::CONTINUE)
+        throw ContinueException();
+    throw BreakException();
 }
 
 void Interpreter::evaluate(Block *block) {
@@ -221,5 +224,5 @@ void Interpreter::evaluate(Block *block) {
 }
 
 void Interpreter::evaluate(FunctionDefinition *statement) {
-    setVariable(statement->name, new Function(statement->arguments, statement->body));
+    setVariable(statement->name, new Callable(statement->arguments, statement->body));
 }

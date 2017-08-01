@@ -3,7 +3,7 @@
 
 #include <string>
 #include <stack>
-#include "../Tokenizer/Token.h"
+#include <vector>
 
 class Binary;
 class Unary;
@@ -23,16 +23,6 @@ class Block;
 
 class Object;
 class Interpreter {
-    std::vector<Object *> scopes;
-    std::stack<Object *> garbage;
-
-    void addScope();
-    void deleteScope();
-    void collect();
-    Object * track(Object *object);
-    Object *getVariable(const std::string &name);
-    void setVariable(const std::string &name, Object *value);
-    void evaluateStatements(std::vector<Statement *> &statements);
 public:
     Interpreter();
     ~Interpreter();
@@ -52,6 +42,29 @@ public:
     void evaluate(ReturnStatement *statement);
     void evaluate(ControlFlow *statement);
     void evaluate(Block *block);
+private:
+    std::vector<Object *> scopes;
+    std::stack<Object *> garbage;
+
+    void addScope();
+    void deleteScope();
+    void collect();
+    Object *track(Object *object);
+    Object *getVariable(const std::string &name);
+    void setVariable(const std::string &name, Object *value);
+    void evaluateStatements(std::vector<Statement *> &statements);
+
+    struct ReturnException {
+        Object *content;
+
+        explicit ReturnException(Object *content = nullptr) : content(content) {}
+    };
+    struct FlowException {
+    };
+    struct ContinueException : FlowException {
+    };
+    struct BreakException : FlowException {
+    };
 };
 
 #endif //INTERPRETER_INTERPRETER_H
