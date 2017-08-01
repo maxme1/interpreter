@@ -7,49 +7,48 @@
 
 Object *Interpreter::evaluate(Binary *expression) {
     Object *left = expression->left->evaluate(this), *right = expression->right->evaluate(this);
-    if (expression->type == Token::ADD)
+    if (expression->ofType(Token::ADD))
         return track(left->add(right));
-    if (expression->type == Token::SUB)
+    if (expression->ofType(Token::SUB))
         return track(left->subtract(right));
-    if (expression->type == Token::MUL)
+    if (expression->ofType(Token::MUL))
         return track(left->multiply(right));
-    if (expression->type == Token::DIV)
+    if (expression->ofType(Token::DIV))
         return track(left->divide(right));
 //    comparison
-    if (expression->type == Token::EQUAL)
+    if (expression->ofType(Token::EQUAL))
         return track(left->equal(right));
-    if (expression->type == Token::NOT_EQUAL)
+    if (expression->ofType(Token::NOT_EQUAL))
         return track(left->not_equal(right));
-    if (expression->type == Token::GREATER_OR_EQUAL)
+    if (expression->ofType(Token::GREATER_OR_EQUAL))
         return track(left->greater_or_equal(right));
-    if (expression->type == Token::GREATER)
+    if (expression->ofType(Token::GREATER))
         return track(left->greater(right));
-    if (expression->type == Token::LESS)
+    if (expression->ofType(Token::LESS))
         return track(left->less(right));
-    if (expression->type == Token::LESS_OR_EQUAL)
+    if (expression->ofType(Token::LESS_OR_EQUAL))
         return track(left->less_or_equal(right));
     return nullptr;
 }
 
 Object *Interpreter::evaluate(Unary *expression) {
     Object *argument = expression->argument->evaluate(this);
-    if (expression->type == Token::ADD)
+    if (expression->ofType(Token::ADD))
         return track(argument->unary_add());
-    if (expression->type == Token::SUB)
+    if (expression->ofType(Token::SUB))
         return track(argument->unary_subtract());
-    if (expression->type == Token::BRACKET)
+    if (expression->ofType(Token::BRACKET))
         return argument;
     return nullptr;
 }
 
 Object *Interpreter::evaluate(Literal *expression) {
-    auto body = expression->body;
-    auto type = expression->type;
-    if (type == Token::NUMBER)
-        return track(new Int(std::atoi(body.c_str())));
-    if (type == Token::BOOL)
-        return track(new Bool(body == "True"));
-    if (type == Token::NONE)
+    if (expression->ofType(Token::NUMBER))
+// TODO: does'nt look good
+        return track(new Int(std::atoi(expression->str().c_str())));
+    if (expression->ofType(Token::BOOL))
+        return track(new Bool(expression->str() == "True"));
+    if (expression->ofType(Token::NONE))
         return track(new None());
     return nullptr;
 }
@@ -60,9 +59,16 @@ Object *Interpreter::evaluate(SetVariable *expression) {
     return value;
 }
 
+Object *Interpreter::evaluate(SetAttribute *expression) {
+//    TODO: also looks bad
+    auto value = expression->value->evaluate(this), target = expression->target->target->evaluate(this);
+    target->setAttribute(expression->target->name, value);
+    return value;
+}
+
 Object *Interpreter::evaluate(Variable *expression) {
 //    leaks here?
-    return getVariable(expression->body);
+    return getVariable(expression->name);
 }
 
 //TODO: closures don't work for now
@@ -100,4 +106,9 @@ Object *Interpreter::evaluate(FunctionExpression *expression) {
     track(returnObject);
     deleteScope();
     return returnObject;
+}
+
+Object *Interpreter::evaluate(GetAttribute *expression) {
+    auto target = expression->target->evaluate(this);
+    return target->getAttribute(expression->name);
 }

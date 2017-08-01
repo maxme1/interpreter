@@ -18,7 +18,8 @@ argsList = IDENTIFIER (SEPARATOR IDENTIFIER)*
 
 expression = comparison | assignment
 
-assignment = IDENTIFIER '=' expression
+assignment = assignable '=' expression
+assignable = ( primary attribute ) | IDENTIFIER
 
 comparison = term (( '==' | '>=' | '<=' | '<' | '>' | '!=' ) term )*
 term = factor ( ('+' | '-') factor )*
@@ -26,10 +27,12 @@ factor = unary ( ('*' | '/') unary )*
 # TODO: maybe add unlimited unary operations
 unary = ('+' | '-')? primary
 
-primary = literal ( '(' call? ')' )*
+primary = literal suffix*
 literal = NUMBER | '(' expression ')' | IDENTIFIER | BOOL | NONE
 
+suffix = ( '(' call? ')' ) | attribute
 call = expression (SEPARATOR expression)*
+attribute = '.' IDENTIFIER
 
 -- literals --
 

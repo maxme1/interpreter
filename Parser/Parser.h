@@ -5,6 +5,7 @@
 #include <vector>
 #include <initializer_list>
 #include <iostream>
+#include <assert.h>
 #include "Expression/Expression.h"
 
 class Parser {
@@ -110,47 +111,53 @@ class Parser {
     };
 
     Expression *expression() {
-        Expression *left = comparison();
+        auto left = comparison();
         if (matches({Token::ASSIGNMENT})) {
             Token previous = *(position - 1);
-            advance();
-            Expression *right = expression();
+            auto token = advance();
+            auto right = expression();
             if (left->ofType(Token::IDENTIFIER)) {
-                return new SetVariable(previous.body, right);
+                return new SetVariable(token, previous.body, right);
+            }
+            if (left->ofType(Token::ATTRIBUTE)) {
+                auto lookup = dynamic_cast<GetAttribute *>(left);
+                assert(lookup);
+                return new SetAttribute(token, lookup, right);
             }
 
             throw "Bad assignment";
         }
+//        here may be a leak
         return left;
     }
 
     Expression *comparison() {
-        Expression *left = term();
+        auto left = term();
         while (matches({Token::EQUAL, Token::GREATER, Token::GREATER_OR_EQUAL, Token::LESS, Token::LESS_OR_EQUAL,
                         Token::NOT_EQUAL})) {
             auto current = advance();
-            Expression *right = term();
-            left = new Binary(current.body, current.type, left, right);
+            auto right = term();
+            left = new Binary(current, left, right);
         }
         return left;
     }
 
     Expression *term() {
-        Expression *left = factor();
+        auto left = factor();
         while (matches({Token::ADD, Token::SUB})) {
             auto current = advance();
-            Expression *right = factor();
-            left = new Binary(current.body, current.type, left, right);
+            auto right = factor();
+            left = new Binary(current, left, right);
         }
         return left;
     }
 
     Expression *factor() {
-        Expression *left = unary();
+        auto left = unary();
         while (matches({Token::MUL, Token::DIV})) {
             auto current = advance();
-            Expression *right = unary();
-            left = new Binary(current.body, current.type, left, right);
+            auto right = unary();
+            left = new Binary(current, left, right);
         }
         return left;
     }
@@ -159,17 +166,22 @@ class Parser {
         if (!matches({Token::ADD, Token::SUB}))
             return primary();
         auto current = advance();
-        Expression *argument = primary();
-        return new Unary(current.body, current.type, argument);
+        auto argument = primary();
+        return new Unary(current, argument);
     }
 
     Expression *primary() {
         auto left = literal();
-//        function
-        while (matches({Token::BRACKET_OPEN})) {
-            advance();
-            auto args = arguments();
-            left = new FunctionExpression(left, args);
+        while (matches({Token::BRACKET_OPEN, Token::ATTRIBUTE})) {
+            if (matches({Token::BRACKET_OPEN})) {
+                auto token = advance();
+                auto args = arguments();
+                left = new FunctionExpression(token, left, args);
+            } else if (matches({Token::ATTRIBUTE})) {
+                auto token = advance();
+                auto name = require({Token::IDENTIFIER}).body;
+                left = new GetAttribute(token, left, name);
+            }
         }
         return left;
     }
@@ -187,24 +199,23 @@ class Parser {
 
     Expression *literal() {
         if (matches({Token::NUMBER, Token::BOOL, Token::NONE})) {
-//            TODO: create constructor with token
             auto current = advance();
-            return new Literal(current.body, current.type);
+            return new Literal(current);
         }
         if (matches({Token::IDENTIFIER})) {
             auto current = advance();
-            return new Variable(current.body, current.type);
+            return new Variable(current);
         }
         require({Token::BRACKET_OPEN});
         auto result = expression();
         require({Token::BRACKET_CLOSE});
-        return new Unary("()", Token::BRACKET, result);
+        return new Unary(Token(Token::BRACKET, "()"), result);
     }
 
 public:
     bool error = false;
 
-    Parser(const std::vector<Token> &tokens);
+    explicit Parser(const std::vector<Token> &tokens);
 
 //    TODO: combine build and block
     std::vector<Statement *> build() {
@@ -212,7 +223,7 @@ public:
         try {
             while (position != tokens.end())
                 statements.push_back(statement());
-        } catch (TokenTypes types) {
+        } catch (TokenTypes &types) {
             error = true;
 //            TODO: no memory is being freed whatsoever
 //            TODO: more specific

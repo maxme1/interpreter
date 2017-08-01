@@ -4,8 +4,6 @@
 #include "../Parser/Parser.h"
 #include "../Object/Types/Int.h"
 #include "../Object/native.h"
-#include "../Object/Types/Exception.h"
-#include "../Object/Types/Callable.h"
 
 
 Interpreter::Interpreter() {
@@ -36,6 +34,10 @@ void Interpreter::interpret(std::string text) {
         evaluateStatements(statements);
     } catch (Exception &e) {
         std::cout << e.str();
+    } catch (ControlFlow) {
+        std::cout << "Control flow outside loop";
+    } catch (ReturnException) {
+        std::cout << "return outside function";
     }
     collect();
 }

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include <utility>
 #include "../../Object/Object.h"
 #include "../../Tokenizer/Token.h"
 #include "../../Interpreter/Interpreter.h"
@@ -14,18 +15,14 @@ class Expression {
     friend class Interpreter;
     virtual Object *evaluate(Interpreter *interpreter) = 0;
 
-    std::string body;
-protected:
-    Token::tokenType type;
+    Token token;
 public:
-    Expression() = default;
-    virtual ~Expression() = default;;
+    explicit Expression(Token token) : token(std::move(token)) {};
+    virtual ~Expression() = default;
 
-    Expression(const std::string &body, Token::tokenType type) : body(body), type(type) {};
+    bool ofType(Token::tokenType type) { return type == token.type; }
 
-    bool ofType(Token::tokenType _type) { return _type == type; }
-
-    virtual std::string str() { return body; };
+    virtual std::string str() { return token.body; };
 };
 
 class Binary : public Expression {
@@ -36,11 +33,9 @@ class Binary : public Expression {
     }
 
     Expression *left, *right;
-
 public:
-    Binary(const std::string &body, Token::tokenType type, Expression *left, Expression *right);
-    ~Binary();
-
+    Binary(Token token, Expression *left, Expression *right);
+    ~Binary() override;
     std::string str() override;
 };
 
@@ -53,21 +48,20 @@ class Unary : public Expression {
 
     Expression *argument;
 public:
-
-    Unary(const std::string &body, Token::tokenType type, Expression *argument);
-    virtual ~Unary();
+    Unary(Token token, Expression *argument);
+    ~Unary() override;
     std::string str() override;
 };
 
 class Literal : public Expression {
     friend class Interpreter;
-
+private:
     Object *evaluate(Interpreter *interpreter) override {
         return interpreter->evaluate(this);
     }
 
 public:
-    Literal(const std::string &body, Token::tokenType type) : Expression(body, type) {}
+    explicit Literal(const Token &token) : Expression(token) {}
 };
 
 class Variable : public Expression {
@@ -78,7 +72,9 @@ class Variable : public Expression {
     }
 
 public:
-    Variable(const std::string &body, Token::tokenType type) : Expression(body, type) {}
+    explicit Variable(const Token &token) : Expression(token), name(token.body) {}
+
+    std::string name;
 };
 
 class FunctionExpression : public Expression {
@@ -91,7 +87,24 @@ class FunctionExpression : public Expression {
     Expression *target;
     std::vector<Expression *> argsList;
 public:
-    FunctionExpression(Expression *target, const std::vector<Expression *> &argsList);
+    FunctionExpression(Token token, Expression *target, std::vector<Expression *> argsList);
+    ~FunctionExpression() override;
+    std::string str() override;
+};
+
+class GetAttribute : public Expression {
+    friend class Interpreter;
+    friend class SetAttribute;
+
+    Object *evaluate(Interpreter *interpreter) override {
+        return interpreter->evaluate(this);
+    }
+
+    Expression *target;
+    std::string name;
+public:
+    GetAttribute(Token token, Expression *target, std::string name);
+    ~GetAttribute() override;
     std::string str() override;
 };
 
@@ -106,8 +119,24 @@ class SetVariable : public Expression {
     Expression *value;
 
 public:
-    SetVariable(const std::string &name, Expression *value);
-    ~SetVariable();
+    SetVariable(Token token, std::string name, Expression *value);
+    ~SetVariable() override;
+    std::string str() override;
+};
+
+class SetAttribute : public Expression {
+    friend class Interpreter;
+
+    Object *evaluate(Interpreter *interpreter) override {
+        return interpreter->evaluate(this);
+    }
+
+    Expression *value;
+    GetAttribute *target;
+
+public:
+    SetAttribute(const Token &token, GetAttribute *target, Expression *value);
+    ~SetAttribute() override;
     std::string str() override;
 };
 

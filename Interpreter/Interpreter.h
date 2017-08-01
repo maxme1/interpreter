@@ -4,13 +4,16 @@
 #include <string>
 #include <stack>
 #include <vector>
+#include "../Tokenizer/Token.h"
 
 class Binary;
 class Unary;
 class Literal;
 class SetVariable;
+class SetAttribute;
 class Variable;
 class FunctionExpression;
+class GetAttribute;
 
 class Statement;
 class ExpressionStatement;
@@ -32,8 +35,10 @@ public:
     Object *evaluate(Unary *expression);
     Object *evaluate(Literal *expression);
     Object *evaluate(SetVariable *expression);
+    Object *evaluate(SetAttribute *expression);
     Object *evaluate(Variable *expression);
     Object *evaluate(FunctionExpression *expression);
+    Object *evaluate(GetAttribute *expression);
 
     void evaluate(ExpressionStatement *statement);
     void evaluate(IfStatement *statement);
