@@ -7,7 +7,7 @@
 
 struct Token {
     enum tokenType {
-        NUMBER, BOOL,
+        NUMBER, BOOL, NONE,
         ADD, SUB, MUL, DIV,
         EQUAL, GREATER, GREATER_OR_EQUAL, LESS, LESS_OR_EQUAL, NOT_EQUAL,
         IDENTIFIER, ASSIGNMENT,

@@ -186,7 +186,7 @@ class Parser {
     }
 
     Expression *literal() {
-        if (matches({Token::NUMBER, Token::BOOL})) {
+        if (matches({Token::NUMBER, Token::BOOL, Token::NONE})) {
 //            TODO: create constructor with token
             auto current = advance();
             return new Literal(current.body, current.type);

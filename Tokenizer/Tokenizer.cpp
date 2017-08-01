@@ -48,6 +48,7 @@ std::map<std::string, Token::tokenType> two_symbols = {
 std::map<std::string, Token::tokenType> reserved = {
         {"True",     Token::BOOL},
         {"False",    Token::BOOL},
+        {"None",     Token::NONE},
         {"if",       Token::IF},
         {"else",     Token::ELSE},
         {"while",    Token::WHILE},

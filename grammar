@@ -27,7 +27,7 @@ factor = unary ( ('*' | '/') unary )*
 unary = ('+' | '-')? primary
 
 primary = literal ( '(' call? ')' )*
-literal = NUMBER | '(' expression ')' | IDENTIFIER | BOOL
+literal = NUMBER | '(' expression ')' | IDENTIFIER | BOOL | NONE
 
 call = expression (SEPARATOR expression)*
 
@@ -36,5 +36,6 @@ call = expression (SEPARATOR expression)*
 NUMBER = '\d+'
 IDENTIFIER = '[^a-zA-Z_]\w*'
 BOOL = 'True' | 'False'
+NONE = 'None'
 DELIMITER = ';'
 SEPARATOR = ','
