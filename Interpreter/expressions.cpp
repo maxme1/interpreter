@@ -1,9 +1,9 @@
 #include <iostream>
 #include "Interpreter.h"
-#include "../Tokenizer/Tokenizer.h"
 #include "../Parser/Parser.h"
 #include "../Object/Types/Int.h"
 #include "../Object/native.h"
+#include "../Object/Types/None.h"
 
 Object *Interpreter::evaluate(Binary *expression) {
     Object *left = expression->left->evaluate(this), *right = expression->right->evaluate(this);
@@ -74,24 +74,21 @@ Object *Interpreter::evaluate(Variable *expression) {
 //TODO: closures don't work for now
 Object *Interpreter::evaluate(FunctionExpression *expression) {
     Object *obj = expression->target->evaluate(this);
-    Callable *callable = dynamic_cast<Callable *>(obj);
+    auto *callable = dynamic_cast<Callable *>(obj);
     if (!callable)
         throw Exception("Object is not callable");
 
-    if (expression->argsList.size() != callable->arguments.size())
+    if (!callable->checkArguments(expression->argsList.size()))
         throw Exception("Number of arguments doesn't match");
 
     addScope();
-    for (int i = 0; i < callable->arguments.size(); i++) {
+    for (int i = 0; i < expression->argsList.size(); i++) {
         auto arg = expression->argsList[i]->evaluate(this);
-        setVariable(callable->arguments[i], arg);
+        setVariable(callable->argument(i), arg);
     }
     Object *returnObject = nullptr;
     try {
-        if (callable->body)
-            callable->body->evaluate(this);
-        else
-            returnObject = callable->call(scopes.back());
+        returnObject = callable->__call__(scope, this);
     } catch (ReturnException &e) {
         returnObject = e.content;
     } catch (FlowException &e) {

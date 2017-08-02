@@ -70,6 +70,20 @@ std::string FunctionDefinition::str() {
     return result + ")" + body->str();
 }
 
+FunctionDefinition::~FunctionDefinition() {
+    delete body;
+}
+
+ClassDefinition::ClassDefinition(const std::string &name, Statement *body) : body(body), name(name) {}
+
+std::string ClassDefinition::str() {
+    return "class " + name + body->str();
+}
+
+ClassDefinition::~ClassDefinition() {
+    delete body;
+}
+
 Block::Block(const std::vector<Statement *> &statements) : statements(statements) {}
 
 std::string Block::str() {

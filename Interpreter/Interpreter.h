@@ -5,6 +5,7 @@
 #include <stack>
 #include <vector>
 #include "../Tokenizer/Token.h"
+#include "../Object/Types/Scope.h"
 
 class Binary;
 class Unary;
@@ -20,6 +21,7 @@ class ExpressionStatement;
 class IfStatement;
 class WhileStatement;
 class FunctionDefinition;
+class ClassDefinition;
 class ReturnStatement;
 class ControlFlow;
 class Block;
@@ -44,11 +46,12 @@ public:
     void evaluate(IfStatement *statement);
     void evaluate(WhileStatement *statement);
     void evaluate(FunctionDefinition *statement);
+    void evaluate(ClassDefinition *statement);
     void evaluate(ReturnStatement *statement);
     void evaluate(ControlFlow *statement);
     void evaluate(Block *block);
 private:
-    std::vector<Object *> scopes;
+    Scope *scope = nullptr;
     std::stack<Object *> garbage;
 
     void addScope();

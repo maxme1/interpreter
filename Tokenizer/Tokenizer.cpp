@@ -57,6 +57,7 @@ std::map<std::string, Token::tokenType> reserved = {
         {"continue", Token::CONTINUE},
         {"return",   Token::RETURN},
         {"def",      Token::FUNCTION},
+        {"class",    Token::CLASS},
 };
 
 Token Tokenizer::nextToken() {

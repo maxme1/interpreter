@@ -4,23 +4,21 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "../Parser/Statement/Statement.h"
 
-// TODO: throw 'Operator not defined here'
-class Bool;
 class Object {
-    friend class Interpreter;
     int mentions = 0;
-    bool canDelete();
 public:
     virtual ~Object();
 
     std::map<std::string, Object *> attributes;
+    bool canDelete();
+
+    void save() { mentions++; }
 
     virtual std::string str() { return "Object"; };
 
     void setAttribute(const std::string &name, Object *value);
-    Object *getAttribute(const std::string &name);
+    virtual Object *getAttribute(const std::string &name);
 
     virtual Object *add(Object *other);
     virtual Object *unary_add();

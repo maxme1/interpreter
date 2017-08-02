@@ -26,6 +26,8 @@ class Parser {
             return whileStatement();
         if (matches({Token::FUNCTION}))
             return functionDefinition();
+        if (matches({Token::CLASS}))
+            return classDefinition();
 
         auto body = statementBody();
         require({Token::DELIMITER});
@@ -99,6 +101,13 @@ class Parser {
         require({Token::BRACKET_CLOSE});
         auto body = block();
         return new FunctionDefinition(name, arguments, body);
+    }
+
+    Statement *classDefinition() {
+        require({Token::CLASS});
+        auto name = require({Token::IDENTIFIER}).body;
+        auto body = block();
+        return new ClassDefinition(name, body);
     }
 
     Statement *block() {

@@ -117,6 +117,22 @@ class FunctionDefinition : public Statement {
 
 public:
     FunctionDefinition(const std::string &name, const std::vector<std::string> &arguments, Statement *body);
+    ~FunctionDefinition() override;
+    std::string str() override;
+};
+
+class ClassDefinition : public Statement {
+    friend class Interpreter;
+    Statement *body;
+    std::string name;
+
+    void evaluate(Interpreter *interpreter) override {
+        interpreter->evaluate(this);
+    }
+
+public:
+    ClassDefinition(const std::string &name, Statement *body);
+    ~ClassDefinition() override;
     std::string str() override;
 };
 

@@ -1,8 +1,8 @@
 #include <iostream>
 #include "Interpreter.h"
-#include "../Tokenizer/Tokenizer.h"
 #include "../Parser/Parser.h"
 #include "../Object/native.h"
+#include "../Object/Class.h"
 
 void Interpreter::evaluate(ReturnStatement *statement) {
     if (statement->expression)
@@ -47,5 +47,24 @@ void Interpreter::evaluate(Block *block) {
 }
 
 void Interpreter::evaluate(FunctionDefinition *statement) {
-    setVariable(statement->name, new Callable(statement->arguments, statement->body));
+    setVariable(statement->name, new Function(statement->arguments, statement->body));
+}
+
+void Interpreter::evaluate(ClassDefinition *statement) {
+    addScope();
+    try {
+        statement->body->evaluate(this);
+    } catch (ReturnException &e) {
+//        TODO: move to syntactic errors
+        throw Exception("Return outside function");
+    } catch (FlowException &e) {
+//        TODO: move to syntactic errors
+        throw Exception("Control flow outside loop");
+    } catch (Exception &e) {
+        deleteScope();
+        throw e;
+    }
+    auto result = track(new Class(scope));
+    deleteScope();
+    setVariable(statement->name, result);
 }

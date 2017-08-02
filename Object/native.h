@@ -2,19 +2,27 @@
 #define INTERPRETER_NATIVE_H
 
 #include <iostream>
-#include "Object.h"
-#include "Types/None.h"
 #include "Types/Callable.h"
 
-class Print : public Callable {
-public:
-    Print() : Callable({"arg"}) {}
+typedef Object *(*nativeFunction)(Object *);
+class FromFunction : public Callable {
+    std::vector<std::string> arguments;
+    nativeFunction function;
 
-    Object *call(Object *args) {
-        auto arg = args->getAttribute("arg");
-        std::cout << arg->str() << std::endl;
-        return nullptr;
+protected:
+    bool checkArguments(int count) override {
+        return arguments.size() == count;
     }
+
+    std::string argument(int i) override { return arguments[i]; }
+
+    virtual Object *__call__(Object *args, Interpreter *interpreter) {
+        return function(args);
+    }
+
+public:
+    FromFunction(nativeFunction function, const std::vector<std::string> &arguments) :
+            arguments(arguments), function(function) {}
 };
 
 #endif //INTERPRETER_NATIVE_H

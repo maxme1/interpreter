@@ -15,7 +15,7 @@ struct Token {
         BRACKET_OPEN, BRACKET_CLOSE, BRACKET,
         BLOCK_OPEN, BLOCK_CLOSE,
         IF, ELSE, WHILE,
-        FUNCTION,
+        FUNCTION, CLASS,
         BREAK, CONTINUE, RETURN,
         PROGRAM_END, ERROR
     };

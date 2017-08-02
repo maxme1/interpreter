@@ -1,7 +1,7 @@
 program = statement*
 
 # TODO: add empty statements consisting just of a semicolon
-statement = (StmtBody DELIMITER) | block | ifStmt | whileStmt | funcDef
+statement = (StmtBody DELIMITER) | block | ifStmt | whileStmt | funcDef | classDef
 
 StmtBody = expression | 'break' | 'continue' | returnStmt
 returnStmt = 'return' expression?
@@ -13,6 +13,8 @@ block = '{' statement* '}'
 
 funcDef = 'def' IDENTIFIER '(' argsList? ')' block
 argsList = IDENTIFIER (SEPARATOR IDENTIFIER)*
+
+classDef = 'class' IDENTIFIER block
 
 -- expression --
 

@@ -8,7 +8,12 @@
 
 Interpreter::Interpreter() {
     addScope();
-    setVariable("print", new Print());
+    setVariable("print", new FromFunction(
+            [](Object *args) -> Object * {
+                auto arg = args->getAttribute("arg");
+                std::cout << arg->str() << std::endl;
+                return nullptr;
+            }, {"arg"}));
 }
 
 Interpreter::~Interpreter() {
@@ -43,30 +48,31 @@ void Interpreter::interpret(std::string text) {
 }
 
 void Interpreter::addScope() {
-    scopes.push_back(new Object());
+    auto lower = new Scope();
+    if (scope)
+        lower->setUpper(scope);
+    scope = lower;
 }
 
 void Interpreter::deleteScope() {
-    delete scopes.back();
-    scopes.pop_back();
+    assert(scope);
+    auto upper = scope->getUpper();
+    if (scope->canDelete())
+        delete scope;
+    scope = upper;
 }
 
 Object *Interpreter::getVariable(const std::string &name) {
-    for (auto it = scopes.rbegin(); it != scopes.rend(); it++) {
-        auto result = (*it)->attributes.find(name);
-        if (result != (*it)->attributes.end())
-            return result->second;
-    }
-    throw Exception("No variable named " + name);
+    scope->getAttribute(name);
 }
 
 void Interpreter::setVariable(const std::string &name, Object *value) {
-    scopes.back()->setAttribute(name, value);
+    scope->setAttribute(name, value);
 }
 
 Object *Interpreter::track(Object *object) {
 //    whenever the interpreter _might_ create a new object we store it
-    object->mentions++;
+    object->save();
     garbage.push(object);
     return object;
 }

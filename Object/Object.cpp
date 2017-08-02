@@ -58,3 +58,4 @@ Object *Object::subtract(Object *other) { throw Exception("Operator not defined"
 Object *Object::unary_add() { throw Exception("Operator not defined"); }
 
 Object *Object::add(Object *other) { throw Exception("Operator not defined"); }
+
