@@ -3,14 +3,27 @@
 
 
 #include "../Object.h"
+#include "../../Parser/Statement/Statement.h"
 
 class Callable : public Object {
     friend class Interpreter;
     friend class ClassMethod;
+    Scope *context = nullptr;
 protected:
     virtual bool checkArguments(int count) = 0;
     virtual std::string argument(int i) = 0;
     virtual Object *__call__(Object *args, Interpreter *interpreter) = 0;
+public:
+    Callable() = default;
+
+    explicit Callable(Scope *context) : context(context) {
+        context->save();
+    }
+
+    virtual ~Callable() {
+        if (context and context->canDelete())
+            delete context;
+    }
 };
 
 class Function : public Callable {
@@ -28,8 +41,8 @@ protected:
     }
 
 public:
-    explicit Function(const std::vector<std::string> &arguments, Statement *body) :
-            body(body), arguments(arguments) {}
+    explicit Function(const std::vector<std::string> &arguments, Statement *body, Scope *context) :
+            Callable(context), body(body), arguments(arguments) {}
 
     ~Function() override {
         delete body;
@@ -55,9 +68,8 @@ protected:
     }
 
 public:
-    ClassMethod(Object *source, Callable *function) {
-        this->function = function;
-        this->source = source;
+    ClassMethod(Object *source, Callable *function) :
+            function(function), source(source) {
         function->save();
         source->save();
     }

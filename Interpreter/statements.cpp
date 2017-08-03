@@ -47,7 +47,7 @@ void Interpreter::evaluate(Block *block) {
 }
 
 void Interpreter::evaluate(FunctionDefinition *statement) {
-    setVariable(statement->name, new Function(statement->arguments, statement->body));
+    setVariable(statement->name, new Function(statement->arguments, statement->body, scope));
 }
 
 void Interpreter::evaluate(ClassDefinition *statement) {

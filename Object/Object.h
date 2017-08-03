@@ -7,6 +7,7 @@
 
 class Object {
     int mentions = 0;
+protected:
 public:
     virtual ~Object();
 
@@ -19,6 +20,7 @@ public:
 
     void setAttribute(const std::string &name, Object *value);
     virtual Object *getAttribute(const std::string &name);
+    virtual Object * findAttribute(const std::string &name);
 
     virtual Object *add(Object *other);
     virtual Object *unary_add();

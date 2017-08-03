@@ -4,9 +4,36 @@
 #include "../Object/Types/Int.h"
 #include "../Object/native.h"
 #include "../Object/Types/None.h"
+#include "../Object/Class.h"
+
+std::map<Token::tokenType, std::string> binary = {
+        {Token::ADD,              "add"},
+        {Token::SUB,              "sub"},
+        {Token::MUL,              "mul"},
+        {Token::DIV,              "div"},
+        {Token::EQUAL,            "eq"},
+        {Token::GREATER,          "gr"},
+        {Token::GREATER_OR_EQUAL, "geq"},
+        {Token::LESS,             "ls"},
+        {Token::LESS_OR_EQUAL,    "leq"},
+        {Token::NOT_EQUAL,        "neq"}
+};
+
+std::map<Token::tokenType, std::string> unary = {
+        {Token::ADD, "uadd"},
+        {Token::SUB, "usub"},
+};
 
 Object *Interpreter::evaluate(Binary *expression) {
     Object *left = expression->left->evaluate(this), *right = expression->right->evaluate(this);
+//    user-defined methods
+    auto name = binary.find(expression->token.type);
+    if (name != binary.end()) {
+        auto method = left->findAttribute(name->second);
+        if (method)
+            return callOperator(method, {right});
+    }
+
     if (expression->ofType(Token::ADD))
         return track(left->add(right));
     if (expression->ofType(Token::SUB))
@@ -33,6 +60,14 @@ Object *Interpreter::evaluate(Binary *expression) {
 
 Object *Interpreter::evaluate(Unary *expression) {
     Object *argument = expression->argument->evaluate(this);
+    //    user-defined methods
+    auto name = unary.find(expression->token.type);
+    if (name != unary.end()) {
+        auto method = argument->findAttribute(name->second);
+        if (method)
+            return callOperator(method, {});
+    }
+
     if (expression->ofType(Token::ADD))
         return track(argument->unary_add());
     if (expression->ofType(Token::SUB))
@@ -71,38 +106,19 @@ Object *Interpreter::evaluate(Variable *expression) {
     return getVariable(expression->name);
 }
 
-//TODO: closures don't work for now
 Object *Interpreter::evaluate(FunctionExpression *expression) {
-    Object *obj = expression->target->evaluate(this);
-    auto *callable = dynamic_cast<Callable *>(obj);
-    if (!callable)
-        throw Exception("Object is not callable");
+    Object *object = expression->target->evaluate(this);
 
-    if (!callable->checkArguments(expression->argsList.size()))
-        throw Exception("Number of arguments doesn't match");
+    auto classObject = dynamic_cast<Class *>(object);
+    if (classObject) {
+        auto instance = classObject->__call__(nullptr, this);
+        auto init = instance->findAttribute("init");
+        if (init)
+            callFunction(init, expression->argsList);
+        return instance;
+    }
 
-    addScope();
-    for (int i = 0; i < expression->argsList.size(); i++) {
-        auto arg = expression->argsList[i]->evaluate(this);
-        setVariable(callable->argument(i), arg);
-    }
-    Object *returnObject = nullptr;
-    try {
-        returnObject = callable->__call__(scope, this);
-    } catch (ReturnException &e) {
-        returnObject = e.content;
-    } catch (FlowException &e) {
-//        TODO: move to syntactic errors
-        throw Exception("Control flow outside loop");
-    } catch (Exception &e) {
-        deleteScope();
-        throw e;
-    }
-    if (!returnObject)
-        returnObject = new None;
-    track(returnObject);
-    deleteScope();
-    return returnObject;
+    return callFunction(object, expression->argsList);
 }
 
 Object *Interpreter::evaluate(GetAttribute *expression) {

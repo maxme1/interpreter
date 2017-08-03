@@ -3,6 +3,8 @@
 
 #include "Types/Callable.h"
 #include "Types/Exception.h"
+#include "Types/Scope.h"
+#include "Types/None.h"
 
 
 class ClassInstance : public Object {
@@ -14,13 +16,18 @@ public:
         classPtr->save();
     }
 
-    Object *getAttribute(const std::string &name) override {
-        auto value = attributes.find(name);
-        Object *result;
-        if (value != attributes.end())
-            result = value->second;
-        else
-            result = classPtr->getAttribute(name);
+    ~ClassInstance() override {
+        if (classPtr->canDelete())
+            delete classPtr;
+    }
+
+    Object *findAttribute(const std::string &name) override {
+        auto result = Object::findAttribute(name);
+        if (!result)
+            result = classPtr->findAttribute(name);
+        if(!result)
+            return nullptr;
+//        creating a class method
         auto method = dynamic_cast<Callable *> (result);
         if (method)
             return new ClassMethod(this, method);
@@ -29,23 +36,23 @@ public:
 };
 
 class Class : public Callable {
+    friend class Interpreter;
 protected:
 
     std::string argument(int i) override {
         return nullptr;
     }
 
-    bool checkArguments(int count) override { return true; }
+    bool checkArguments(int count) override { return count == 0; }
 
     Object *__call__(Object *args, Interpreter *interpreter) override {
         return new ClassInstance(this);
-//      TODO:  call init
     }
 
 public:
-    explicit Class(Object *scope) {
+    explicit Class(Scope *context) : Callable(context) {
 //        copy the class's scope
-        attributes = scope->attributes;
+        attributes = context->attributes;
         for (auto &&attribute : attributes) {
             attribute.second->save();
         }
