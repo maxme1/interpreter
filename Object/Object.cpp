@@ -28,17 +28,16 @@ void Object::setAttribute(const std::string &name, Object *value) {
 }
 
 Object *Object::findAttribute(const std::string &name) {
-    try {
-        return getAttribute(name);
-    } catch (Exception &e) {
-        return nullptr;
-    }
-}
-
-Object *Object::getAttribute(const std::string &name) {
     auto value = attributes.find(name);
     if (value != attributes.end())
         return value->second;
+    return nullptr;
+}
+
+Object *Object::getAttribute(const std::string &name) {
+    auto result = findAttribute(name);
+    if (result)
+        return result;
     throw Exception("AttributeError");
 }
 

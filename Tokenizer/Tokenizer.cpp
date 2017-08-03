@@ -11,13 +11,18 @@ Tokenizer::Tokenizer(std::string text) : text(text) {
 std::vector<Token> Tokenizer::tokenize() {
     auto result = std::vector<Token>();
     auto next = nextToken();
+//    filtering DELIMITER duplicates
+    bool add = true;
     while (next.type != Token::PROGRAM_END) {
-        result.push_back(next);
+        if (add)
+            result.push_back(next);
         if (next.type == Token::ERROR) {
             error = true;
             return result;
         }
         next = nextToken();
+//        add the DELIMITER if only it doesn't repeat itself
+        add = not(result.back().type == Token::DELIMITER and next.type == Token::DELIMITER);
     }
     return result;
 }

@@ -6,6 +6,7 @@
 #include <vector>
 #include "../Object/Types/Scope.h"
 
+class Expression;
 class Binary;
 class Unary;
 class Literal;
@@ -64,8 +65,14 @@ private:
     void setVariable(const std::string &name, Object *value);
     void evaluateStatements(std::vector<Statement *> &statements);
 
-    Object *call(Object *object, std::initializer_list<Object *> arguments);
+    Object *callOperator(Object *object, std::initializer_list<Object *> arguments);
+    Object * callFunction(Object *object, const std::vector<Expression *> &argsList);
 
+    Object *call(Callable *callable);
+    Callable *getCallable(Object *object);
+    void checkArguments(Callable *callable, int count);
+
+//    Control Flow
     struct ReturnException {
         Object *content;
 

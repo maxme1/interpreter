@@ -14,13 +14,13 @@ public:
         this->upper->save();
     }
 
-    Object *getAttribute(const std::string &name) override {
-        auto value = attributes.find(name);
-        if (value != attributes.end())
-            return value->second;
+    Object *findAttribute(const std::string &name) override {
+        auto result = Object::findAttribute(name);
+        if (result)
+            return result;
         if (upper)
-            return upper->getAttribute(name);
-        throw Exception("No variable " + name);
+            return upper->findAttribute(name);
+        return nullptr;
     }
 
     ~Scope() override {

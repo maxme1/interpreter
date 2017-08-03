@@ -4,6 +4,7 @@
 #include "../Object.h"
 #include "Bool.h"
 #include "Exception.h"
+#include "../native.h"
 
 class Int : public Object {
     Int *getInt(Object *target) {

@@ -7,16 +7,16 @@
 #include "../Object/Class.h"
 
 std::map<Token::tokenType, std::string> binary = {
-        {Token::ADD, "add"},
-        {Token::SUB, "sub"},
-        {Token::MUL, "mul"},
-        {Token::DIV, "div"},
-        {Token::EQUAL, "eq"},
-        {Token::GREATER, "gr"},
+        {Token::ADD,              "add"},
+        {Token::SUB,              "sub"},
+        {Token::MUL,              "mul"},
+        {Token::DIV,              "div"},
+        {Token::EQUAL,            "eq"},
+        {Token::GREATER,          "gr"},
         {Token::GREATER_OR_EQUAL, "geq"},
-        {Token::LESS, "ls"},
-        {Token::LESS_OR_EQUAL, "leq"},
-        {Token::NOT_EQUAL, "neq"}
+        {Token::LESS,             "ls"},
+        {Token::LESS_OR_EQUAL,    "leq"},
+        {Token::NOT_EQUAL,        "neq"}
 };
 
 std::map<Token::tokenType, std::string> unary = {
@@ -31,7 +31,7 @@ Object *Interpreter::evaluate(Binary *expression) {
     if (name != binary.end()) {
         auto method = left->findAttribute(name->second);
         if (method)
-            return call(method, {right});
+            return callOperator(method, {right});
     }
 
     if (expression->ofType(Token::ADD))
@@ -65,7 +65,7 @@ Object *Interpreter::evaluate(Unary *expression) {
     if (name != unary.end()) {
         auto method = argument->findAttribute(name->second);
         if (method)
-            return call(method, {});
+            return callOperator(method, {});
     }
 
     if (expression->ofType(Token::ADD))
@@ -106,76 +106,19 @@ Object *Interpreter::evaluate(Variable *expression) {
     return getVariable(expression->name);
 }
 
-//TODO: closures don't work for now
 Object *Interpreter::evaluate(FunctionExpression *expression) {
-    Object *obj = expression->target->evaluate(this);
-    auto *callable = dynamic_cast<Callable *>(obj);
-    if (!callable)
-        throw Exception("Object is not callable");
+    Object *object = expression->target->evaluate(this);
 
-//    creating a class?
-    auto classObject = dynamic_cast<Class *>(callable);
+    auto classObject = dynamic_cast<Class *>(object);
     if (classObject) {
-        auto instance = track(new ClassInstance(classObject));
+        auto instance = classObject->__call__(nullptr, this);
         auto init = instance->findAttribute("init");
-        if (!init)
-            return instance;
-        auto *callable = dynamic_cast<Callable *>(init);
-        if (!callable)
-            throw Exception("Init is not callable");
-
-        if (!callable->checkArguments(expression->argsList.size()))
-            throw Exception("Number of arguments doesn't match");
-
-        addScope(callable->context);
-        addScope();
-        for (int i = 0; i < expression->argsList.size(); i++) {
-            auto arg = expression->argsList[i]->evaluate(this);
-            setVariable(callable->argument(i), arg);
-        }
-        try {
-            callable->__call__(scope, this);
-        } catch (ReturnException &e) {
-            throw Exception("No return from init");
-        } catch (FlowException &e) {
-//        TODO: move to syntactic errors
-            throw Exception("Control flow outside loop");
-        } catch (Exception &e) {
-            deleteScope();
-            throw e;
-        }
-        deleteScope();
-        deleteScope();
+        if (init)
+            callFunction(init, expression->argsList);
         return instance;
     }
 
-    if (!callable->checkArguments(expression->argsList.size()))
-        throw Exception("Number of arguments doesn't match");
-
-    addScope(callable->context);
-    addScope();
-    for (int i = 0; i < expression->argsList.size(); i++) {
-        auto arg = expression->argsList[i]->evaluate(this);
-        setVariable(callable->argument(i), arg);
-    }
-    Object *returnObject = nullptr;
-    try {
-        returnObject = callable->__call__(scope, this);
-    } catch (ReturnException &e) {
-        returnObject = e.content;
-    } catch (FlowException &e) {
-//        TODO: move to syntactic errors
-        throw Exception("Control flow outside loop");
-    } catch (Exception &e) {
-        deleteScope();
-        throw e;
-    }
-    if (!returnObject)
-        returnObject = new None;
-    track(returnObject);
-    deleteScope();
-    deleteScope();
-    return returnObject;
+    return callFunction(object, expression->argsList);
 }
 
 Object *Interpreter::evaluate(GetAttribute *expression) {

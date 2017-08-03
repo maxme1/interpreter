@@ -97,21 +97,19 @@ void Interpreter::evaluateStatements(std::vector<Statement *> &statements) {
     }
 }
 
-Object *Interpreter::call(Object *object, std::initializer_list<Object *> arguments) {
+Callable *Interpreter::getCallable(Object *object) {
     auto *callable = dynamic_cast<Callable *>(object);
-    if (!callable)
-        throw Exception("Object is not callable");
+    if (callable)
+        return callable;
+    throw Exception("Object is not callable");
+}
 
-    if (!callable->checkArguments(arguments.size()))
+void Interpreter::checkArguments(Callable *callable, int count) {
+    if (!callable->checkArguments(count))
         throw Exception("Number of arguments doesn't match");
+}
 
-    addScope(callable->context);
-    addScope();
-    int i = 0;
-    for (auto &&argument : arguments) {
-        setVariable(callable->argument(i), argument);
-        i++;
-    }
+Object *Interpreter::call(Callable *callable) {
     Object *returnObject = nullptr;
     try {
         returnObject = callable->__call__(scope, this);
@@ -120,14 +118,57 @@ Object *Interpreter::call(Object *object, std::initializer_list<Object *> argume
     } catch (FlowException &e) {
 //        TODO: move to syntactic errors
         throw Exception("Control flow outside loop");
-    } catch (Exception &e) {
-        deleteScope();
-        throw e;
     }
     if (!returnObject)
         returnObject = new None;
-    track(returnObject);
-    deleteScope();
-    deleteScope();
-    return returnObject;
+    return track(returnObject);
+}
+
+Object *Interpreter::callFunction(Object *object, const std::vector<Expression *> &argsList) {
+    auto callable = getCallable(object);
+    checkArguments(callable, argsList.size());
+
+    addScope(callable->context);
+    addScope();
+
+    try {
+        for (int i = 0; i < argsList.size(); i++) {
+            auto arg = argsList[i]->evaluate(this);
+            setVariable(callable->argument(i), arg);
+        }
+        auto result = call(callable);
+        deleteScope();
+        deleteScope();
+        return result;
+    }
+    catch (Exception &e) {
+        deleteScope();
+        deleteScope();
+        throw e;
+    }
+}
+
+Object *Interpreter::callOperator(Object *object, std::initializer_list<Object *> arguments) {
+    auto *callable = getCallable(object);
+    checkArguments(callable, arguments.size());
+
+    addScope(callable->context);
+    addScope();
+
+    try {
+        int i = 0;
+        for (auto &&argument : arguments) {
+            setVariable(callable->argument(i), argument);
+            i++;
+        }
+        auto result = call(callable);
+        deleteScope();
+        deleteScope();
+        return result;
+    }
+    catch (Exception &e) {
+        deleteScope();
+        deleteScope();
+        throw e;
+    }
 }
