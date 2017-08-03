@@ -2,13 +2,13 @@
 #include "Interpreter.h"
 #include "../Tokenizer/Tokenizer.h"
 #include "../Parser/Parser.h"
-#include "../Object/native.h"
+#include "../Object/Native.h"
 #include "../Object/Types/None.h"
 
 
 Interpreter::Interpreter() {
     addScope();
-    setVariable("print", new FromFunction(
+    setVariable("print", new NativeFunction(
             [](Object *args) -> Object * {
                 auto arg = args->getAttribute("arg");
                 std::cout << arg->str() << std::endl;

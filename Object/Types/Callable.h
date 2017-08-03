@@ -74,7 +74,7 @@ public:
         source->save();
     }
 
-    virtual ~ClassMethod() {
+    ~ClassMethod() override {
         if (function->canDelete())
             delete function;
         if (source->canDelete())

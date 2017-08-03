@@ -2,7 +2,7 @@
 #include "Interpreter.h"
 #include "../Parser/Parser.h"
 #include "../Object/Types/Int.h"
-#include "../Object/native.h"
+#include "../Object/Native.h"
 #include "../Object/Types/None.h"
 #include "../Object/Class.h"
 
