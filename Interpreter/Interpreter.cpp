@@ -2,8 +2,8 @@
 #include "Interpreter.h"
 #include "../Tokenizer/Tokenizer.h"
 #include "../Parser/Parser.h"
-#include "../Object/Types/Int.h"
 #include "../Object/native.h"
+#include "../Object/Types/None.h"
 
 
 Interpreter::Interpreter() {
@@ -47,8 +47,12 @@ void Interpreter::interpret(std::string text) {
     collect();
 }
 
-void Interpreter::addScope() {
-    auto lower = new Scope();
+void Interpreter::addScope(Scope *ready) {
+    Scope *lower;
+    if (!ready)
+        lower = new Scope();
+    else
+        lower = ready;
     if (scope)
         lower->setUpper(scope);
     scope = lower;
@@ -91,4 +95,39 @@ void Interpreter::evaluateStatements(std::vector<Statement *> &statements) {
         statement->evaluate(this);
         collect();
     }
+}
+
+Object *Interpreter::call(Object *object, std::initializer_list<Object *> arguments) {
+    auto *callable = dynamic_cast<Callable *>(object);
+    if (!callable)
+        throw Exception("Object is not callable");
+
+    if (!callable->checkArguments(arguments.size()))
+        throw Exception("Number of arguments doesn't match");
+
+    addScope(callable->context);
+    addScope();
+    int i = 0;
+    for (auto &&argument : arguments) {
+        setVariable(callable->argument(i), argument);
+        i++;
+    }
+    Object *returnObject = nullptr;
+    try {
+        returnObject = callable->__call__(scope, this);
+    } catch (ReturnException &e) {
+        returnObject = e.content;
+    } catch (FlowException &e) {
+//        TODO: move to syntactic errors
+        throw Exception("Control flow outside loop");
+    } catch (Exception &e) {
+        deleteScope();
+        throw e;
+    }
+    if (!returnObject)
+        returnObject = new None;
+    track(returnObject);
+    deleteScope();
+    deleteScope();
+    return returnObject;
 }

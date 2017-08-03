@@ -4,9 +4,36 @@
 #include "../Object/Types/Int.h"
 #include "../Object/native.h"
 #include "../Object/Types/None.h"
+#include "../Object/Class.h"
+
+std::map<Token::tokenType, std::string> binary = {
+        {Token::ADD, "add"},
+        {Token::SUB, "sub"},
+        {Token::MUL, "mul"},
+        {Token::DIV, "div"},
+        {Token::EQUAL, "eq"},
+        {Token::GREATER, "gr"},
+        {Token::GREATER_OR_EQUAL, "geq"},
+        {Token::LESS, "ls"},
+        {Token::LESS_OR_EQUAL, "leq"},
+        {Token::NOT_EQUAL, "neq"}
+};
+
+std::map<Token::tokenType, std::string> unary = {
+        {Token::ADD, "uadd"},
+        {Token::SUB, "usub"},
+};
 
 Object *Interpreter::evaluate(Binary *expression) {
     Object *left = expression->left->evaluate(this), *right = expression->right->evaluate(this);
+//    user-defined methods
+    auto name = binary.find(expression->token.type);
+    if (name != binary.end()) {
+        auto method = left->findAttribute(name->second);
+        if (method)
+            return call(method, {right});
+    }
+
     if (expression->ofType(Token::ADD))
         return track(left->add(right));
     if (expression->ofType(Token::SUB))
@@ -33,6 +60,14 @@ Object *Interpreter::evaluate(Binary *expression) {
 
 Object *Interpreter::evaluate(Unary *expression) {
     Object *argument = expression->argument->evaluate(this);
+    //    user-defined methods
+    auto name = unary.find(expression->token.type);
+    if (name != unary.end()) {
+        auto method = argument->findAttribute(name->second);
+        if (method)
+            return call(method, {});
+    }
+
     if (expression->ofType(Token::ADD))
         return track(argument->unary_add());
     if (expression->ofType(Token::SUB))
@@ -78,9 +113,46 @@ Object *Interpreter::evaluate(FunctionExpression *expression) {
     if (!callable)
         throw Exception("Object is not callable");
 
+//    creating a class?
+    auto classObject = dynamic_cast<Class *>(callable);
+    if (classObject) {
+        auto instance = track(new ClassInstance(classObject));
+        auto init = instance->findAttribute("init");
+        if (!init)
+            return instance;
+        auto *callable = dynamic_cast<Callable *>(init);
+        if (!callable)
+            throw Exception("Init is not callable");
+
+        if (!callable->checkArguments(expression->argsList.size()))
+            throw Exception("Number of arguments doesn't match");
+
+        addScope(callable->context);
+        addScope();
+        for (int i = 0; i < expression->argsList.size(); i++) {
+            auto arg = expression->argsList[i]->evaluate(this);
+            setVariable(callable->argument(i), arg);
+        }
+        try {
+            callable->__call__(scope, this);
+        } catch (ReturnException &e) {
+            throw Exception("No return from init");
+        } catch (FlowException &e) {
+//        TODO: move to syntactic errors
+            throw Exception("Control flow outside loop");
+        } catch (Exception &e) {
+            deleteScope();
+            throw e;
+        }
+        deleteScope();
+        deleteScope();
+        return instance;
+    }
+
     if (!callable->checkArguments(expression->argsList.size()))
         throw Exception("Number of arguments doesn't match");
 
+    addScope(callable->context);
     addScope();
     for (int i = 0; i < expression->argsList.size(); i++) {
         auto arg = expression->argsList[i]->evaluate(this);
@@ -101,6 +173,7 @@ Object *Interpreter::evaluate(FunctionExpression *expression) {
     if (!returnObject)
         returnObject = new None;
     track(returnObject);
+    deleteScope();
     deleteScope();
     return returnObject;
 }

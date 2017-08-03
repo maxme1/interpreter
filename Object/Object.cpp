@@ -1,6 +1,5 @@
 #include <iostream>
 #include "Object.h"
-#include "Types/Bool.h"
 #include "Types/Exception.h"
 
 Object::~Object() {
@@ -26,6 +25,14 @@ void Object::setAttribute(const std::string &name, Object *value) {
     } else
         value->mentions++;
     attributes[name] = value;
+}
+
+Object *Object::findAttribute(const std::string &name) {
+    try {
+        return getAttribute(name);
+    } catch (Exception &e) {
+        return nullptr;
+    }
 }
 
 Object *Object::getAttribute(const std::string &name) {

@@ -14,7 +14,6 @@ public:
         this->upper->save();
     }
 
-//    TODO: unify
     Object *getAttribute(const std::string &name) override {
         auto value = attributes.find(name);
         if (value != attributes.end())

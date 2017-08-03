@@ -4,7 +4,6 @@
 #include <string>
 #include <stack>
 #include <vector>
-#include "../Tokenizer/Token.h"
 #include "../Object/Types/Scope.h"
 
 class Binary;
@@ -27,7 +26,9 @@ class ControlFlow;
 class Block;
 
 class Object;
+class Callable;
 class Interpreter {
+    friend class Class;
 public:
     Interpreter();
     ~Interpreter();
@@ -54,13 +55,16 @@ private:
     Scope *scope = nullptr;
     std::stack<Object *> garbage;
 
-    void addScope();
+    void addScope(Scope *ready = nullptr);
     void deleteScope();
     void collect();
     Object *track(Object *object);
     Object *getVariable(const std::string &name);
+
     void setVariable(const std::string &name, Object *value);
     void evaluateStatements(std::vector<Statement *> &statements);
+
+    Object *call(Object *object, std::initializer_list<Object *> arguments);
 
     struct ReturnException {
         Object *content;

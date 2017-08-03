@@ -3,6 +3,8 @@
 
 #include "Types/Callable.h"
 #include "Types/Exception.h"
+#include "Types/Scope.h"
+#include "Types/None.h"
 
 
 class ClassInstance : public Object {
@@ -12,6 +14,11 @@ public:
     ClassInstance(Object *classPtr) {
         this->classPtr = classPtr;
         classPtr->save();
+    }
+
+    ~ClassInstance() override {
+        if (classPtr->canDelete())
+            delete classPtr;
     }
 
     Object *getAttribute(const std::string &name) override {
@@ -35,17 +42,16 @@ protected:
         return nullptr;
     }
 
-    bool checkArguments(int count) override { return true; }
+    bool checkArguments(int count) override { return count == 0; }
 
     Object *__call__(Object *args, Interpreter *interpreter) override {
-        return new ClassInstance(this);
-//      TODO:  call init
+        return interpreter->track(new ClassInstance(this));
     }
 
 public:
-    explicit Class(Object *scope) {
+    explicit Class(Scope *context) : Callable(context) {
 //        copy the class's scope
-        attributes = scope->attributes;
+        attributes = context->attributes;
         for (auto &&attribute : attributes) {
             attribute.second->save();
         }
