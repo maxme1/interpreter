@@ -2,7 +2,7 @@
 #include "Interpreter.h"
 #include "../Parser/Parser.h"
 #include "../Object/Types/Int.h"
-#include "../Object/native.h"
+#include "../Object/Native.h"
 #include "../Object/Types/None.h"
 #include "../Object/Class.h"
 
@@ -111,7 +111,7 @@ Object *Interpreter::evaluate(FunctionExpression *expression) {
 
     auto classObject = dynamic_cast<Class *>(object);
     if (classObject) {
-        auto instance = classObject->__call__(nullptr, this);
+        auto instance = classObject->__call__({}, this);
         auto init = instance->findAttribute("init");
         if (init)
             callFunction(init, expression->argsList);

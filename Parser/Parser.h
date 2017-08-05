@@ -5,7 +5,7 @@
 #include <vector>
 #include <initializer_list>
 #include <iostream>
-#include <assert.h>
+#include <cassert>
 #include "Expression/Expression.h"
 
 class Parser {

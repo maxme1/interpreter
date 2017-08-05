@@ -22,6 +22,7 @@ public:
     virtual Object *getAttribute(const std::string &name);
     virtual Object * findAttribute(const std::string &name);
 
+//    TODO: move these to NativeObject
     virtual Object *add(Object *other);
     virtual Object *unary_add();
     virtual Object *subtract(Object *other);
