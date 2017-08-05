@@ -4,16 +4,17 @@
 #include "../Parser/Parser.h"
 #include "../Object/Native.h"
 #include "../Object/Types/None.h"
+#include "../Object/Types/Array.h"
 
 
 Interpreter::Interpreter() {
     addScope();
     setVariable("print", new NativeFunction(
-            [](Object *args) -> Object * {
-                auto arg = args->getAttribute("arg");
-                std::cout << arg->str() << std::endl;
+            [](ArgsList args) -> Object * {
+                std::cout << args[0]->str() << std::endl;
                 return nullptr;
-            }, {"arg"}));
+            }, 1));
+    setVariable("array", new ArrayClass());
 }
 
 Interpreter::~Interpreter() {
@@ -109,10 +110,10 @@ void Interpreter::checkArguments(Callable *callable, int count) {
         throw Exception("Number of arguments doesn't match");
 }
 
-Object *Interpreter::call(Callable *callable) {
+Object *Interpreter::call(Callable *callable, ArgsList arguments) {
     Object *returnObject = nullptr;
     try {
-        returnObject = callable->__call__(scope, this);
+        returnObject = callable->__call__(arguments, this);
     } catch (ReturnException &e) {
         returnObject = e.content;
     } catch (FlowException &e) {
@@ -132,11 +133,11 @@ Object *Interpreter::callFunction(Object *object, const std::vector<Expression *
     addScope();
 
     try {
-        for (int i = 0; i < argsList.size(); i++) {
-            auto arg = argsList[i]->evaluate(this);
-            setVariable(callable->argument(i), arg);
+        auto arguments = std::vector<Object *>();
+        for (auto &&argument : argsList) {
+            arguments.push_back(argument->evaluate(this));
         }
-        auto result = call(callable);
+        auto result = call(callable, arguments);
         deleteScope();
         deleteScope();
         return result;
@@ -148,7 +149,7 @@ Object *Interpreter::callFunction(Object *object, const std::vector<Expression *
     }
 }
 
-Object *Interpreter::callOperator(Object *object, std::initializer_list<Object *> arguments) {
+Object *Interpreter::callOperator(Object *object, ArgsList arguments) {
     auto *callable = getCallable(object);
     checkArguments(callable, arguments.size());
 
@@ -156,12 +157,7 @@ Object *Interpreter::callOperator(Object *object, std::initializer_list<Object *
     addScope();
 
     try {
-        int i = 0;
-        for (auto &&argument : arguments) {
-            setVariable(callable->argument(i), argument);
-            i++;
-        }
-        auto result = call(callable);
+        auto result = call(callable, arguments);
         deleteScope();
         deleteScope();
         return result;

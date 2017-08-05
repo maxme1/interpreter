@@ -3,71 +3,51 @@
 
 #include <iostream>
 #include <utility>
-#include "Types/Callable.h"
+#include "Callable.h"
 #include "Class.h"
 #include <cassert>
 
-typedef Object *(*nativeFunction)(Object *);
+#define $method(name, type) \
+static Object *(name)(Object *_self, ArgsList args) {\
+    auto self = dynamic_cast<type *>(_self); \
+    assert(self);
+
+typedef Object *(*nativeFunction)(ArgsList);
+typedef Object *(*nativeMethod)(Object *, ArgsList);
+
 class NativeFunction : public Callable {
-    std::vector<std::string> arguments;
+    int argumentsCount;
     nativeFunction function;
 
 protected:
-    bool checkArguments(int count) override {
-        return arguments.size() == count;
-    }
-
-    std::string argument(int i) override { return arguments[i]; }
-
-    Object *__call__(Object *args, Interpreter *interpreter) override {
-        return function(args);
-    }
+    bool checkArguments(int count) override;
+    Object *__call__(ArgsList args, Interpreter *interpreter) override;
 
 public:
-    NativeFunction(nativeFunction function, std::vector<std::string> arguments) :
-            arguments(std::move(arguments)), function(function) {}
-};
-
-struct NativeClass;
-typedef std::vector<Object *> &ArgsList;
-typedef Object *(*nativeMethod)(NativeClass *, ArgsList);
-#define cast(a) auto self = dynamic_cast<a *>(_self); assert(self);
-struct NativeClass : public Object {
-    std::map<std::string, std::pair<nativeMethod, std::vector<std::string>>> methods;
-
-    Object *findAttribute(const std::string &name) override;
+    NativeFunction(nativeFunction function, int argumentsCount) : argumentsCount(argumentsCount), function(function) {}
 };
 
 class NativeMethod : public Callable {
-    friend class Interpreter;
     nativeMethod method;
-    NativeClass *source;
-    std::vector<std::string> arguments;
+    int argumentsCount;
 protected:
-    bool checkArguments(int count) override {
-        return arguments.size() == count;
-    }
-
-    std::string argument(int i) override { return arguments[i]; }
-
-    Object *__call__(Object *args, Interpreter *interpreter) override {
-        auto localArgs = std::vector<Object *>(arguments.size());
-        for (auto &&item : arguments) {
-            localArgs.push_back(args->getAttribute(item));
-        }
-        return method(source, localArgs);
-    }
+    bool checkArguments(int count) override;
+    Object *__call__(ArgsList args, Interpreter *interpreter) override;
 
 public:
-    NativeMethod(NativeClass *source, nativeMethod method, std::vector<std::string> arguments) :
-            method(method), source(source), arguments(std::move(arguments)) {
-        source->save();
-    }
+    NativeMethod(nativeMethod method, int argumentsCount) : method(method), argumentsCount(argumentsCount) {}
+};
 
-    ~NativeMethod() override {
-        if (source->canDelete())
-            delete source;
-    }
+struct NativeClass : public Callable {
+    friend class Interpreter;
+protected:
+
+protected:
+    bool checkArguments(int count) override { return count == 0; }
+
+public:
+    std::map<std::string, NativeMethod *> methods;
+    Object *findAttribute(const std::string &name) override;
 };
 
 #endif //INTERPRETER_NATIVE_H

@@ -4,24 +4,9 @@
 #include "../Object.h"
 #include "Bool.h"
 #include "Exception.h"
-#include "../Native.h"
 
-//struct A : public NativeClass {
-//    int x = 0;
-//
-//    A() {
-//        methods["test"] = {test, {}};
-//    }
-//
-//    static Object *test(NativeClass *_self, Object *args) {
-//        cast(A);
-//        std::cout << self->x;
-//        return nullptr;
-//    }
-//};
-
-struct Int : public NativeClass {
-    int getInt(Object *target) {
+struct Int : public Object {
+    static int getInt(Object *target) {
         Int *local = dynamic_cast<Int *>(target);
         if (local) {
             return local->value;
@@ -36,20 +21,13 @@ public:
 
     int value;
 
-    explicit Int(int value) : value(value) {
-        methods["add"] = {add, {"other"}};
-    }
+    explicit Int(int value) : value(value) {}
 
     std::string str() {
         return std::to_string(value);
     }
 
-//    Object *add(Object *other) { return new Int(value + getInt(other)->value); }
-
-    static Object *add(NativeClass *_self, ArgsList args) {
-        cast(Int);
-        return new Int(self->value + self->getInt(args[0]));
-    }
+    Object *add(Object *other) { return new Int(value + getInt(other)); }
 
     Object *unary_add() { return this; }
 

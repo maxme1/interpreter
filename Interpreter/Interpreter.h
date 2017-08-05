@@ -30,6 +30,9 @@ class Object;
 class Callable;
 class Interpreter {
     friend class Class;
+    friend class Function;
+    friend class ClassMethod;
+    friend class NativeMethod;
 public:
     Interpreter();
     ~Interpreter();
@@ -65,10 +68,10 @@ private:
     void setVariable(const std::string &name, Object *value);
     void evaluateStatements(std::vector<Statement *> &statements);
 
-    Object *callOperator(Object *object, std::initializer_list<Object *> arguments);
+    Object *callOperator(Object *object, const std::vector<Object *> & arguments);
     Object * callFunction(Object *object, const std::vector<Expression *> &argsList);
 
-    Object *call(Callable *callable);
+    Object *call(Callable *callable, const std::vector<Object *> &arguments);
     Callable *getCallable(Object *object);
     void checkArguments(Callable *callable, int count);
 
