@@ -43,6 +43,17 @@ FunctionExpression::~FunctionExpression() {
     }
 }
 
+GetItem::GetItem(Token token, Expression *target, Expression *argument) :
+        Expression(std::move(token)), target(target), argument(argument) {}
+
+std::string GetItem::str() {
+    return target->str() + "[" + argument->str() + "]";
+}
+
+GetItem::~GetItem() {
+    delete target, argument;
+}
+
 GetAttribute::GetAttribute(Token token, Expression *target, std::string name) :
         Expression(std::move(token)), target(target), name(std::move(name)) {}
 

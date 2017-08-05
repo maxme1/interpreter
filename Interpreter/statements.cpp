@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Interpreter.h"
 #include "../Parser/Parser.h"
-#include "../Object/Native.h"
+#include "../Object/Native/Native.h"
 #include "../Object/Class.h"
 
 void Interpreter::evaluate(ReturnStatement *statement) {

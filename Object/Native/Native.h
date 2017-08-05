@@ -3,18 +3,26 @@
 
 #include <iostream>
 #include <utility>
-#include "Callable.h"
-#include "Class.h"
+#include "../Callable.h"
+#include "../Class.h"
 #include <cassert>
 
-#define $method(name, type) \
+// some useful macros
+#define $method(name, type)\
 static Object *(name)(Object *_self, ArgsList args) {\
     auto self = dynamic_cast<type *>(_self); \
     assert(self);
 
+#define $class(name) \
+template<typename name> \
+std::map<std::string, NativeMethod *> NativeObject<name>::methods; \
+struct Array : public NativeObject<name>
+
+// types
 typedef Object *(*nativeFunction)(ArgsList);
 typedef Object *(*nativeMethod)(Object *, ArgsList);
 
+// callables
 class NativeFunction : public Callable {
     int argumentsCount;
     nativeFunction function;
@@ -38,16 +46,6 @@ public:
     NativeMethod(nativeMethod method, int argumentsCount) : method(method), argumentsCount(argumentsCount) {}
 };
 
-struct NativeClass : public Callable {
-    friend class Interpreter;
-protected:
-
-protected:
-    bool checkArguments(int count) override { return count == 0; }
-
-public:
-    std::map<std::string, NativeMethod *> methods;
-    Object *findAttribute(const std::string &name) override;
-};
+#include "NativeObject.h"
 
 #endif //INTERPRETER_NATIVE_H

@@ -31,9 +31,11 @@ unary = ('+' | '-')? primary
 primary = literal suffix*
 literal = NUMBER | '(' expression ')' | IDENTIFIER | BOOL | NONE
 
-suffix = ( '(' call? ')' ) | attribute
-call = expression (SEPARATOR expression)*
+suffix = call | attribute | item
 attribute = '.' IDENTIFIER
+item = '[' expression ']'
+call = '(' argsValues? ')'
+argsValues = expression (SEPARATOR expression)*
 
 -- literals --
 

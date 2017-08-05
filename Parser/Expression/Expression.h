@@ -92,6 +92,21 @@ public:
     std::string str() override;
 };
 
+class GetItem : public Expression {
+    friend class Interpreter;
+
+    Object *evaluate(Interpreter *interpreter) override {
+        return interpreter->evaluate(this);
+    }
+
+    Expression *target;
+    Expression *argument;
+public:
+    GetItem(Token token, Expression *target, Expression *argument);
+    ~GetItem() override;
+    std::string str() override;
+};
+
 class GetAttribute : public Expression {
     friend class Interpreter;
     friend class SetAttribute;

@@ -2,7 +2,7 @@
 #include "Interpreter.h"
 #include "../Parser/Parser.h"
 #include "../Object/Types/Int.h"
-#include "../Object/Native.h"
+#include "../Object/Native/Native.h"
 #include "../Object/Types/None.h"
 #include "../Object/Class.h"
 
@@ -34,27 +34,31 @@ Object *Interpreter::evaluate(Binary *expression) {
             return callOperator(method, {right});
     }
 
+    auto leftNative = dynamic_cast<BaseNative *>(left);
+    if (!leftNative)
+        throw Exception("Operator not defined");
+
     if (expression->ofType(Token::ADD))
-        return track(left->add(right));
+        return track(leftNative->add(right));
     if (expression->ofType(Token::SUB))
-        return track(left->subtract(right));
+        return track(leftNative->subtract(right));
     if (expression->ofType(Token::MUL))
-        return track(left->multiply(right));
+        return track(leftNative->multiply(right));
     if (expression->ofType(Token::DIV))
-        return track(left->divide(right));
+        return track(leftNative->divide(right));
 //    comparison
     if (expression->ofType(Token::EQUAL))
-        return track(left->equal(right));
+        return track(leftNative->equal(right));
     if (expression->ofType(Token::NOT_EQUAL))
-        return track(left->not_equal(right));
+        return track(leftNative->not_equal(right));
     if (expression->ofType(Token::GREATER_OR_EQUAL))
-        return track(left->greater_or_equal(right));
+        return track(leftNative->greater_or_equal(right));
     if (expression->ofType(Token::GREATER))
-        return track(left->greater(right));
+        return track(leftNative->greater(right));
     if (expression->ofType(Token::LESS))
-        return track(left->less(right));
+        return track(leftNative->less(right));
     if (expression->ofType(Token::LESS_OR_EQUAL))
-        return track(left->less_or_equal(right));
+        return track(leftNative->less_or_equal(right));
     return nullptr;
 }
 
@@ -68,10 +72,14 @@ Object *Interpreter::evaluate(Unary *expression) {
             return callOperator(method, {});
     }
 
+    auto argumentNative = dynamic_cast<BaseNative *>(argument);
+    if (!argumentNative)
+        throw Exception("Operator not defined");
+
     if (expression->ofType(Token::ADD))
-        return track(argument->unary_add());
+        return track(argumentNative->unary_add());
     if (expression->ofType(Token::SUB))
-        return track(argument->unary_subtract());
+        return track(argumentNative->unary_subtract());
     if (expression->ofType(Token::BRACKET))
         return argument;
     return nullptr;
@@ -119,6 +127,20 @@ Object *Interpreter::evaluate(FunctionExpression *expression) {
     }
 
     return callFunction(object, expression->argsList);
+}
+
+Object *Interpreter::evaluate(GetItem *expression) {
+    auto target = expression->target->evaluate(this);
+    auto argument = expression->argument->evaluate(this);
+    //    user-defined method
+    auto method = target->findAttribute("getitem");
+    if (method)
+        return callOperator(method, {argument});
+
+    auto native = dynamic_cast<BaseNative *>(target);
+    if (!native)
+        throw Exception("Operator not defined");
+    return track(native->getItem(argument));
 }
 
 Object *Interpreter::evaluate(GetAttribute *expression) {

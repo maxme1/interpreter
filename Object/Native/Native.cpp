@@ -1,15 +1,5 @@
 #include "Native.h"
 
-Object *NativeClass::findAttribute(const std::string &name) {
-    auto result = Object::findAttribute(name);
-    if (!result) {
-        auto value = methods.find(name);
-        if (value != methods.end()) {
-            return value->second;
-        }
-    }
-    return result;
-}
 
 bool NativeFunction::checkArguments(int count) { return argumentsCount == count; }
 

@@ -40,28 +40,3 @@ Object *Object::getAttribute(const std::string &name) {
         return result;
     throw Exception("AttributeError");
 }
-
-Object *Object::not_equal(Object *other) { throw Exception("Operator not defined"); }
-
-Object *Object::less_or_equal(Object *other) { throw Exception("Operator not defined"); }
-
-Object *Object::greater_or_equal(Object *other) { throw Exception("Operator not defined"); }
-
-Object *Object::less(Object *other) { throw Exception("Operator not defined"); }
-
-Object *Object::greater(Object *other) { throw Exception("Operator not defined"); }
-
-Object *Object::equal(Object *other) { throw Exception("Operator not defined"); }
-
-Object *Object::divide(Object *other) { throw Exception("Operator not defined"); }
-
-Object *Object::multiply(Object *other) { throw Exception("Operator not defined"); }
-
-Object *Object::unary_subtract() { throw Exception("Operator not defined"); }
-
-Object *Object::subtract(Object *other) { throw Exception("Operator not defined"); }
-
-Object *Object::unary_add() { throw Exception("Operator not defined"); }
-
-Object *Object::add(Object *other) { throw Exception("Operator not defined"); }
-

@@ -37,6 +37,8 @@ std::map<char, Token::tokenType> one_symbol = {
         {',', Token::SEPARATOR},
         {'(', Token::BRACKET_OPEN},
         {')', Token::BRACKET_CLOSE},
+        {'[', Token::ITEM_OPEN},
+        {']', Token::ITEM_CLOSE},
         {'.', Token::ATTRIBUTE},
         {'{', Token::BLOCK_OPEN},
         {'}', Token::BLOCK_CLOSE},

@@ -15,6 +15,7 @@ class SetAttribute;
 class Variable;
 class FunctionExpression;
 class GetAttribute;
+class GetItem;
 
 class Statement;
 class ExpressionStatement;
@@ -46,6 +47,7 @@ public:
     Object *evaluate(Variable *expression);
     Object *evaluate(FunctionExpression *expression);
     Object *evaluate(GetAttribute *expression);
+    Object *evaluate(GetItem *expression);
 
     void evaluate(ExpressionStatement *statement);
     void evaluate(IfStatement *statement);

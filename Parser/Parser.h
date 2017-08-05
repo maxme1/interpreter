@@ -142,8 +142,8 @@ class Parser {
 
     Expression *comparison() {
         auto left = term();
-        while (matches({Token::EQUAL, Token::GREATER, Token::GREATER_OR_EQUAL, Token::LESS, Token::LESS_OR_EQUAL,
-                        Token::NOT_EQUAL})) {
+        while (matches({Token::EQUAL, Token::GREATER, Token::GREATER_OR_EQUAL, Token::LESS,
+                        Token::LESS_OR_EQUAL, Token::NOT_EQUAL})) {
             auto current = advance();
             auto right = term();
             left = new Binary(current, left, right);
@@ -181,7 +181,7 @@ class Parser {
 
     Expression *primary() {
         auto left = literal();
-        while (matches({Token::BRACKET_OPEN, Token::ATTRIBUTE})) {
+        while (matches({Token::BRACKET_OPEN, Token::ATTRIBUTE, Token::ITEM_OPEN})) {
             if (matches({Token::BRACKET_OPEN})) {
                 auto token = advance();
                 auto args = arguments();
@@ -190,6 +190,11 @@ class Parser {
                 auto token = advance();
                 auto name = require({Token::IDENTIFIER}).body;
                 left = new GetAttribute(token, left, name);
+            } else if (matches({Token::ITEM_OPEN})) {
+                auto token = advance();
+                auto arg = expression();
+                left = new GetItem(token, left, arg);
+                require({Token::ITEM_CLOSE});
             }
         }
         return left;

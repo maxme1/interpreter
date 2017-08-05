@@ -2,7 +2,7 @@
 #include "Interpreter.h"
 #include "../Tokenizer/Tokenizer.h"
 #include "../Parser/Parser.h"
-#include "../Object/Native.h"
+#include "../Object/Native/Native.h"
 #include "../Object/Types/None.h"
 #include "../Object/Types/Array.h"
 
@@ -14,7 +14,7 @@ Interpreter::Interpreter() {
                 std::cout << args[0]->str() << std::endl;
                 return nullptr;
             }, 1));
-    setVariable("array", new ArrayClass());
+    setVariable("array", Array::build());
 }
 
 Interpreter::~Interpreter() {
