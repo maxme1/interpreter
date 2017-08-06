@@ -94,6 +94,7 @@ public:
 
 class GetItem : public Expression {
     friend class Interpreter;
+    friend class SetItem;
 
     Object *evaluate(Interpreter *interpreter) override {
         return interpreter->evaluate(this);
@@ -152,6 +153,22 @@ class SetAttribute : public Expression {
 public:
     SetAttribute(const Token &token, GetAttribute *target, Expression *value);
     ~SetAttribute() override;
+    std::string str() override;
+};
+
+class SetItem : public Expression {
+    friend class Interpreter;
+
+    Object *evaluate(Interpreter *interpreter) override {
+        return interpreter->evaluate(this);
+    }
+
+    Expression *value;
+    GetItem *target;
+
+public:
+    SetItem(const Token &token, GetItem *target, Expression *value);
+    ~SetItem() override;
     std::string str() override;
 };
 

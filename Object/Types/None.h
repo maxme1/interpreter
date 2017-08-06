@@ -8,7 +8,7 @@ class None : public Object {
 public:
     bool asBool() override { return false; }
 
-    std::string str() override { return "None"; }
+    std::string asString() override { return "None"; }
 };
 
 

@@ -75,6 +75,17 @@ Token Tokenizer::nextToken() {
         return Token(Token::PROGRAM_END, "<<<");
 
     auto begin = position;
+//    string
+    if (*position == '\'') {
+        position++;
+        while (position != text.end() and *position != '\'')
+            position++;
+        if (*position == '\'') {
+            position++;
+            return tk(Token::STRING);
+        }
+        return tk(Token::ERROR);
+    }
 //    number
     if (isdigit(*position)) {
         while (isdigit(*position))

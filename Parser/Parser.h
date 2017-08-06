@@ -133,6 +133,11 @@ class Parser {
                 assert(lookup);
                 return new SetAttribute(token, lookup, right);
             }
+            if (left->ofType(Token::ITEM_OPEN)) {
+                auto lookup = dynamic_cast<GetItem *>(left);
+                assert(lookup);
+                return new SetItem(token, lookup, right);
+            }
 
             throw "Bad assignment";
         }
@@ -212,7 +217,7 @@ class Parser {
     }
 
     Expression *literal() {
-        if (matches({Token::NUMBER, Token::BOOL, Token::NONE})) {
+        if (matches({Token::NUMBER, Token::BOOL, Token::NONE, Token::STRING})) {
             auto current = advance();
             return new Literal(current);
         }

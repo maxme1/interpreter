@@ -86,3 +86,14 @@ std::string SetAttribute::str() {
 SetAttribute::~SetAttribute() {
     delete target, value;
 }
+
+SetItem::SetItem(const Token &token, GetItem *target, Expression *value) :
+        Expression(token), target(target), value(value) {}
+
+std::string SetItem::str() {
+    return "(" + target->str() + "[" + target->argument->str() + "] = " + value->str() + ")";
+}
+
+SetItem::~SetItem() {
+    delete target, value;
+}

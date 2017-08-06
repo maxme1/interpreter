@@ -9,7 +9,7 @@ class Exception : public Object {
 public:
     explicit Exception(const std::string &body) : body(body) {}
 
-    std::string str() override {
+    std::string asString() override {
         return "Exception: " + body;
     }
 };

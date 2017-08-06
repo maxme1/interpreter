@@ -1,20 +1,23 @@
 #include <iostream>
+#include <utility>
 #include "Interpreter.h"
 #include "../Tokenizer/Tokenizer.h"
 #include "../Parser/Parser.h"
 #include "../Object/Native/Native.h"
 #include "../Object/Types/None.h"
 #include "../Object/Types/Array.h"
+#include "../Object/Types/String.h"
 
 
 Interpreter::Interpreter() {
     addScope();
     setVariable("print", new NativeFunction(
             [](ArgsList args) -> Object * {
-                std::cout << args[0]->str() << std::endl;
+                std::cout << args[0]->asString() << std::endl;
                 return nullptr;
             }, 1));
-    setVariable("array", Array::build());
+    setVariable("Array", Array::build());
+    setVariable("String", new StringClass());
 }
 
 Interpreter::~Interpreter() {
@@ -23,7 +26,7 @@ Interpreter::~Interpreter() {
 }
 
 void Interpreter::interpret(std::string text) {
-    Tokenizer t = Tokenizer(text);
+    Tokenizer t = Tokenizer(std::move(text));
     auto tokens = t.tokenize();
     if (t.error) {
         //    TODO: it would be better to know the position in the text on error
@@ -39,7 +42,7 @@ void Interpreter::interpret(std::string text) {
     try {
         evaluateStatements(statements);
     } catch (Exception &e) {
-        std::cout << e.str();
+        std::cout << e.asString();
     } catch (ControlFlow) {
         std::cout << "Control flow outside loop";
     } catch (ReturnException) {

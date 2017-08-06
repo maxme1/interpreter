@@ -16,7 +16,7 @@ static Object *(name)(Object *_self, ArgsList args) {\
 #define $class(name) \
 template<typename name> \
 std::map<std::string, NativeMethod *> NativeObject<name>::methods; \
-struct Array : public NativeObject<name>
+struct name : public NativeObject<name>
 
 // types
 typedef Object *(*nativeFunction)(ArgsList);

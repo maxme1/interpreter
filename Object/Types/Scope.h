@@ -5,6 +5,7 @@
 #include "Exception.h"
 
 class Scope : public Object {
+    friend class Class;
     Scope *upper = nullptr;
 public:
     Scope *getUpper() { return upper; }

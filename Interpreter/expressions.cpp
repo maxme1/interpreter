@@ -5,6 +5,7 @@
 #include "../Object/Native/Native.h"
 #include "../Object/Types/None.h"
 #include "../Object/Class.h"
+#include "../Object/Types/String.h"
 
 std::map<Token::tokenType, std::string> binary = {
         {Token::ADD,              "add"},
@@ -48,6 +49,7 @@ Object *Interpreter::evaluate(Binary *expression) {
         return track(leftNative->divide(right));
 //    comparison
     if (expression->ofType(Token::EQUAL))
+//        add pointer equality
         return track(leftNative->equal(right));
     if (expression->ofType(Token::NOT_EQUAL))
         return track(leftNative->not_equal(right));
@@ -87,12 +89,16 @@ Object *Interpreter::evaluate(Unary *expression) {
 
 Object *Interpreter::evaluate(Literal *expression) {
     if (expression->ofType(Token::NUMBER))
-// TODO: does'nt look good
+// TODO: doesn't look good
         return track(new Int(std::atoi(expression->str().c_str())));
     if (expression->ofType(Token::BOOL))
         return track(new Bool(expression->str() == "True"));
     if (expression->ofType(Token::NONE))
         return track(new None());
+    if (expression->ofType(Token::STRING)) {
+        auto body = expression->str();
+        return track(new String(body.substr(1, body.size() - 2)));
+    }
     return nullptr;
 }
 
@@ -107,6 +113,22 @@ Object *Interpreter::evaluate(SetAttribute *expression) {
     auto value = expression->value->evaluate(this), target = expression->target->target->evaluate(this);
     target->setAttribute(expression->target->name, value);
     return value;
+}
+
+Object *Interpreter::evaluate(SetItem *expression) {
+//    TODO: also looks bad
+    auto target = expression->target->target->evaluate(this);
+    auto argument = expression->target->argument->evaluate(this);
+    auto value = expression->value->evaluate(this);
+    //    user-defined method
+    auto method = target->findAttribute("setitem");
+    if (method)
+        return callOperator(method, {argument, value});
+
+    auto native = dynamic_cast<BaseNative *>(target);
+    if (!native)
+        throw Exception("Operator not defined");
+    return track(native->setItem(argument, value));
 }
 
 Object *Interpreter::evaluate(Variable *expression) {

@@ -12,6 +12,7 @@ class Unary;
 class Literal;
 class SetVariable;
 class SetAttribute;
+class SetItem;
 class Variable;
 class FunctionExpression;
 class GetAttribute;
@@ -32,6 +33,7 @@ class Callable;
 class Interpreter {
     friend class Class;
     friend class Function;
+    friend class StringClass;
     friend class ClassMethod;
     friend class NativeMethod;
 public:
@@ -44,6 +46,7 @@ public:
     Object *evaluate(Literal *expression);
     Object *evaluate(SetVariable *expression);
     Object *evaluate(SetAttribute *expression);
+    Object *evaluate(SetItem *expression);
     Object *evaluate(Variable *expression);
     Object *evaluate(FunctionExpression *expression);
     Object *evaluate(GetAttribute *expression);

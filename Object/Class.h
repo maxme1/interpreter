@@ -7,13 +7,14 @@
 #include "Types/None.h"
 
 
-class ClassInstance : public Object {
+class Instance : public Object {
 protected:
     Object *classPtr;
 
 public:
-    explicit ClassInstance(Object *classPtr);
-    ~ClassInstance() override;
+    Instance() = default;
+    explicit Instance(Object *classPtr);
+    ~Instance() override;
 
     Object *findAttribute(const std::string &name) override;
 };
@@ -25,6 +26,7 @@ protected:
     Object *__call__(ArgsList args, Interpreter *interpreter) override;
 
 public:
+    Class() = default;
     explicit Class(Scope *context);
 };
 

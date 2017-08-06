@@ -25,3 +25,5 @@ Object *BaseNative::unary_add() { throw Exception("Operator not defined"); }
 Object *BaseNative::add(Object *other) { throw Exception("Operator not defined"); }
 
 Object *BaseNative::getItem(Object *other) { throw Exception("Operator not defined"); }
+
+Object *BaseNative::setItem(Object *other, Object *value) { throw Exception("Operator not defined"); }

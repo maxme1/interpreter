@@ -2,18 +2,18 @@
 
 // Instance
 
-ClassInstance::ClassInstance(Object *classPtr) : classPtr(classPtr) {
+Instance::Instance(Object *classPtr) : classPtr(classPtr) {
     classPtr->save();
 }
 
-ClassInstance::~ClassInstance() {
+Instance::~Instance() {
     if (classPtr->canDelete())
         delete classPtr;
 }
 
-Object *ClassInstance::findAttribute(const std::string &name) {
+Object *Instance::findAttribute(const std::string &name) {
     auto result = Object::findAttribute(name);
-    if (!result)
+    if (!result and classPtr)
         result = classPtr->findAttribute(name);
     if (!result)
         return nullptr;
@@ -29,7 +29,7 @@ Object *ClassInstance::findAttribute(const std::string &name) {
 bool Class::checkArguments(int count) { return count == 0; }
 
 Object *Class::__call__(ArgsList args, Interpreter *interpreter) {
-    return new ClassInstance(this);
+    return new Instance(this);
 }
 
 Class::Class(Scope *context) : Callable(context) {

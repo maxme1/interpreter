@@ -19,7 +19,15 @@ $class(Array) {
         return this->array[idx];
     }
 
-    Array() {
+    Object *setItem(Object *other, Object *value) override {
+        auto idx = Int::getInt(other);
+        if (idx >= this->array.size())
+            throw Exception("IndexError");
+        this->array[idx] = value;
+        return value;
+    }
+
+    static void populate() {
         addMethod("push", push, 1);
     }
 };

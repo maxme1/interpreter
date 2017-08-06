@@ -7,6 +7,7 @@ class BaseNative : public Object {
 public:
 //    item access
     virtual Object *getItem(Object *other);
+    virtual Object *setItem(Object *other, Object *value);
 //    arithmetic
     virtual Object *add(Object *other);
     virtual Object *unary_add();
@@ -26,22 +27,29 @@ public:
 template<typename T>
 class NativeObject : public BaseNative {
     friend class Interpreter;
+    class NativeClass : public Class {
+        Object *__call__(const std::vector<Object *> &args, Interpreter *interpreter) override {
+            return new T();
+        }
+    };
 
-protected:
     static std::map<std::string, NativeMethod *> methods;
+protected:
+    static void populate() {};
 
     static void addMethod(std::string name, nativeMethod method, int argumentsCount) {
         methods[name] = new NativeMethod(method, argumentsCount);
     }
 
 public:
-    Object *findAttribute(const std::string &name) {
+    Object *findAttribute(const std::string &name) override {
         auto result = Object::findAttribute(name);
         if (!result) {
             auto value = methods.find(name);
             if (value != methods.end()) {
                 result = value->second;
-            }
+            } else
+                return nullptr;
         }
         auto method = dynamic_cast<Callable *> (result);
         if (method)
@@ -49,12 +57,9 @@ public:
         return result;
     }
 
-    static Object *getInstance(ArgsList args) {
-        return new T();
-    }
-
     static Object *build() {
-        return new NativeFunction(getInstance, 0);
+        T::populate();
+        return new NativeClass();
     }
 };
 

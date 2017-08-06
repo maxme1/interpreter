@@ -29,7 +29,7 @@ factor = unary ( ('*' | '/') unary )*
 unary = ('+' | '-')? primary
 
 primary = literal suffix*
-literal = NUMBER | '(' expression ')' | IDENTIFIER | BOOL | NONE
+literal = NUMBER | '(' expression ')' | IDENTIFIER | BOOL | NONE | STRING
 
 suffix = call | attribute | item
 attribute = '.' IDENTIFIER
@@ -40,8 +40,9 @@ argsValues = expression (SEPARATOR expression)*
 -- literals --
 
 NUMBER = '\d+'
-IDENTIFIER = '[a-zA-Z_]\w*'
+STRING = "'[^']*'"
 BOOL = 'True' | 'False'
 NONE = 'None'
+IDENTIFIER = '[a-zA-Z_]\w*'
 DELIMITER = ';'
 SEPARATOR = ','

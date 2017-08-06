@@ -14,7 +14,7 @@ public:
 
     explicit Bool(bool value) : value(value) {}
 
-    std::string str() {
+    std::string asString() {
         if (value)
             return "True";
         return "False";
