@@ -23,27 +23,28 @@ typedef Object *(*nativeFunction)(ArgsList);
 typedef Object *(*nativeMethod)(Object *, ArgsList);
 
 // callables
-class NativeFunction : public Callable {
-    int argumentsCount;
-    nativeFunction function;
-
+class NativeCallable : public Callable {
+    int minArguments, maxArguments;
 protected:
     bool checkArguments(int count) override;
-    Object *__call__(ArgsList args, Interpreter *interpreter) override;
 
 public:
-    NativeFunction(nativeFunction function, int argumentsCount) : argumentsCount(argumentsCount), function(function) {}
+    static const int ANY = -1, SAME = -2;
+    explicit NativeCallable(int minArguments, int maxArguments);
 };
 
-class NativeMethod : public Callable {
-    nativeMethod method;
-    int argumentsCount;
-protected:
-    bool checkArguments(int count) override;
-    Object *__call__(ArgsList args, Interpreter *interpreter) override;
-
+class NativeFunction : public NativeCallable {
+    nativeFunction function;
 public:
-    NativeMethod(nativeMethod method, int argumentsCount) : method(method), argumentsCount(argumentsCount) {}
+    NativeFunction(nativeFunction function, int minArguments, int maxArguments = NativeCallable::SAME);
+    Object *__call__(ArgsList args, Interpreter *interpreter) override;
+};
+
+class NativeMethod : public NativeCallable {
+    nativeMethod method;
+public:
+    NativeMethod(nativeMethod method, int minArguments, int maxArguments = NativeCallable::SAME);
+    Object *__call__(ArgsList args, Interpreter *interpreter) override;
 };
 
 #include "NativeObject.h"

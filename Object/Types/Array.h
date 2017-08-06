@@ -4,8 +4,15 @@
 #include "../Native/Native.h"
 #include "Int.h"
 
+// TODO: memory management
 $class(Array) {
     std::vector<Object *> array;
+
+    $method(init, Array)
+        for (auto &&arg : args) {
+            self->array.push_back(arg);
+        }
+    }
 
     $method(push, Array)
         self->array.push_back(args[0]);
@@ -27,7 +34,21 @@ $class(Array) {
         return value;
     }
 
+    std::string asString() override {
+        std::string result = "[";
+        bool first = true;
+        for (auto &&item : array) {
+            if (not first)
+                result += ", ";
+            else
+                first = false;
+            result += item->asString();
+        }
+        return result + "]";
+    }
+
     static void populate() {
+        addMethod("init", init, 1, -1);
         addMethod("push", push, 1);
     }
 };

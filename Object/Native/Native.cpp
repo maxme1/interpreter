@@ -1,15 +1,25 @@
 #include "Native.h"
 
 
-bool NativeFunction::checkArguments(int count) { return argumentsCount == count; }
+bool NativeCallable::checkArguments(int count) {
+    return count >= minArguments and (count <= maxArguments or maxArguments == ANY);
+}
 
-Object *NativeFunction::__call__(const std::vector<Object *> &args, Interpreter *interpreter) {
+NativeCallable::NativeCallable(int minArguments, int maxArguments) :
+        minArguments(minArguments), maxArguments(maxArguments) {
+    if (maxArguments == SAME)
+        this->maxArguments = minArguments;
+}
+
+NativeFunction::NativeFunction(nativeFunction function, int minArguments, int maxArguments) :
+        NativeCallable(minArguments, maxArguments), function(function) {}
+
+Object *NativeFunction::__call__(ArgsList args, Interpreter *interpreter) {
     return function(args);
 }
 
-bool NativeMethod::checkArguments(int count) {
-    return argumentsCount == count;
-}
+NativeMethod::NativeMethod(nativeMethod method, int minArguments, int maxArguments) :
+        NativeCallable(minArguments, maxArguments), method(method) {}
 
 Object *NativeMethod::__call__(const std::vector<Object *> &args, Interpreter *interpreter) {
     auto self = interpreter->getVariable("this");

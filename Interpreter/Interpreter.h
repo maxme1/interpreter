@@ -73,8 +73,8 @@ private:
     void setVariable(const std::string &name, Object *value);
     void evaluateStatements(std::vector<Statement *> &statements);
 
-    Object *callOperator(Object *object, const std::vector<Object *> & arguments);
-    Object * callFunction(Object *object, const std::vector<Expression *> &argsList);
+    Object *callOperator(Object *object, const std::vector<Object *> &arguments);
+    Object *callFunction(Object *object, const std::vector<Expression *> &argsList);
 
     Object *call(Callable *callable, const std::vector<Object *> &arguments);
     Callable *getCallable(Object *object);

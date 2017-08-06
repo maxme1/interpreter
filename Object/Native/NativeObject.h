@@ -37,8 +37,9 @@ class NativeObject : public BaseNative {
 protected:
     static void populate() {};
 
-    static void addMethod(std::string name, nativeMethod method, int argumentsCount) {
-        methods[name] = new NativeMethod(method, argumentsCount);
+    static void addMethod(std::string name, nativeMethod method, int minArguments,
+                          int maxArguments = NativeFunction::SAME) {
+        methods[name] = new NativeMethod(method, minArguments, maxArguments);
     }
 
 public:

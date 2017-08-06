@@ -13,9 +13,17 @@ Interpreter::Interpreter() {
     addScope();
     setVariable("print", new NativeFunction(
             [](ArgsList args) -> Object * {
-                std::cout << args[0]->asString() << std::endl;
+                bool first = true;
+                for (auto &&arg : args) {
+                    if (not first) {
+                        std::cout << " ";
+                    } else
+                        first = false;
+                    std::cout << arg->asString();
+                }
+                std::cout << std::endl;
                 return nullptr;
-            }, 1));
+            }, 1, NativeCallable::ANY));
     setVariable("Array", Array::build());
     setVariable("String", new StringClass());
 }
