@@ -144,6 +144,7 @@ Object *Interpreter::callFunction(Object *object, const std::vector<Expression *
     auto callable = getCallable(object);
     checkArguments(callable, argsList.size());
 
+//    TODO: create a single function
     addScope(callable->context);
     addScope();
 

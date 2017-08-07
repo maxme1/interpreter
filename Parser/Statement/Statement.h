@@ -110,13 +110,15 @@ class FunctionDefinition : public Statement {
     Statement *body;
     std::vector<std::string> arguments;
     std::string name;
+    bool unlimited;
 
     void evaluate(Interpreter *interpreter) override {
         interpreter->evaluate(this);
     }
 
 public:
-    FunctionDefinition(const std::string &name, const std::vector<std::string> &arguments, Statement *body);
+    FunctionDefinition(const std::string &name, const std::vector<std::string> &arguments, Statement *body,
+                       bool unlimited);
     ~FunctionDefinition() override;
     std::string str() override;
 };

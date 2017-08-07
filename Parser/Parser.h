@@ -85,22 +85,36 @@ class Parser {
         return new WhileStatement(condition, body);
     }
 
+//    TODO: this function got too large
     Statement *functionDefinition() {
         require({Token::FUNCTION});
         auto name = require({Token::IDENTIFIER}).body;
         require({Token::BRACKET_OPEN});
         auto arguments = std::vector<std::string>();
-        bool first = true;
+        bool first = true, unlimited = false;
         while (!matches({Token::BRACKET_CLOSE})) {
             if (!first)
                 require({Token::SEPARATOR});
+            if (matches({Token::MUL})) {
+//                unlimited arguments
+                advance();
+                unlimited = true;
+            }
             auto local = require({Token::IDENTIFIER});
+            //        checking uniqueness
+            for (auto &argument : arguments) {
+                if (argument == local.body)
+                    throw "Duplicate argument";
+            }
+
             arguments.push_back(local.body);
+            if (unlimited)
+                break;
             first = false;
         }
         require({Token::BRACKET_CLOSE});
         auto body = block();
-        return new FunctionDefinition(name, arguments, body);
+        return new FunctionDefinition(name, arguments, body, unlimited);
     }
 
     Statement *classDefinition() {

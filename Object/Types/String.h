@@ -15,6 +15,10 @@ $class(String) {
         return string;
     }
 
+    bool asBool() override {
+        return !string.empty();
+    }
+
     static std::string toString(Object *object, API *api) {
         auto method = object->findAttribute("str");
         if (!method)
@@ -22,8 +26,9 @@ $class(String) {
         return api->call(method, {})->asString();
     }
 
-    bool asBool() override {
-        return !string.empty();
+    $method(init, String)
+        self->string = toString(args[0], api);
+        return nullptr;
     }
 
     $method(add, String)
@@ -31,11 +36,6 @@ $class(String) {
         if (!that)
             throw Exception("not a string");
         return new String(self->string + that->string);
-    }
-
-    $method(init, String)
-        self->string = toString(args[0], api);
-        return nullptr;
     }
 
     static void populate() {

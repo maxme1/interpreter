@@ -1,8 +1,6 @@
 #ifndef INTERPRETER_BOOL_H
 #define INTERPRETER_BOOL_H
 
-#include "String.h"
-
 $class(Bool) {
     bool value;
     Bool() = default;
@@ -13,6 +11,18 @@ $class(Bool) {
         return value;
     }
 
+    static bool toBool(Object *object, API *api) {
+        auto method = object->findAttribute("bool");
+        if (!method)
+            return object->asBool();
+        return api->call(method, {})->asBool();
+    }
+
+    $method(init, Bool)
+        self->value = Bool::toBool(args[0], api);
+        return nullptr;
+    }
+
     $method(str, Bool)
         if (self->value)
             return new String("True");
@@ -21,6 +31,7 @@ $class(Bool) {
 
     static void populate() {
         addMethod("str", str);
+        addMethod("init", init, 1);
     }
 };
 

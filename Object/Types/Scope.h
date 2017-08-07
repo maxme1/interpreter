@@ -19,7 +19,8 @@ public:
         auto result = Object::findAttribute(name);
         if (result)
             return result;
-        if (upper)
+//        avoid cycles
+        if (upper and upper != this)
             return upper->findAttribute(name);
         return nullptr;
     }

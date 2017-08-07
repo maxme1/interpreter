@@ -27,13 +27,14 @@ class Function : public Callable {
     friend class Interpreter;
     Statement *body = nullptr;
     std::vector<std::string> arguments;
+    bool unlimited;
 
 protected:
     bool checkArguments(int count) override;
     Object *__call__(ArgsList args, API *api) override;
 
 public:
-    explicit Function(std::vector<std::string> arguments, Statement *body, Scope *context);
+    explicit Function(std::vector<std::string> arguments, Statement *body, bool unlimited, Scope *context);
     ~Function() override;
 };
 

@@ -6,6 +6,9 @@
 
 $class(Array) {
     std::vector<Object *> array;
+    Array() = default;
+
+    Array(ArgsList array) : array(array) {}
 
     bool asBool() override {
         return !array.empty();

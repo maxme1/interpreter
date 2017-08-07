@@ -56,7 +56,8 @@ std::string ReturnStatement::str() {
 }
 
 FunctionDefinition::FunctionDefinition(const std::string &name, const std::vector<std::string> &arguments,
-                                       Statement *body) : body(body), arguments(arguments), name(name) {}
+                                       Statement *body, bool unlimited) :
+        body(body), arguments(arguments), name(name), unlimited(unlimited) {}
 
 std::string FunctionDefinition::str() {
     std::string result = "def " + name + "(";
