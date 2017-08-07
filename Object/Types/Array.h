@@ -16,6 +16,7 @@ $class(Array) {
             arg->save();
             self->array.push_back(arg);
         }
+        return nullptr;
     }
 
     $method(push, Array)
