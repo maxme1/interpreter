@@ -30,12 +30,9 @@ class Block;
 
 class Object;
 class Callable;
+class API;
 class Interpreter {
-    friend class Class;
-    friend class Function;
-    friend class StringClass;
-    friend class ClassMethod;
-    friend class NativeMethod;
+    friend class API;
 public:
     Interpreter();
     ~Interpreter();
@@ -61,6 +58,8 @@ public:
     void evaluate(ControlFlow *statement);
     void evaluate(Block *block);
 private:
+    API *api;
+
     Scope *scope = nullptr;
     std::stack<Object *> garbage;
 
@@ -68,8 +67,8 @@ private:
     void deleteScope();
     void collect();
     Object *track(Object *object);
-    Object *getVariable(const std::string &name);
 
+    Object *getVariable(const std::string &name);
     void setVariable(const std::string &name, Object *value);
     void evaluateStatements(std::vector<Statement *> &statements);
 

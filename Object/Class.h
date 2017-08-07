@@ -8,11 +8,10 @@
 
 
 class Instance : public Object {
-protected:
     Object *classPtr;
+protected:
 
 public:
-    Instance() = default;
     explicit Instance(Object *classPtr);
     ~Instance() override;
 
@@ -23,7 +22,7 @@ class Class : public Callable {
     friend class Interpreter;
 protected:
     bool checkArguments(int count) override;
-    Object *__call__(ArgsList args, Interpreter *interpreter) override;
+    Object *__call__(ArgsList args, API *api) override;
 
 public:
     Class() = default;

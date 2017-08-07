@@ -9,15 +9,17 @@ Callable::~Callable() {
         delete context;
 }
 
+Function::Function(std::vector<std::string> arguments, Statement *body, Scope *context) :
+        Callable(context), body(body), arguments(std::move(arguments)) {}
+
 bool Function::checkArguments(int count) { return arguments.size() == count; }
 
-
-Object *Function::__call__(const std::vector<Object *> &args, Interpreter *interpreter) {
+Object *Function::__call__(const std::vector<Object *> &args, API *api) {
 //        populating with arguments
     for (int i = 0; i < arguments.size(); ++i)
-        interpreter->setVariable(arguments[i], args[i]);
+        api->setVariable(arguments[i], args[i]);
 
-    body->evaluate(interpreter);
+    body->evaluate(api->interpreter);
 }
 
 Function::~Function() {
@@ -28,9 +30,9 @@ bool ClassMethod::checkArguments(int count) {
     return function->checkArguments(count);
 }
 
-Object *ClassMethod::__call__(const std::vector<Object *> &args, Interpreter *interpreter) {
-    interpreter->setVariable("this", source);
-    return function->__call__(args, interpreter);
+Object *ClassMethod::__call__(const std::vector<Object *> &args, API *api) {
+    api->setVariable("this", source);
+    return function->__call__(args, api);
 }
 
 ClassMethod::ClassMethod(Object *source, Callable *function) :

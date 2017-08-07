@@ -1,22 +1,19 @@
 #ifndef INTERPRETER_INT_H
 #define INTERPRETER_INT_H
 
-#include "../Object.h"
-#include "Bool.h"
 #include "Exception.h"
-#include "../Native/NativeObject.h"
+#include "../Native/Native.h"
+#include "String.h"
+#include "Bool.h"
 
-struct Int : public BaseNative {
+$class(Int) {
     int value;
+    Int() = default;
 
     explicit Int(int value) : value(value) {}
 
-    static int getInt(Object *target) {
-        Int *local = dynamic_cast<Int *>(target);
-        if (local) {
-            return local->value;
-        }
-        throw Exception("Operator undefined for these types");
+    static int getValue(Object *object) {
+        return cast(object, true)->value;
     }
 
     bool asBool() override {
@@ -27,34 +24,69 @@ struct Int : public BaseNative {
         return std::to_string(value);
     }
 
-    Object *add(Object *other) override { return new Int(value + getInt(other)); }
-
-    Object *unary_add() override { return this; }
-
-    Object *unary_subtract() override { return new Int(-value); }
-
-    Object *subtract(Object *other) override { return new Int(value - getInt(other)); }
-
-    Object *multiply(Object *other) override { return new Int(value * getInt(other)); }
-
-    Object *divide(Object *other) override {
-        int val = getInt(other);
-        if (val == 0)
-            throw Exception("Division by zero");
-        return new Int(value / val);
+    $method(add, Int)
+        return new Int(self->value + Int::getValue(args[0]));
     }
 
-    Object *equal(Object *other) override { return new Bool(value == getInt(other)); }
+    $method(divide, Int)
+        int val = Int::getValue(args[0]);
+        if (val == 0)
+            throw Exception("Division by zero");
+        return new Int(self->value / val);
+    }
 
-    Object *greater(Object *other) override { return new Bool(value > getInt(other)); }
+    $method(unary_add, Int)
+        return self;
+    }
 
-    Object *less(Object *other) override { return new Bool(value < getInt(other)); }
+    $method(unary_subtract, Int)
+        return new Int(-self->value);
+    }
 
-    Object *greater_or_equal(Object *other) override { return new Bool(value >= getInt(other)); }
+    $method(multiply, Int)
+        return new Int(self->value * Int::getValue(args[0]));
+    }
 
-    Object *less_or_equal(Object *other) override { return new Bool(value <= getInt(other)); }
+    $method(subtract, Int)
+        return new Int(self->value - Int::getValue(args[0]));
+    }
 
-    Object *not_equal(Object *other) override { return new Bool(value != getInt(other)); }
+    $method(equal, Int)
+        auto other = Int::cast(args[0]);
+        if (other)
+            return new Bool(self->value == other->value);
+        return new Bool(false);
+    }
+
+    $method(not_equal, Int)
+        auto other = Int::cast(args[0]);
+        if (other)
+            return new Bool(self->value != other->value);
+        return new Bool(false);
+    }
+
+    $method(greater, Int)
+        return new Int(self->value > Int::getValue(args[0]));
+    }
+
+    $method(less, Int)
+        return new Int(self->value < Int::getValue(args[0]));
+    }
+
+    $method(greater_or_equal, Int)
+        return new Int(self->value >= Int::getValue(args[0]));
+    }
+
+    $method(less_or_equal, Int)
+        return new Int(self->value <= Int::getValue(args[0]));
+    }
+
+    static void populate() {
+//        TODO: populate
+        addMethod("add", add, 1);
+        addMethod("div", divide, 1);
+        addMethod("eq", equal, 1);
+    }
 };
 
 

@@ -2,8 +2,11 @@
 #define INTERPRETER_FUNCTION_H
 
 
+#include <utility>
+
 #include "Object.h"
 #include "../Parser/Statement/Statement.h"
+#include "../Interpreter/API.h"
 
 typedef const std::vector<Object *> &ArgsList;
 
@@ -13,7 +16,7 @@ class Callable : public Object {
     Scope *context = nullptr;
 protected:
     virtual bool checkArguments(int count) = 0;
-    virtual Object *__call__(ArgsList args, Interpreter *interpreter) = 0;
+    virtual Object *__call__(ArgsList args, API *api) = 0;
 public:
     Callable() = default;
     explicit Callable(Scope *context);
@@ -27,12 +30,10 @@ class Function : public Callable {
 
 protected:
     bool checkArguments(int count) override;
-    Object *__call__(ArgsList args, Interpreter *interpreter) override;
+    Object *__call__(ArgsList args, API *api) override;
 
 public:
-    explicit Function(const std::vector<std::string> &arguments, Statement *body, Scope *context) :
-            Callable(context), body(body), arguments(arguments) {}
-
+    explicit Function(std::vector<std::string> arguments, Statement *body, Scope *context);
     ~Function() override;
 };
 
@@ -42,7 +43,7 @@ class ClassMethod : public Callable {
     Object *source;
 protected:
     bool checkArguments(int count) override;
-    Object *__call__(ArgsList args, Interpreter *interpreter) override;
+    Object *__call__(ArgsList args, API *api) override;
 
 public:
     ClassMethod(Object *source, Callable *function);

@@ -3,10 +3,11 @@
 
 #include <utility>
 
-#include "../Native/NativeObject.h"
+#include "../Native/Native.h"
 
-struct String : public BaseNative {
-    std::string string;
+$class(String) {
+    std::string string{};
+    String() = default;
 
     explicit String(std::string string) : string(std::move(string)) {}
 
@@ -14,29 +15,32 @@ struct String : public BaseNative {
         return string;
     }
 
+    static std::string toString(Object *object, API *api) {
+        auto method = object->findAttribute("str");
+        if (!method)
+            return object->asString();
+        return api->call(method, {})->asString();
+    }
+
     bool asBool() override {
         return !string.empty();
     }
 
-    Object *add(Object *other) override {
-        auto that = dynamic_cast<String *>(other);
+    $method(add, String)
+        auto that = dynamic_cast<String *>(args[0]);
         if (!that)
-            throw Exception("Not a string");
-        return new String(string + that->string);
-    }
-};
-
-struct StringClass : public Callable {
-protected:
-    bool checkArguments(int count) override {
-        return count == 1;
+            throw Exception("not a string");
+        return new String(self->string + that->string);
     }
 
-    Object *__call__(ArgsList args, Interpreter *interpreter) override {
-        auto method = args[0]->findAttribute("str");
-        if (method)
-            return interpreter->callOperator(method, {});
-        return new String(args[0]->asString());
+    $method(init, String)
+        self->string = toString(args[0], api);
+        return nullptr;
+    }
+
+    static void populate() {
+        addMethod("init", init, 1);
+        addMethod("add", add, 1);
     }
 };
 

@@ -1,27 +1,26 @@
 #include "Native.h"
 
-
-bool NativeCallable::checkArguments(int count) {
-    return count >= minArguments and (count <= maxArguments or maxArguments == ANY);
+template<typename T>
+bool NativeCallable<T>::checkArguments(int count) {
+    return count == argumentsCount or (count >= argumentsCount and unlimited);
 }
 
-NativeCallable::NativeCallable(int minArguments, int maxArguments) :
-        minArguments(minArguments), maxArguments(maxArguments) {
-    if (maxArguments == SAME)
-        this->maxArguments = minArguments;
+template<typename T>
+NativeCallable<T>::NativeCallable(T function, int argumentsCount, bool unlimited) :
+        argumentsCount(argumentsCount), unlimited(unlimited), function(function) {}
+
+template<typename T>
+Object *NativeCallable<T>::__call__(ArgsList args, API *api) {
+    return function(args, api);
 }
 
-NativeFunction::NativeFunction(nativeFunction function, int minArguments, int maxArguments) :
-        NativeCallable(minArguments, maxArguments), function(function) {}
-
-Object *NativeFunction::__call__(ArgsList args, Interpreter *interpreter) {
-    return function(args);
+template<>
+Object *NativeCallable<nativeMethod>::__call__(const std::vector<Object *> &args, API *api) {
+    auto self = api->getVariable("this");
+    return function(self, args, api);
 }
 
-NativeMethod::NativeMethod(nativeMethod method, int minArguments, int maxArguments) :
-        NativeCallable(minArguments, maxArguments), method(method) {}
-
-Object *NativeMethod::__call__(const std::vector<Object *> &args, Interpreter *interpreter) {
-    auto self = interpreter->getVariable("this");
-    return method(self, args);
-}
+template
+class NativeCallable<nativeFunction>;
+template
+class NativeCallable<nativeMethod>;

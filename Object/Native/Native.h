@@ -7,45 +7,36 @@
 #include "../Class.h"
 #include <cassert>
 
-// some useful macros
-#define $method(name, type)\
-static Object *(name)(Object *_self, ArgsList args) {\
-    auto self = dynamic_cast<type *>(_self); \
+// macros
+#define $class(type) struct type : public NativeObject<type>
+
+#define $method(name, type) \
+static Object *(name)(Object *_self, ArgsList args, API *api) { \
+    auto self = type::cast(_self, true); \
     assert(self);
 
-#define $class(name) \
-template<typename name> \
-std::map<std::string, NativeMethod *> NativeObject<name>::methods; \
-struct name : public NativeObject<name>
+#define $lambda [](ArgsList args, API *api) -> Object *
 
 // types
-typedef Object *(*nativeFunction)(ArgsList);
-typedef Object *(*nativeMethod)(Object *, ArgsList);
+typedef Object *(*nativeFunction)(ArgsList, API *);
+typedef Object *(*nativeMethod)(Object *, ArgsList, API *);
 
 // callables
+template<typename T>
 class NativeCallable : public Callable {
-    int minArguments, maxArguments;
+    T function;
+    int argumentsCount;
+    bool unlimited;
 protected:
     bool checkArguments(int count) override;
 
 public:
-    static const int ANY = -1, SAME = -2;
-    explicit NativeCallable(int minArguments, int maxArguments);
+    explicit NativeCallable(T function, int argumentsCount, bool unlimited = false);
+    Object *__call__(ArgsList args, API *api) override;
 };
 
-class NativeFunction : public NativeCallable {
-    nativeFunction function;
-public:
-    NativeFunction(nativeFunction function, int minArguments, int maxArguments = NativeCallable::SAME);
-    Object *__call__(ArgsList args, Interpreter *interpreter) override;
-};
-
-class NativeMethod : public NativeCallable {
-    nativeMethod method;
-public:
-    NativeMethod(nativeMethod method, int minArguments, int maxArguments = NativeCallable::SAME);
-    Object *__call__(ArgsList args, Interpreter *interpreter) override;
-};
+typedef NativeCallable<nativeFunction> NativeFunction;
+typedef NativeCallable<nativeMethod> NativeMethod;
 
 #include "NativeObject.h"
 

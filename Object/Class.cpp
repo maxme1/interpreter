@@ -28,7 +28,7 @@ Object *Instance::findAttribute(const std::string &name) {
 
 bool Class::checkArguments(int count) { return count == 0; }
 
-Object *Class::__call__(ArgsList args, Interpreter *interpreter) {
+Object *Class::__call__(ArgsList args, API *api) {
     return new Instance(this);
 }
 

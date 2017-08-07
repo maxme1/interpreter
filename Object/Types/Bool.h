@@ -1,23 +1,26 @@
 #ifndef INTERPRETER_BOOL_H
 #define INTERPRETER_BOOL_H
 
-#include <string>
-#include "../Object.h"
+#include "String.h"
 
-class Bool : public Object {
-public:
+$class(Bool) {
+    bool value;
+    Bool() = default;
+
+    explicit Bool(bool value) : value(value) {}
+
     bool asBool() override {
         return value;
     }
 
-    bool value;
+    $method(str, Bool)
+        if (self->value)
+            return new String("True");
+        return new String("False");
+    }
 
-    explicit Bool(bool value) : value(value) {}
-
-    std::string asString() {
-        if (value)
-            return "True";
-        return "False";
+    static void populate() {
+        addMethod("str", str);
     }
 };
 

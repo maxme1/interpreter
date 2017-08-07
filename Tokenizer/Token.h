@@ -18,7 +18,7 @@ struct Token {
         IF, ELSE, WHILE,
         FUNCTION, CLASS,
         BREAK, CONTINUE, RETURN,
-        PROGRAM_END, ERROR
+        PROGRAM_END, ERROR, COMMENT
     };
 
     tokenType type;

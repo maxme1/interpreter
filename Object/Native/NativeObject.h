@@ -3,65 +3,66 @@
 
 #include "Native.h"
 
-class BaseNative : public Object {
-public:
-//    item access
-    virtual Object *getItem(Object *other);
-    virtual Object *setItem(Object *other, Object *value);
-//    arithmetic
-    virtual Object *add(Object *other);
-    virtual Object *unary_add();
-    virtual Object *subtract(Object *other);
-    virtual Object *unary_subtract();
-    virtual Object *multiply(Object *other);
-    virtual Object *divide(Object *other);
-//    comparison
-    virtual Object *equal(Object *other);
-    virtual Object *greater(Object *other);
-    virtual Object *less(Object *other);
-    virtual Object *greater_or_equal(Object *other);
-    virtual Object *less_or_equal(Object *other);
-    virtual Object *not_equal(Object *other);
-};
-
 template<typename T>
-class NativeObject : public BaseNative {
-    friend class Interpreter;
-    class NativeClass : public Class {
-        Object *__call__(const std::vector<Object *> &args, Interpreter *interpreter) override {
+class NativeObject : public Object {
+    struct NativeClass : public Class {
+        inline static NativeClass &getClass() {
+            static NativeClass Instance;
+            return Instance;
+        }
+
+        NativeClass(NativeClass const &) = delete;
+        void operator=(NativeClass const &)  = delete;
+        static bool populated;
+    protected:
+        Object *__call__(const std::vector<Object *> &args, API *api) override {
             return new T();
         }
+
+    private:
+        NativeClass() = default;
     };
 
-    static std::map<std::string, NativeMethod *> methods;
+    static Object *classPtr;
 protected:
-    static void populate() {};
-
-    static void addMethod(std::string name, nativeMethod method, int minArguments,
-                          int maxArguments = NativeFunction::SAME) {
-        methods[name] = new NativeMethod(method, minArguments, maxArguments);
+    static void addMethod(const std::string &name, nativeMethod method, int argumentsCount = 0,
+                          bool unlimited = false) {
+        classPtr->setAttribute(name, new NativeMethod(method, argumentsCount, unlimited));
     }
 
 public:
+    static T *cast(Object *object, bool strict = false) {
+        auto result = dynamic_cast<T *>(object);
+        if (strict and !result)
+            throw Exception("Could not convert object");
+        return result;
+    }
+
+    static void populate() {}
+
     Object *findAttribute(const std::string &name) override {
         auto result = Object::findAttribute(name);
-        if (!result) {
-            auto value = methods.find(name);
-            if (value != methods.end()) {
-                result = value->second;
-            } else
-                return nullptr;
-        }
+        if (!result and classPtr)
+            result = classPtr->findAttribute(name);
+        if (!result)
+            return nullptr;
+//        creating a class method
         auto method = dynamic_cast<Callable *> (result);
         if (method)
             return new ClassMethod(this, method);
         return result;
     }
 
-    static Object *build() {
-        T::populate();
-        return new NativeClass();
+    static Object *getClass() {
+        if (!classPtr) {
+            classPtr = &NativeClass::getClass();
+            T::populate();
+        }
+        return classPtr;
     }
 };
+
+template<typename T>
+Object *NativeObject<T>::classPtr = nullptr;
 
 #endif //INTERPRETER_NATIVEOBJECT_H

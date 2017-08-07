@@ -14,7 +14,7 @@ std::vector<Token> Tokenizer::tokenize() {
 //    filtering DELIMITER duplicates
     bool add = true;
     while (next.type != Token::PROGRAM_END) {
-        if (add)
+        if (add and next.type != Token::COMMENT)
             result.push_back(next);
         if (next.type == Token::ERROR) {
             error = true;
@@ -68,13 +68,21 @@ std::map<std::string, Token::tokenType> reserved = {
 };
 
 Token Tokenizer::nextToken() {
+//    blanks
     while (position != text.end() and (*position == ' ' or *position == '\n' or *position == '\r'))
         position++;
+
 
     if (position == text.end())
         return Token(Token::PROGRAM_END, "<<<");
 
     auto begin = position;
+//    comments
+    if (*position == '#') {
+        while (position != text.end() and *position != '\n')
+            position++;
+        return tk(Token::COMMENT);
+    }
 //    string
     if (*position == '\'') {
         position++;
@@ -116,5 +124,6 @@ Token Tokenizer::nextToken() {
         return tk(one_symbol[*begin]);
     }
 
+    position++;
     return tk(Token::ERROR);
 }

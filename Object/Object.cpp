@@ -14,16 +14,12 @@ bool Object::canDelete() {
 }
 
 void Object::setAttribute(const std::string &name, Object *value) {
-    auto pair = attributes.find(name);
-    if (pair != attributes.end()) {
+    value->save();
 //    remove the old object
-        if (pair->second != value) {
-            if (pair->second->canDelete())
-                delete pair->second;
-            value->mentions++;
-        }
-    } else
-        value->mentions++;
+    auto pair = attributes.find(name);
+    if (pair != attributes.end())
+        if (pair->second->canDelete())
+            delete pair->second;
     attributes[name] = value;
 }
 

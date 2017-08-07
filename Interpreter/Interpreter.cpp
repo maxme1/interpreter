@@ -4,33 +4,37 @@
 #include "../Tokenizer/Tokenizer.h"
 #include "../Parser/Parser.h"
 #include "../Object/Native/Native.h"
-#include "../Object/Types/None.h"
+#include "../Object/Types/Int.h"
 #include "../Object/Types/Array.h"
-#include "../Object/Types/String.h"
 
 
 Interpreter::Interpreter() {
+    api = new API(this);
     addScope();
-    setVariable("print", new NativeFunction(
-            [](ArgsList args) -> Object * {
-                bool first = true;
-                for (auto &&arg : args) {
-                    if (not first) {
-                        std::cout << " ";
-                    } else
-                        first = false;
-                    std::cout << arg->asString();
-                }
-                std::cout << std::endl;
-                return nullptr;
-            }, 1, NativeCallable::ANY));
-    setVariable("Array", Array::build());
-    setVariable("String", new StringClass());
+    setVariable("print", new NativeFunction($lambda {
+        bool first = true;
+        for (auto &&arg : args) {
+            if (not first) {
+                std::cout << " ";
+            } else
+                first = false;
+            auto val = String::toString({arg}, api);
+            std::cout << val;
+        }
+        std::cout << std::endl;
+        return nullptr;
+    }, 0, true));
+
+    setVariable("Int", Int::getClass());
+    setVariable("Array", Array::getClass());
+    setVariable("String", String::getClass());
+    setVariable("Bool", Bool::getClass());
 }
 
 Interpreter::~Interpreter() {
     deleteScope();
     collect();
+    delete api;
 }
 
 void Interpreter::interpret(std::string text) {
@@ -38,7 +42,7 @@ void Interpreter::interpret(std::string text) {
     auto tokens = t.tokenize();
     if (t.error) {
         //    TODO: it would be better to know the position in the text on error
-        std::cout << "Undefined token";
+        std::cout << "Undefined token:" << tokens.back().body;
         return;
     }
 
@@ -124,7 +128,7 @@ void Interpreter::checkArguments(Callable *callable, int count) {
 Object *Interpreter::call(Callable *callable, ArgsList arguments) {
     Object *returnObject = nullptr;
     try {
-        returnObject = callable->__call__(arguments, this);
+        returnObject = callable->__call__(arguments, api);
     } catch (ReturnException &e) {
         returnObject = e.content;
     } catch (FlowException &e) {

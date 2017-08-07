@@ -16,11 +16,12 @@ public:
 
     void save() { mentions++; }
 
-    void setAttribute(const std::string &name, Object *value);
-    virtual Object *getAttribute(const std::string &name);
+    virtual void setAttribute(const std::string &name, Object *value) final;
+    virtual Object *getAttribute(const std::string &name) final;
     virtual Object *findAttribute(const std::string &name);
 
     virtual std::string asString() { return "Object"; };
+
     virtual bool asBool() { return false; };
 };
 

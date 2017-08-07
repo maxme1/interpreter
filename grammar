@@ -37,7 +37,7 @@ item = '[' expression ']'
 call = '(' argsValues? ')'
 argsValues = expression (SEPARATOR expression)*
 
--- literals --
+-- base definitions --
 
 NUMBER = '\d+'
 STRING = "'[^']*'"
@@ -46,3 +46,4 @@ NONE = 'None'
 IDENTIFIER = '[a-zA-Z_]\w*'
 DELIMITER = ';'
 SEPARATOR = ','
+COMMENT = '#[^\n]*'
