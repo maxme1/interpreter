@@ -3,30 +3,35 @@
 
 #include "Callable.h"
 #include "Types/Exception.h"
-#include "Types/Scope.h"
 #include "Types/None.h"
 
-
+class Class;
 class Instance : public Object {
-    Object *classPtr;
+    Class *classPtr;
 protected:
 
 public:
-    explicit Instance(Object *classPtr);
+    explicit Instance(Class *classPtr);
     ~Instance() override;
 
     Object *findAttribute(const std::string &name) override;
+    Object *getSuperClass();
 };
 
 class Class : public Callable {
     friend class Interpreter;
+    friend class Instance;
+    Object *superclass;
 protected:
     bool checkArguments(int count) override;
     Object *__call__(ArgsList args, API *api) override;
 
 public:
     Class() = default;
-    explicit Class(Scope *context);
+    Class(Object *context, Class *superclass);
+    virtual ~Class();
+
+    Object *findAttribute(const std::string &name) override;
 };
 
 #endif //INTERPRETER_CLASS_H

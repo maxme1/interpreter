@@ -47,11 +47,21 @@ void Interpreter::evaluate(Block *block) {
 }
 
 void Interpreter::evaluate(FunctionDefinition *statement) {
-    setVariable(statement->name, new Function(statement->arguments, statement->body, statement->unlimited, scope));
+    setVariable(statement->name,
+                new Function(statement->arguments, statement->body, statement->unlimited, getContext()));
 }
 
 void Interpreter::evaluate(ClassDefinition *statement) {
-    addScope();
+    auto context = getContext();
+    Class *superclass = nullptr;
+    if (statement->superclass) {
+        auto temp = statement->superclass->evaluate(this);
+        superclass = dynamic_cast<Class *>(temp);
+        if (!superclass)
+            throw Exception("Cannot subclass instances");
+    }
+    auto classScope = track(new Class(context, superclass));
+    addScope(classScope);
     try {
         statement->body->evaluate(this);
     } catch (ReturnException &e) {
@@ -64,7 +74,6 @@ void Interpreter::evaluate(ClassDefinition *statement) {
         deleteScope();
         throw e;
     }
-    auto result = track(new Class(scope));
+    context->setAttribute(statement->name, classScope);
     deleteScope();
-    setVariable(statement->name, result);
 }

@@ -120,8 +120,14 @@ class Parser {
     Statement *classDefinition() {
         require({Token::CLASS});
         auto name = require({Token::IDENTIFIER}).body;
+        Expression *superclass = nullptr;
+        if (matches({Token::BRACKET_OPEN})) {
+            advance();
+            superclass = expression();
+            require({Token::BRACKET_CLOSE});
+        }
         auto body = block();
-        return new ClassDefinition(name, body);
+        return new ClassDefinition(name, body, superclass);
     }
 
     Statement *block() {

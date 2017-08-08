@@ -13,7 +13,8 @@ block = '{' statement* '}'
 funcDef = 'def' IDENTIFIER '(' argsList? ')' block
 argsList = IDENTIFIER (SEPARATOR IDENTIFIER)*
 
-classDef = 'class' IDENTIFIER block
+classDef = 'class' IDENTIFIER superclass? block
+superclass = '(' expression ')'
 
 -- expression --
 

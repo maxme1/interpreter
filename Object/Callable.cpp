@@ -1,7 +1,7 @@
 #include "Callable.h"
 #include "Types/Array.h"
 
-Callable::Callable(Scope *context) : context(context) {
+Callable::Callable(Object *context) : context(context) {
     context->save();
 }
 
@@ -10,7 +10,7 @@ Callable::~Callable() {
         delete context;
 }
 
-Function::Function(std::vector<std::string> arguments, Statement *body, bool unlimited, Scope *context) :
+Function::Function(std::vector<std::string> arguments, Statement *body, bool unlimited, Object *context) :
         Callable(context), body(body), arguments(std::move(arguments)), unlimited(unlimited) {}
 
 bool Function::checkArguments(int count) {
@@ -44,6 +44,13 @@ bool ClassMethod::checkArguments(int count) {
 
 Object *ClassMethod::__call__(ArgsList args, API *api) {
     api->setVariable("this", source);
+//    TODO: better inheritance ramification
+    auto instance = dynamic_cast<Instance *>(source);
+    if (instance) {
+        auto super = instance->getSuperClass();
+        if (super)
+            api->setVariable("super", super);
+    }
     return function->__call__(args, api);
 }
 

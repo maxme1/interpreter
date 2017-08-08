@@ -75,14 +75,15 @@ FunctionDefinition::~FunctionDefinition() {
     delete body;
 }
 
-ClassDefinition::ClassDefinition(const std::string &name, Statement *body) : body(body), name(name) {}
+ClassDefinition::ClassDefinition(std::string name, Statement *body, Expression *superclass)
+        : body(body), name(std::move(name)), superclass(superclass) {}
 
 std::string ClassDefinition::str() {
     return "class " + name + body->str();
 }
 
 ClassDefinition::~ClassDefinition() {
-    delete body;
+    delete body, superclass;
 }
 
 Block::Block(const std::vector<Statement *> &statements) : statements(statements) {}

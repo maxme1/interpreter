@@ -24,6 +24,15 @@ $class(Int) {
         return std::to_string(value);
     }
 
+    $method(init, Int)
+        self->value = Int::getValue(args[0]);
+        return nullptr;
+    }
+
+    $method(str, Int)
+        return new String(self->asString());
+    }
+
     $method(add, Int)
         return new Int(self->value + Int::getValue(args[0]));
     }
@@ -83,6 +92,8 @@ $class(Int) {
 
     static void populate() {
 //        TODO: populate
+        addMethod("init", init, 1);
+        addMethod("str", str, 0);
         addMethod("add", add, 1);
         addMethod("div", divide, 1);
         addMethod("eq", equal, 1);

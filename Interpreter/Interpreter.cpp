@@ -18,8 +18,7 @@ Interpreter::Interpreter() {
                 std::cout << " ";
             } else
                 first = false;
-            auto val = String::toString({arg}, api);
-            std::cout << val;
+            std::cout << String::toString({arg}, api);
         }
         std::cout << std::endl;
         return nullptr;
@@ -63,31 +62,36 @@ void Interpreter::interpret(std::string text) {
     collect();
 }
 
-void Interpreter::addScope(Scope *ready) {
-    Scope *lower;
-    if (!ready)
-        lower = new Scope();
-    else
-        lower = ready;
-    if (scope)
-        lower->setUpper(scope);
-    scope = lower;
+void Interpreter::addScope(Object *context) {
+    auto newScope = context;
+    if (!newScope)
+        newScope = new Object();
+    scopes.push_back(newScope);
 }
 
 void Interpreter::deleteScope() {
-    assert(scope);
-    auto upper = scope->getUpper();
-    if (scope->canDelete())
-        delete scope;
-    scope = upper;
+    assert(!scopes.empty());
+    auto upper = scopes.back();
+    scopes.pop_back();
+    if (upper->canDelete())
+        delete upper;
 }
 
 Object *Interpreter::getVariable(const std::string &name) {
-    scope->getAttribute(name);
+    for (auto scope = scopes.rbegin(); scope != scopes.rend(); scope++) {
+        auto result = (*scope)->findAttribute(name);
+        if (result)
+            return result;
+    }
+    throw Exception("Variable " + name + " not defined");
+}
+
+Object *Interpreter::getContext() {
+    return scopes.back();
 }
 
 void Interpreter::setVariable(const std::string &name, Object *value) {
-    scope->setAttribute(name, value);
+    scopes.back()->setAttribute(name, value);
 }
 
 Object *Interpreter::track(Object *object) {

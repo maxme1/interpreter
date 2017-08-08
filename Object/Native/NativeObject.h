@@ -3,24 +3,27 @@
 
 #include "Native.h"
 
+struct NativeClass : public Class {
+};
+
 template<typename T>
 class NativeObject : public Object {
-    struct NativeClass : public Class {
-        inline static NativeClass &getClass() {
-            static NativeClass Instance;
+    friend class Class;
+    struct LocalNative : public NativeClass {
+        inline static LocalNative &getClass() {
+            static LocalNative Instance;
             return Instance;
         }
 
-        NativeClass(NativeClass const &) = delete;
-        void operator=(NativeClass const &)  = delete;
-        static bool populated;
+        LocalNative(LocalNative const &) = delete;
+        void operator=(LocalNative const &)  = delete;
     protected:
         Object *__call__(const std::vector<Object *> &args, API *api) override {
             return new T();
         }
 
     private:
-        NativeClass() = default;
+        LocalNative() = default;
     };
 
     static Object *classPtr;
@@ -55,7 +58,7 @@ public:
 
     static Object *getClass() {
         if (!classPtr) {
-            classPtr = &NativeClass::getClass();
+            classPtr = &LocalNative::getClass();
             T::populate();
         }
         return classPtr;

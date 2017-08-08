@@ -126,6 +126,7 @@ public:
 class ClassDefinition : public Statement {
     friend class Interpreter;
     Statement *body;
+    Expression *superclass;
     std::string name;
 
     void evaluate(Interpreter *interpreter) override {
@@ -133,7 +134,7 @@ class ClassDefinition : public Statement {
     }
 
 public:
-    ClassDefinition(const std::string &name, Statement *body);
+    ClassDefinition(std::string name, Statement *body, Expression *superclass);
     ~ClassDefinition() override;
     std::string str() override;
 };

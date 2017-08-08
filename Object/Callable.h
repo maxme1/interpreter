@@ -13,13 +13,13 @@ typedef const std::vector<Object *> &ArgsList;
 class Callable : public Object {
     friend class Interpreter;
     friend class ClassMethod;
-    Scope *context = nullptr;
+    Object *context = nullptr;
 protected:
     virtual bool checkArguments(int count) = 0;
     virtual Object *__call__(ArgsList args, API *api) = 0;
 public:
     Callable() = default;
-    explicit Callable(Scope *context);
+    explicit Callable(Object *context);
     ~Callable() override;
 };
 
@@ -34,7 +34,7 @@ protected:
     Object *__call__(ArgsList args, API *api) override;
 
 public:
-    explicit Function(std::vector<std::string> arguments, Statement *body, bool unlimited, Scope *context);
+    explicit Function(std::vector<std::string> arguments, Statement *body, bool unlimited, Object *context);
     ~Function() override;
 };
 

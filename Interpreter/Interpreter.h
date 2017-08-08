@@ -4,7 +4,6 @@
 #include <string>
 #include <stack>
 #include <vector>
-#include "../Object/Types/Scope.h"
 
 class Expression;
 class Binary;
@@ -60,13 +59,14 @@ public:
 private:
     API *api;
 
-    Scope *scope = nullptr;
-    std::stack<Object *> garbage;
-
-    void addScope(Scope *ready = nullptr);
+    std::vector<Object *> scopes;
+    void addScope(Object *context = nullptr);
     void deleteScope();
-    void collect();
+    Object *getContext();
+
+    std::stack<Object *> garbage;
     Object *track(Object *object);
+    void collect();
 
     Object *getVariable(const std::string &name);
     void setVariable(const std::string &name, Object *value);
