@@ -11,7 +11,7 @@ $class(Bool)
         return value;
     }
 
-    static bool toBool(Object *object, API *api) {
+    static bool toBool(ObjPtr object, API *api) {
         auto method = object->findAttribute("bool");
         if (!method)
             return object->asBool();
@@ -25,8 +25,8 @@ $class(Bool)
 
     $method(str, Bool)
         if (self->value)
-            return new String("True");
-        return new String("False");
+            return New(String("True"));
+        return New(String("False"));
     }
 
     static void populate() {

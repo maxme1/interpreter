@@ -4,11 +4,11 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <bits/shared_ptr.h>
+#include <memory>
 
 class Object;
 typedef std::shared_ptr<Object> ObjPtr;
-class Object {
+class Object : public std::enable_shared_from_this<Object> {
 protected:
     std::map<std::string, ObjPtr> attributes;
 public:
@@ -19,6 +19,8 @@ public:
     virtual std::string asString() { return "Object"; };
 
     virtual bool asBool() { return false; };
+
+    typedef std::shared_ptr<Object> ptr;
 };
 
 #endif //INTERPRETER_OBJECT_H

@@ -20,8 +20,8 @@ $class(String)
         return !string.empty();
     }
 
-    static std::string toString(Object *object, API *api) {
-        auto aClass = dynamic_cast<Class *>(object);
+    static std::string toString(ObjPtr object, API *api) {
+        auto aClass = std::dynamic_pointer_cast<Class>(object);
         if (aClass)
             return aClass->asString();
         auto method = object->findAttribute("str");
@@ -36,10 +36,8 @@ $class(String)
     }
 
     $method(add, String)
-        auto that = dynamic_cast<String *>(args[0]);
-        if (!that)
-            throw Exception("not a string");
-        return new String(self->string + that->string);
+        auto that = cast(args[0], true);
+        return New(String(self->string + that->string));
     }
 
     static void populate() {

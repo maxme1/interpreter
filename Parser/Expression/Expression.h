@@ -13,7 +13,7 @@
 class Object;
 class Expression {
     friend class Interpreter;
-    virtual Object *evaluate(Interpreter *interpreter) = 0;
+    virtual ObjPtr evaluate(Interpreter *interpreter) = 0;
 
     Token token;
 public:
@@ -28,7 +28,7 @@ public:
 class Binary : public Expression {
     friend class Interpreter;
 
-    Object *evaluate(Interpreter *interpreter) override {
+    ObjPtr evaluate(Interpreter *interpreter) override {
         return interpreter->evaluate(this);
     }
 
@@ -42,7 +42,7 @@ public:
 class Unary : public Expression {
     friend class Interpreter;
 
-    Object *evaluate(Interpreter *interpreter) override {
+    ObjPtr evaluate(Interpreter *interpreter) override {
         return interpreter->evaluate(this);
     }
 
@@ -56,7 +56,7 @@ public:
 class Literal : public Expression {
     friend class Interpreter;
 private:
-    Object *evaluate(Interpreter *interpreter) override {
+    ObjPtr evaluate(Interpreter *interpreter) override {
         return interpreter->evaluate(this);
     }
 
@@ -67,7 +67,7 @@ public:
 class Variable : public Expression {
     friend class Interpreter;
 
-    Object *evaluate(Interpreter *interpreter) override {
+    ObjPtr evaluate(Interpreter *interpreter) override {
         return interpreter->evaluate(this);
     }
 
@@ -80,7 +80,7 @@ public:
 class FunctionExpression : public Expression {
     friend class Interpreter;
 
-    Object *evaluate(Interpreter *interpreter) override {
+    ObjPtr evaluate(Interpreter *interpreter) override {
         return interpreter->evaluate(this);
     }
 
@@ -96,7 +96,7 @@ class GetItem : public Expression {
     friend class Interpreter;
     friend class SetItem;
 
-    Object *evaluate(Interpreter *interpreter) override {
+    ObjPtr evaluate(Interpreter *interpreter) override {
         return interpreter->evaluate(this);
     }
 
@@ -112,7 +112,7 @@ class GetAttribute : public Expression {
     friend class Interpreter;
     friend class SetAttribute;
 
-    Object *evaluate(Interpreter *interpreter) override {
+    ObjPtr evaluate(Interpreter *interpreter) override {
         return interpreter->evaluate(this);
     }
 
@@ -127,7 +127,7 @@ public:
 class SetVariable : public Expression {
     friend class Interpreter;
 
-    Object *evaluate(Interpreter *interpreter) override {
+    ObjPtr evaluate(Interpreter *interpreter) override {
         return interpreter->evaluate(this);
     }
 
@@ -143,7 +143,7 @@ public:
 class SetAttribute : public Expression {
     friend class Interpreter;
 
-    Object *evaluate(Interpreter *interpreter) override {
+    ObjPtr evaluate(Interpreter *interpreter) override {
         return interpreter->evaluate(this);
     }
 
@@ -159,7 +159,7 @@ public:
 class SetItem : public Expression {
     friend class Interpreter;
 
-    Object *evaluate(Interpreter *interpreter) override {
+    ObjPtr evaluate(Interpreter *interpreter) override {
         return interpreter->evaluate(this);
     }
 

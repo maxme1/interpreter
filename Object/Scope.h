@@ -4,8 +4,6 @@
 #include "Object.h"
 
 class Scope : public Object {
-    friend class Class;
-    ObjPtr upper{nullptr};
 public:
     ObjPtr findAttribute(const std::string &name) override {
         auto result = Object::findAttribute(name);
@@ -14,10 +12,16 @@ public:
         return result;
     }
 
-    void setUpper(Scope *scope) {
+    typedef std::shared_ptr<Scope> ptr;
+
+    void setUpper(Scope::ptr scope) {
         if (!upper)
             upper = scope;
     }
+
+private:
+    friend class Class;
+    ptr upper{nullptr};
 };
 
 #endif //INTERPRETER_SCOPE_H

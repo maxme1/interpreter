@@ -5,11 +5,11 @@
 #include "../Class.h"
 
 struct NativeClass : public Class {
-    explicit NativeClass(Class *superclass) : Class(superclass) {}
+    explicit NativeClass(Class::ptr superclass) : Class(superclass) {}
 };
 
 struct NoSuperClass {
-    static Class *build() {
+    static Class::ptr build() {
         return nullptr;
     }
 };
@@ -18,46 +18,46 @@ template<typename T, typename Base>
 class NativeObject : public Instance {
     friend class Class;
     struct LocalNative : public NativeClass {
-        inline static LocalNative &getClass() {
-            static LocalNative LocalClass(Base::build());
-            return LocalClass;
+        inline static Class::ptr getClass() {
+            static Class::ptr instance = std::make_shared<Class>(Base::build());
+            return instance;
         }
 
         LocalNative(LocalNative const &) = delete;
         void operator=(LocalNative const &)  = delete;
 
-        Object *makeInstance(Class *instanceClass) override {
+        Instance::ptr makeInstance(const ptr &instanceClass) override {
             if (instanceClass)
                 return new T(instanceClass);
-            return new T(&getClass());
+            return new T(getClass());
         }
 
     private:
-        explicit LocalNative(Class *superclass) : NativeClass(superclass) {};
+        explicit LocalNative(Class::ptr superclass) : NativeClass(superclass) {};
     };
 
     static bool populated;
 protected:
     static void addMethod(const std::string &name, nativeMethod method, int argumentsCount = 0,
                           bool unlimited = false) {
-        LocalNative::getClass().setAttribute(name, new NativeMethod(method, argumentsCount, unlimited));
+        LocalNative::getClass()->setAttribute(name, ObjPtr(new NativeMethod(method, argumentsCount, unlimited)));
     }
 
 public:
-    explicit NativeObject(Class *classPtr) : Instance(classPtr) {}
+    explicit NativeObject(Class::ptr classPtr) : Instance(classPtr) {}
 
     NativeObject() : Instance(build()) {}
 
-    static T *cast(Object *object, bool strict = false) {
-        auto result = dynamic_cast<T *>(object);
+    static std::shared_ptr<T> cast(ObjPtr object, bool strict = false) {
+        auto result = std::dynamic_pointer_cast<T>(object);
         assert(not strict or (result != nullptr));
         return result;
     }
 
     static void populate() {}
 
-    static Class *build() {
-        auto result = &LocalNative::getClass();
+    static Class::ptr build() {
+        auto result = LocalNative::getClass();
         if (!populated) {
             populated = true;
             T::populate();

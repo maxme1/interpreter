@@ -6,30 +6,35 @@
 class Class;
 class Instance : public Object {
 protected:
-    Class *classPtr;
+    std::shared_ptr<Class> classPtr;
 public:
     Instance() = default;
-    explicit Instance(Class *classPtr);
+    explicit Instance(std::shared_ptr<Class> classPtr);
 
     std::string asString() override;
     ObjPtr findAttribute(const std::string &name) override;
 
-    virtual Class *getClass();
+    virtual std::shared_ptr<Class> getClass();
+
+    typedef std::shared_ptr<Instance> ptr;
 };
 
 class Class : public Object {
-    friend class Interpreter;
-    Class *superclass = nullptr;
-protected:
-    virtual ObjPtr makeInstance(Class *instanceClass);
-
 public:
-    explicit Class(Class *superclass);
-    Class(const std::string &name, Scope *body, Class *superclass, Scope *context);
+    typedef std::shared_ptr<Class> ptr;
+
+    explicit Class(Class::ptr superclass);
+    Class(const std::string &name, Scope::ptr body, Class::ptr superclass, Scope::ptr context);
     std::string asString() override;
     ObjPtr findAttribute(const std::string &name) override;
 
-    Class *getSuperClass();
+    Class::ptr getSuperClass();
+
+private:
+    friend class Interpreter;
+    ptr superclass{nullptr};
+protected:
+    virtual Instance::ptr makeInstance(const ptr &instanceClass);
 };
 
 #endif //INTERPRETER_CLASS_H
