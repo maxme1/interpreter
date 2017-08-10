@@ -5,15 +5,9 @@
 
 class Scope : public Object {
     friend class Class;
-    Scope *upper{nullptr};
+    ObjPtr upper{nullptr};
 public:
-    Scope() = default;
-
-    ~Scope() override {
-        Object::remove(upper);
-    }
-
-    Object *findAttribute(const std::string &name) override {
+    ObjPtr findAttribute(const std::string &name) override {
         auto result = Object::findAttribute(name);
         if (!result and upper)
             return upper->findAttribute(name);
@@ -21,10 +15,8 @@ public:
     }
 
     void setUpper(Scope *scope) {
-        if (!upper) {
+        if (!upper)
             upper = scope;
-            scope->save();
-        }
     }
 };
 

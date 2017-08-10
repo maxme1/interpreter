@@ -7,27 +7,20 @@ std::string Instance::asString() {
     return "<" + getClass()->asString() + " instance>";
 }
 
-Object *Instance::findAttribute(const std::string &name) {
+ObjPtr Instance::findAttribute(const std::string &name) {
     auto result = Object::findAttribute(name);
     if (!result)
         result = getClass()->findAttribute(name);
     if (!result)
         return nullptr;
 //        creating a class method
-    auto method = dynamic_cast<Callable *> (result);
+    auto method = std::dynamic_pointer_cast<Callable *>(result);
     if (method)
         return new ClassMethod(method, this);
     return result;
 }
 
-Instance::Instance(Class *classPtr) : classPtr(classPtr) {
-    assert(classPtr);
-    classPtr->save();
-}
-
-Instance::~Instance() {
-    Object::remove(classPtr);
-}
+Instance::Instance(Class *classPtr) : classPtr(classPtr) {}
 
 Class *Instance::getClass() {
     assert(classPtr);
@@ -36,7 +29,7 @@ Class *Instance::getClass() {
 
 // Class
 
-Object *Class::makeInstance(Class *instanceClass) {
+ObjPtr Class::makeInstance(Class *instanceClass) {
     if (instanceClass)
         return new Instance(instanceClass);
     Class *theClass = this;
@@ -45,24 +38,12 @@ Object *Class::makeInstance(Class *instanceClass) {
     return theClass->makeInstance(this);
 }
 
-Class::Class(const std::string &name, Scope *body, Class *superclass, Scope *context) {
+Class::Class(const std::string &name, Scope *body, Class *superclass, Scope *context) : superclass(superclass) {
     for (auto &&attribute : body->attributes)
         setAttribute(attribute.first, attribute.second);
-
-//    TODO: refactor
-    if (!superclass) {
-        this->superclass = nullptr;
-        return;
-    }
-    this->superclass = superclass;
-    this->superclass->save();
 }
 
-Class::~Class() {
-    Object::remove(superclass);
-}
-
-Object *Class::findAttribute(const std::string &name) {
+ObjPtr Class::findAttribute(const std::string &name) {
     auto result = Object::findAttribute(name);
     if (!result and superclass)
         return superclass->findAttribute(name);
@@ -82,4 +63,3 @@ std::string Class::asString() {
 }
 
 Class::Class(Class *superclass) : superclass(superclass) {}
-

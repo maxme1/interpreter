@@ -4,21 +4,17 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <bits/shared_ptr.h>
 
+class Object;
+typedef std::shared_ptr<Object> ObjPtr;
 class Object {
-    int mentions = 0;
-    bool canDelete();
 protected:
-    std::map<std::string, Object *> attributes;
+    std::map<std::string, ObjPtr> attributes;
 public:
-    virtual ~Object();
-
-    static void remove(Object *object);
-    void save();
-
-    virtual void setAttribute(const std::string &name, Object *value) final;
-    virtual Object *getAttribute(const std::string &name) final;
-    virtual Object *findAttribute(const std::string &name);
+    virtual void setAttribute(const std::string &name, ObjPtr value) final;
+    virtual ObjPtr getAttribute(const std::string &name) final;
+    virtual ObjPtr findAttribute(const std::string &name);
 
     virtual std::string asString() { return "Object"; };
 
