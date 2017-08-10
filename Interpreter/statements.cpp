@@ -100,7 +100,7 @@ void Interpreter::evaluate(ClassDefinition *statement) {
         auto temp = statement->superclass->evaluate(this);
         superclass = std::dynamic_pointer_cast<Class>(temp);
         if (!superclass)
-            throw Wrap(new Exception("Cannot subclass instances"));
+            throw Wrap(new ValueError("Cannot subclass instances"));
     }
     auto context = getContext();
     addScope();

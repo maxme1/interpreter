@@ -11,7 +11,6 @@
 class Parser {
     typedef std::initializer_list<Token::tokenType> TokenTypes;
     std::vector<Token> tokens;
-    std::vector<Token>::iterator position;
 
     bool matches(std::initializer_list<Token::tokenType> types);
     Token advance();
@@ -276,14 +275,16 @@ class Parser {
             auto current = advance();
             return new Variable(current);
         }
-        require({Token::BRACKET_OPEN});
+        auto bracket = require({Token::BRACKET_OPEN});
         auto result = expression();
         require({Token::BRACKET_CLOSE});
-        return new Unary(Token(Token::BRACKET, "()"), result);
+        return new Unary(bracket, result);
     }
 
 public:
     bool error = false;
+    std::string message{};
+    std::vector<Token>::iterator position;
 
     explicit Parser(const std::vector<Token> &tokens);
 
@@ -293,14 +294,14 @@ public:
         try {
             while (position != tokens.end())
                 statements.push_back(statement());
-        } catch (TokenTypes &types) {
-            error = true;
-//            TODO: no memory is being freed whatsoever
-//            TODO: more specific
-            std::cout << "Expected something else instead of " << position->body;
         } catch (char const *message) {
+//            TODO: no memory is being freed whatsoever
             error = true;
-            std::cout << message;
+            this->message = message;
+        } catch (std::string message) {
+//            TODO: no memory is being freed whatsoever
+            error = true;
+            this->message = message;
         }
         return statements;
     };

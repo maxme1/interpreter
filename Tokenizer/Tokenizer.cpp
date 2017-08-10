@@ -2,7 +2,7 @@
 #include <map>
 #include "Tokenizer.h"
 
-#define tk(a) Token(a, std::string(begin, position))
+#define tk(a) Token(a, std::string(begin, position), position - text.begin())
 
 Tokenizer::Tokenizer(std::string text) : text(std::move(text)) {
     position = this->text.begin();
@@ -78,7 +78,7 @@ Token Tokenizer::nextToken() {
 
 
     if (position == text.end())
-        return Token(Token::PROGRAM_END, "<<<");
+        return Token(Token::PROGRAM_END, "<<<", text.size() - 1);
 
     auto begin = position;
 //    comments
@@ -108,24 +108,27 @@ Token Tokenizer::nextToken() {
     if (isalpha(*position) or *position == '_') {
         while (isalnum(*position) or *position == '_')
             position++;
-        auto result = std::string(begin, position);
-        if (reserved.find(result) != reserved.end()) {
-            return tk(reserved[result]);
+        auto result = reserved.find(std::string(begin, position));
+        if (result != reserved.end()) {
+            return tk(result->second);
         }
         return tk(Token::IDENTIFIER);
     }
 //    two symbols
     if ((position + 1) != text.end()) {
-        auto two = std::string(begin, position + 2);
-        if (two_symbols.find(two) != two_symbols.end()) {
+        auto result = two_symbols.find(std::string(begin, position + 2));
+        if (result != two_symbols.end()) {
             position += 2;
-            return tk(two_symbols[two]);
+            return tk(result->second);
         }
     }
 //    one symbol
-    if (one_symbol.find(*position) != one_symbol.end()) {
-        position++;
-        return tk(one_symbol[*begin]);
+    {
+        auto result = one_symbol.find(*position);
+        if (result != one_symbol.end()) {
+            position++;
+            return tk(result->second);
+        }
     }
 
     position++;

@@ -16,7 +16,7 @@ Binary::~Binary() {
 Unary::Unary(Token token, Expression *argument) : Expression(std::move(token)), argument(argument) {}
 
 std::string Unary::str() {
-    if (ofType(Token::BRACKET))
+    if (ofType(Token::BRACKET_OPEN))
         return argument->str();
     return Expression::str() + argument->str();
 }

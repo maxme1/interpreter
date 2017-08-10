@@ -20,17 +20,24 @@ Interpreter::~Interpreter() {
 }
 
 void Interpreter::interpret(std::string text) {
-    Tokenizer t = Tokenizer(std::move(text));
+    Tokenizer t = Tokenizer(text);
     auto tokens = t.tokenize();
+//    TODO: now it's just a mess
     if (t.error) {
-        //    TODO: it would be better to know the position in the text on error
-        std::cout << "Undefined token:" << tokens.back().body;
+        int position = tokens.back().position;
+        int begin = std::max<int>(0, position - textRange);
+        std::cout << text.substr(begin, textRange);
+        std::cout << " <<<\n==========\nUndefined token: " << tokens.back().body;
         return;
     }
 
     Parser p = Parser(tokens);
     auto statements = p.build();
     if (p.error) {
+        int position = p.position->position;
+        int begin = std::max<int>(0, position - textRange);
+        std::cout << text.substr(begin, textRange);
+        std::cout << " <<<\n==========\n" << p.message;
         return;
     }
     try {

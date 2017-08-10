@@ -22,7 +22,7 @@ Token Parser::advance() {
 
 Token Parser::require(std::initializer_list<Token::tokenType> types) {
     if (!matches(types))
-        throw types;
+        throw "Unexpected token: " + position->body;
 
     return advance();
 }

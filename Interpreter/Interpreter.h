@@ -69,6 +69,8 @@ public:
     void evaluate(ControlFlow *statement);
     void evaluate(Block *block);
 private:
+    const int textRange = 50;
+
     API *api;
     void populate();
     void addFunction(const std::string &name, ObjPtr(*function)(const std::vector<ObjPtr> &, API *),
