@@ -11,18 +11,18 @@
 Interpreter::Interpreter() {
     api = new API(this);
     addScope();
-    setVariable("print", new NativeFunction($lambda {
-        bool first = true;
-        for (auto &&arg : args) {
-            if (not first) {
-                std::cout << " ";
-            } else
-                first = false;
-            std::cout << String::toString({arg}, api);
-        }
-        std::cout << std::endl;
-        return nullptr;
-    }, 0, true));
+    setVariable("print", New(NativeFunction($lambda {
+            bool first = true;
+            for (auto &&arg : args) {
+                if (not first) {
+                    std::cout << " ";
+                } else
+                    first = false;
+                std::cout << String::toString({arg}, api);
+            }
+            std::cout << std::endl;
+            return nullptr;
+    }, 0, true)));
 
     setVariable("Int", Int::build());
     setVariable("Array", Array::build());
@@ -34,7 +34,6 @@ Interpreter::Interpreter() {
 
 Interpreter::~Interpreter() {
     deleteScope();
-    collect();
     delete api;
 }
 
@@ -61,29 +60,26 @@ void Interpreter::interpret(std::string text) {
     } catch (ReturnException) {
         std::cout << "return outside function";
     }
-    collect();
 }
 
-void Interpreter::addScope(Scope *context) {
-    Scope *newScope;
+void Interpreter::addScope(Scope::ptr context) {
+    Scope::ptr newScope;
     if (context)
         newScope = context;
     else {
-        newScope = new Scope();
+        newScope = std::make_shared<Scope>();
         if (!scopes.empty())
             newScope->setUpper(scopes.back());
     }
-    track(newScope);
     scopes.push_back(newScope);
 }
 
 void Interpreter::deleteScope() {
     assert(!scopes.empty());
-    Object::remove(scopes.back());
     scopes.pop_back();
 }
 
-Object *Interpreter::getVariable(const std::string &name) {
+ObjPtr Interpreter::getVariable(const std::string &name) {
     assert(!scopes.empty());
     auto end = scopes.rend() - 1;
     for (auto scope = scopes.rbegin(); scope != end; scope++) {
@@ -94,51 +90,33 @@ Object *Interpreter::getVariable(const std::string &name) {
     return scopes[0]->getAttribute(name);
 }
 
-Scope *Interpreter::getContext() {
+Scope::ptr Interpreter::getContext() {
     return scopes.back();
 }
 
-void Interpreter::setVariable(const std::string &name, Object *value) {
-    scopes.back()->setAttribute(name, value);
-}
-
-Object *Interpreter::track(Object *object) {
-    assert(object);
-//    whenever the interpreter _might_ create a new object we store it
-    object->save();
-    garbage.push(object);
-    return object;
-}
-
-void Interpreter::collect() {
-    while (!garbage.empty()) {
-        auto obj = garbage.top();
-        garbage.pop();
-        Object::remove(obj);
-    }
+void Interpreter::setVariable(const std::string &name, ObjPtr value) {
+    scopes.back()->setAttribute(name, std::move(value));
 }
 
 void Interpreter::evaluateStatements(std::vector<Statement *> &statements) {
-    for (auto statement : statements) {
+    for (auto statement : statements)
         statement->evaluate(this);
-        collect();
-    }
 }
 
-Callable *Interpreter::getCallable(Object *object) {
-    auto *callable = dynamic_cast<Callable *>(object);
+Callable::ptr Interpreter::getCallable(ObjPtr object) {
+    auto callable = std::dynamic_pointer_cast<Callable>(object);
     if (callable)
         return callable;
     throw Wrap(new ValueError("Object is not callable"));
 }
 
-void Interpreter::checkArguments(Callable *callable, int count) {
+void Interpreter::checkArguments(Callable::ptr callable, int count) {
     if (!callable->checkArguments(count))
         throw Wrap(new ValueError("Number of arguments doesn't match: " + std::to_string(count)));
 }
 
-Object *Interpreter::call(Callable *callable, ArgsList arguments) {
-    Object *returnObject = nullptr;
+ObjPtr Interpreter::call(Callable::ptr callable, ArgsList arguments) {
+    ObjPtr returnObject = nullptr;
     try {
         returnObject = callable->call(arguments, api);
     } catch (ReturnException &e) {
@@ -148,12 +126,12 @@ Object *Interpreter::call(Callable *callable, ArgsList arguments) {
         throw Wrap(new SyntaxError("Control flow outside loop"));
     }
     if (!returnObject)
-        returnObject = new None();
+        returnObject = New(None());
     return returnObject;
 }
 
-Object *Interpreter::callFunction(Object *object, const std::vector<Expression *> &argsList) {
-    auto callable = getCallable(object);
+ObjPtr Interpreter::callFunction(ObjPtr object, const std::vector<Expression *> &argsList) {
+    auto callable = getCallable(std::move(object));
     checkArguments(callable, argsList.size());
 
 //    TODO: create a single function
@@ -174,8 +152,8 @@ Object *Interpreter::callFunction(Object *object, const std::vector<Expression *
     }
 }
 
-Object *Interpreter::callOperator(Object *object, ArgsList arguments) {
-    auto *callable = getCallable(object);
+ObjPtr Interpreter::callOperator(ObjPtr object, ArgsList arguments) {
+    auto callable = getCallable(std::move(object));
     checkArguments(callable, arguments.size());
 
     addScope(callable->context);
@@ -194,36 +172,38 @@ Object *Interpreter::callOperator(Object *object, ArgsList arguments) {
     }
 }
 
-std::vector<Object *> Interpreter::evaluateArguments(const std::vector<Expression *> &argsList) {
-    auto result = std::vector<Object *>();
+std::vector<ObjPtr> Interpreter::evaluateArguments(const std::vector<Expression *> &argsList) {
+    auto result = std::vector<ObjPtr>();
     for (auto &&argument : argsList)
-        result.push_back(track(argument->evaluate(this)));
+        result.push_back(argument->evaluate(this));
     return result;
 }
 
-bool Interpreter::isDerived(Object *derived, Class *base) {
+bool Interpreter::isDerived(ObjPtr derived, Class::ptr base) {
     if (base == nullptr)
         return false;
-    auto instance = dynamic_cast<Instance *>(derived);
-    Class *theClass;
+    auto instance = std::dynamic_pointer_cast<Instance>(derived);
+    Class::ptr theClass;
     if (!instance)
-        theClass = dynamic_cast<Class *>(derived);
+        theClass = std::dynamic_pointer_cast<Class>(derived);
     else
         theClass = instance->getClass();
     if (!theClass)
         throw Wrap(new ValueError("The object is not a class nor an instance"));
     while (theClass != base and theClass != nullptr)
         theClass = theClass->getSuperClass();
-    return theClass == base;
+    return theClass.get() == base.get();
 }
 
 Interpreter::ExceptionWrapper::ExceptionWrapper(Object *exception) {
+    auto temp = ObjPtr(exception);
+    if (!isDerived(temp, Exception::build()))
+        throw Wrap(new ValueError("Only objects derived from Exception can be raised"));
+    this->exception = temp;
+}
+
+Interpreter::ExceptionWrapper::ExceptionWrapper(const ObjPtr &exception) {
     if (!isDerived(exception, Exception::build()))
         throw Wrap(new ValueError("Only objects derived from Exception can be raised"));
     this->exception = exception;
-    exception->save();
-}
-
-Interpreter::ExceptionWrapper::~ExceptionWrapper() {
-    Object::remove(exception);
 }

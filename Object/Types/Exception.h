@@ -12,26 +12,28 @@ $subclass(ClassName, Base) \
         Exception::setName(ClassName::build(), #ClassName); \
     } \
     std::string asString() override { \
-        return Exception::getString(this); \
+        return Exception::getString(shared_from_this()); \
     } \
 };
 
 $class(Exception)
+
     explicit Exception(const std::string &body) {
         Exception::setMessage(this, body);
     }
 
-    static Object *init(Object *_self, ArgsList args, API *api);
-    static Object *str(Object *_self, ArgsList args, API *api);
+    static ObjPtr init(ObjPtr _self, ArgsList args, API *api);
+    static ObjPtr str(ObjPtr _self, ArgsList args, API *api);
     std::string asString() override;
 
     static void setMessage(Object *target, const std::string &message);
-    static void setName(Object *target, const std::string &name);
-    static std::string getString(Object *target);
+    static void setName(ObjPtr target, const std::string &name);
+    static std::string getString(ObjPtr target);
 
     static void populate() {
         addMethod("init", init, 1);
         addMethod("str", str);
+        Exception::setName(Exception::build(), "Exception");
     }
 };
 

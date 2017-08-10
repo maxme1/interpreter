@@ -8,19 +8,20 @@
 #include "../Interpreter/API.h"
 #include "Scope.h"
 
-typedef const std::vector<Object *> &ArgsList;
+typedef const std::vector<ObjPtr> &ArgsList;
 
 class Callable : public Object {
     friend class Interpreter;
     friend class ClassMethod;
-    Scope *context = nullptr;
+    Scope::ptr context = nullptr;
 protected:
     virtual bool checkArguments(int count) = 0;
-    virtual Object *call(ArgsList args, API *api) = 0;
+    virtual ObjPtr call(ArgsList args, API *api) = 0;
 public:
     Callable() = default;
-    explicit Callable(Scope *context);
-    ~Callable() override;
+    explicit Callable(Scope::ptr context);
+
+    typedef std::shared_ptr<Callable> ptr;
 };
 
 class Statement;
@@ -32,26 +33,24 @@ class Function : public Callable {
 
 protected:
     bool checkArguments(int count) override;
-    Object *call(ArgsList args, API *api) override;
+    ObjPtr call(ArgsList args, API *api) override;
 
 public:
-    explicit Function(std::vector<std::string> arguments, Statement *body, bool unlimited, Scope *context);
-    ~Function() override;
+    explicit Function(std::vector<std::string> &arguments, Statement *body, bool unlimited, Scope::ptr context);
 };
 
 // TODO: subclass
 class Instance;
 class ClassMethod : public Callable {
     friend class Interpreter;
-    Callable *function;
-    Instance *instance;
+    Callable::ptr function;
+    std::shared_ptr<Instance> instance;
 protected:
     bool checkArguments(int count) override;
-    Object *call(ArgsList args, API *api) override;
+    ObjPtr call(ArgsList args, API *api) override;
 
 public:
-    ClassMethod(Callable *function, Instance *instance);
-    ~ClassMethod() override;
+    ClassMethod(Callable::ptr function, std::shared_ptr<Instance> instance);
 };
 
 #endif //INTERPRETER_FUNCTION_H

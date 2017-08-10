@@ -5,7 +5,7 @@
 #include "Int.h"
 
 $class(Array)
-    std::vector<Object *> array;
+    std::vector<ObjPtr> array;
     Array() = default;
 
     Array(ArgsList array) : array(array) {}
@@ -15,15 +15,12 @@ $class(Array)
     }
 
     $method(init, Array)
-        for (auto &&arg : args) {
-            arg->save();
+        for (auto &&arg : args)
             self->array.push_back(arg);
-        }
         return nullptr;
     }
 
     $method(push, Array)
-        args[0]->save();
         self->array.push_back(args[0]);
         return nullptr;
     }
@@ -31,21 +28,16 @@ $class(Array)
     $method(getItem, Array)
         auto idx = Int::getValue(args[0]);
         if (idx >= self->array.size())
-            throw Exception("IndexError");
+            throw Wrap(new Exception("IndexError"));
         return self->array[idx];
     }
 
     $method(setItem, Array)
         auto idx = Int::getValue(args[0]);
         if (idx >= self->array.size())
-            throw Exception("IndexError");
+            throw Wrap(new Exception("IndexError"));
 
-        args[1]->save();
-        auto old = self->array[idx];
-        Object::remove(old);
-
-        self->array[idx] = args[1];
-        return args[1];
+        return self->array[idx] = args[1];
     }
 
     $method(str, Array)
@@ -58,7 +50,7 @@ $class(Array)
                 first = false;
             result += String::toString(item, api);
         }
-        return new String(result + "]");
+        return New(String(result + "]"));
     }
 
     static void populate() {

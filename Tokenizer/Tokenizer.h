@@ -11,7 +11,7 @@ class Tokenizer {
     Token nextToken();
 
 public:
-    Tokenizer(std::string text);
+    explicit Tokenizer(std::string text);
 
     bool error = false;
 

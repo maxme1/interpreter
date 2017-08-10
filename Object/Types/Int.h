@@ -12,7 +12,7 @@ $class(Int)
 
     explicit Int(int value) : value(value) {}
 
-    static int getValue(Object *object) {
+    static int getValue(ObjPtr object) {
         return cast(object, true)->value;
     }
 
@@ -30,64 +30,64 @@ $class(Int)
     }
 
     $method(str, Int)
-        return new String(self->asString());
+        return New(String(self->asString()));
     }
 
     $method(add, Int)
-        return new Int(self->value + Int::getValue(args[0]));
+        return New(Int(self->value + Int::getValue(args[0])));
     }
 
     $method(divide, Int)
         int val = Int::getValue(args[0]);
         if (val == 0)
             throw Wrap(new Exception("Division by zero"));
-        return new Int(self->value / val);
+        return New(Int(self->value / val));
     }
 
     $method(unary_add, Int)
-        return self;
+        return New(Int(self->value));
     }
 
     $method(unary_subtract, Int)
-        return new Int(-self->value);
+        return New(Int(-self->value));
     }
 
     $method(multiply, Int)
-        return new Int(self->value * Int::getValue(args[0]));
+        return New(Int(self->value * Int::getValue(args[0])));
     }
 
     $method(subtract, Int)
-        return new Int(self->value - Int::getValue(args[0]));
+        return New(Int(self->value - Int::getValue(args[0])));
     }
 
     $method(equal, Int)
         auto other = Int::cast(args[0]);
         if (other)
-            return new Bool(self->value == other->value);
-        return new Bool(false);
+            return New(Bool(self->value == other->value));
+        return New(Bool(false));
     }
 
     $method(not_equal, Int)
         auto other = Int::cast(args[0]);
         if (other)
-            return new Bool(self->value != other->value);
-        return new Bool(false);
+            return New(Bool(self->value != other->value));
+        return New(Bool(false));
     }
 
     $method(greater, Int)
-        return new Int(self->value > Int::getValue(args[0]));
+        return New(Int(self->value > Int::getValue(args[0])));
     }
 
     $method(less, Int)
-        return new Int(self->value < Int::getValue(args[0]));
+        return New(Int(self->value < Int::getValue(args[0])));
     }
 
     $method(greater_or_equal, Int)
-        return new Int(self->value >= Int::getValue(args[0]));
+        return New(Int(self->value >= Int::getValue(args[0])));
     }
 
     $method(less_or_equal, Int)
-        return new Int(self->value <= Int::getValue(args[0]));
+        return New(Int(self->value <= Int::getValue(args[0])));
     }
 
     static void populate() {

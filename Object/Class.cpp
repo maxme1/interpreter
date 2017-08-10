@@ -1,4 +1,5 @@
 #include "Class.h"
+
 #include "Native/NativeObject.h"
 
 // Instance
@@ -7,69 +8,51 @@ std::string Instance::asString() {
     return "<" + getClass()->asString() + " instance>";
 }
 
-Object *Instance::findAttribute(const std::string &name) {
+ObjPtr Instance::findAttribute(const std::string &name) {
     auto result = Object::findAttribute(name);
     if (!result)
         result = getClass()->findAttribute(name);
     if (!result)
         return nullptr;
 //        creating a class method
-    auto method = dynamic_cast<Callable *> (result);
+    auto method = std::dynamic_pointer_cast<Callable>(result);
     if (method)
-        return new ClassMethod(method, this);
+        return New(ClassMethod(method, $this(Instance)));
     return result;
 }
 
-Instance::Instance(Class *classPtr) : classPtr(classPtr) {
-    assert(classPtr);
-    classPtr->save();
-}
+Instance::Instance(Class::ptr classPtr) : classPtr(std::move(classPtr)) {}
 
-Instance::~Instance() {
-    Object::remove(classPtr);
-}
-
-Class *Instance::getClass() {
+Class::ptr Instance::getClass() {
     assert(classPtr);
     return classPtr;
 }
 
 // Class
 
-Object *Class::makeInstance(Class *instanceClass) {
+Instance::ptr Class::makeInstance(const ptr &instanceClass) {
     if (instanceClass)
-        return new Instance(instanceClass);
-    Class *theClass = this;
-    while (theClass->superclass != nullptr)
+        return std::make_shared<Instance>(instanceClass);
+    auto theClass = $this(Class);
+    while (theClass->superclass)
         theClass = theClass->superclass;
-    return theClass->makeInstance(this);
+    return theClass->makeInstance($this(Class));
 }
 
-Class::Class(const std::string &name, Scope *body, Class *superclass, Scope *context) {
+Class::Class(const std::string &name, Scope::ptr body, Class::ptr superclass, Scope::ptr context) :
+        superclass(std::move(superclass)) {
     for (auto &&attribute : body->attributes)
         setAttribute(attribute.first, attribute.second);
-
-//    TODO: refactor
-    if (!superclass) {
-        this->superclass = nullptr;
-        return;
-    }
-    this->superclass = superclass;
-    this->superclass->save();
 }
 
-Class::~Class() {
-    Object::remove(superclass);
-}
-
-Object *Class::findAttribute(const std::string &name) {
+ObjPtr Class::findAttribute(const std::string &name) {
     auto result = Object::findAttribute(name);
     if (!result and superclass)
         return superclass->findAttribute(name);
     return result;
 }
 
-Class *Class::getSuperClass() {
+Class::ptr Class::getSuperClass() {
     return superclass;
 }
 
@@ -81,5 +64,4 @@ std::string Class::asString() {
     return result + ">";
 }
 
-Class::Class(Class *superclass) : superclass(superclass) {}
-
+Class::Class(Class::ptr superclass) : superclass(std::move(superclass)) {}

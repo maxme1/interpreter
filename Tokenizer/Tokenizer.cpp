@@ -4,7 +4,7 @@
 
 #define tk(a) Token(a, std::string(begin, position))
 
-Tokenizer::Tokenizer(std::string text) : text(text) {
+Tokenizer::Tokenizer(std::string text) : text(std::move(text)) {
     position = this->text.begin();
 }
 

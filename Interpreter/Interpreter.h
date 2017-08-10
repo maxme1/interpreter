@@ -3,6 +3,7 @@
 
 #include <string>
 #include <stack>
+#include <utility>
 #include <vector>
 #include <cassert>
 #include <iostream>
@@ -43,16 +44,16 @@ public:
     ~Interpreter();
     void interpret(std::string text);
 
-    Object *evaluate(Binary *expression);
-    Object *evaluate(Unary *expression);
-    Object *evaluate(Literal *expression);
-    Object *evaluate(SetVariable *expression);
-    Object *evaluate(SetAttribute *expression);
-    Object *evaluate(SetItem *expression);
-    Object *evaluate(Variable *expression);
-    Object *evaluate(FunctionExpression *expression);
-    Object *evaluate(GetAttribute *expression);
-    Object *evaluate(GetItem *expression);
+    ObjPtr evaluate(Binary *expression);
+    ObjPtr evaluate(Unary *expression);
+    ObjPtr evaluate(Literal *expression);
+    ObjPtr evaluate(SetVariable *expression);
+    ObjPtr evaluate(SetAttribute *expression);
+    ObjPtr evaluate(SetItem *expression);
+    ObjPtr evaluate(Variable *expression);
+    ObjPtr evaluate(FunctionExpression *expression);
+    ObjPtr evaluate(GetAttribute *expression);
+    ObjPtr evaluate(GetItem *expression);
 
     void evaluate(ExpressionStatement *statement);
     void evaluate(IfStatement *statement);
@@ -67,59 +68,36 @@ public:
 private:
     API *api;
 
-    std::vector<Scope *> scopes;
-    void addScope(Scope *context = nullptr);
+    std::vector<std::shared_ptr<Scope> > scopes;
+    void addScope(std::shared_ptr<Scope> context = nullptr);
     void deleteScope();
-    Scope *getContext();
+    std::shared_ptr<Scope> getContext();
 
-    std::stack<Object *> garbage;
-    Object *track(Object *object);
-    void collect();
-
-    Object *getVariable(const std::string &name);
-    void setVariable(const std::string &name, Object *value);
+    ObjPtr getVariable(const std::string &name);
+    void setVariable(const std::string &name, ObjPtr value);
     void evaluateStatements(std::vector<Statement *> &statements);
 
-    Object *callOperator(Object *object, const std::vector<Object *> &arguments);
-    Object *callFunction(Object *object, const std::vector<Expression *> &argsList);
+    ObjPtr callOperator(ObjPtr object, const std::vector<ObjPtr> &arguments);
+    ObjPtr callFunction(ObjPtr object, const std::vector<Expression *> &argsList);
 
-    Object *call(Callable *callable, const std::vector<Object *> &arguments);
-    std::vector<Object *> evaluateArguments(const std::vector<Expression *> &argsList);
-    Callable *getCallable(Object *object);
-    void checkArguments(Callable *callable, int count);
+    ObjPtr call(std::shared_ptr<Callable> callable, const std::vector<ObjPtr> &arguments);
+    std::vector<ObjPtr> evaluateArguments(const std::vector<Expression *> &argsList);
+    std::shared_ptr<Callable> getCallable(ObjPtr object);
+    void checkArguments(std::shared_ptr<Callable> callable, int count);
 
-    static bool isDerived(Object *derived, Class *base);
+    static bool isDerived(ObjPtr derived, std::shared_ptr<Class> base);
 
 //    Exceptions
     struct ExceptionWrapper {
 //        TODO: maybe should keep only instances
-        Object *exception;
-
+        ObjPtr exception;
         explicit ExceptionWrapper(Object *exception);
-
-        ExceptionWrapper(const ExceptionWrapper &exceptionWrapper) {
-            std::cout << "COPY!";
-            assert(false);
-        }
-
-        ~ExceptionWrapper();
+        explicit ExceptionWrapper(const ObjPtr &exception);
     };
     struct ReturnException {
-        Object *content;
+        ObjPtr content;
 
-        explicit ReturnException(Object *content = nullptr) : content(content) {
-            if (content)
-                content->save();
-        }
-
-        ReturnException(const ExceptionWrapper &exceptionWrapper) {
-            std::cout << "COPY!";
-            assert(false);
-        }
-
-        ~ReturnException() {
-            Object::remove(content);
-        }
+        explicit ReturnException(ObjPtr content = nullptr) : content(std::move(content)) {}
     };
     struct FlowException {
     };

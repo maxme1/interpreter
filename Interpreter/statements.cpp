@@ -6,20 +6,20 @@
 
 void Interpreter::evaluate(ReturnStatement *statement) {
     if (statement->expression)
-        throw ReturnException(track(statement->expression->evaluate(this)));
+        throw ReturnException(statement->expression->evaluate(this));
     throw ReturnException();
 }
 
 void Interpreter::evaluate(RaiseStatement *statement) {
-    throw Wrap(track(statement->expression->evaluate(this)));
+    throw Wrap(statement->expression->evaluate(this));
 }
 
 void Interpreter::evaluate(ExpressionStatement *statement) {
-    track(statement->expression->evaluate(this));
+    statement->expression->evaluate(this);
 }
 
 void Interpreter::evaluate(IfStatement *statement) {
-    auto cond = track(statement->condition->evaluate(this));
+    auto cond = statement->condition->evaluate(this);
     if (cond->asBool()) {
         if (statement->left)
             statement->left->evaluate(this);
@@ -32,9 +32,9 @@ void Interpreter::evaluate(TryStatement *statement) {
         statement->block->evaluate(this);
     } catch (ExceptionWrapper &e) {
 //        TODO: too many cases:
-        auto theClass = dynamic_cast<Class *>(e.exception);
+        auto theClass = std::dynamic_pointer_cast<Class>(e.exception);
         if (!theClass) {
-            auto instance = dynamic_cast<Instance *>(e.exception);
+            auto instance = std::dynamic_pointer_cast<Instance>(e.exception);
             if (instance)
                 theClass = instance->getClass();
         }
@@ -44,7 +44,7 @@ void Interpreter::evaluate(TryStatement *statement) {
             auto variants = evaluateArguments(item->arguments);
             for (auto &&variant : variants) {
 //                TODO: throw here
-                auto arg = dynamic_cast<Class *>(variant);
+                auto arg = std::dynamic_pointer_cast<Class>(variant);
                 if (arg)
                     if (isDerived(theClass, arg)) {
                         item->block->evaluate(this);
@@ -58,7 +58,7 @@ void Interpreter::evaluate(TryStatement *statement) {
 }
 
 void Interpreter::evaluate(WhileStatement *statement) {
-    auto cond = track(statement->condition->evaluate(this));
+    auto cond = statement->condition->evaluate(this);
     while (cond->asBool()) {
         try {
             if (statement->body)
@@ -66,7 +66,7 @@ void Interpreter::evaluate(WhileStatement *statement) {
         } catch (BreakException) {
             break;
         } catch (ContinueException) {}
-        cond = track(statement->condition->evaluate(this));
+        cond = statement->condition->evaluate(this);
     }
 }
 
@@ -82,14 +82,14 @@ void Interpreter::evaluate(Block *block) {
 
 void Interpreter::evaluate(FunctionDefinition *statement) {
     setVariable(statement->name,
-                new Function(statement->arguments, statement->body, statement->unlimited, getContext()));
+                New(Function(statement->arguments, statement->body, statement->unlimited, getContext())));
 }
 
 void Interpreter::evaluate(ClassDefinition *statement) {
-    Class *superclass = nullptr;
+    Class::ptr superclass;
     if (statement->superclass) {
-        auto temp = track(statement->superclass->evaluate(this));
-        superclass = dynamic_cast<Class *>(temp);
+        auto temp = statement->superclass->evaluate(this);
+        superclass = std::dynamic_pointer_cast<Class>(temp);
         if (!superclass)
             throw Wrap(new Exception("Cannot subclass instances"));
     }
@@ -108,7 +108,7 @@ void Interpreter::evaluate(ClassDefinition *statement) {
         throw;
     }
 //    TODO: for now the class does nothing with its context
-    auto classScope = track(new Class(statement->name, getContext(), superclass, context));
+    auto classScope = std::make_shared<Class>(statement->name, getContext(), superclass, context);
     deleteScope();
     setVariable(statement->name, classScope);
 }

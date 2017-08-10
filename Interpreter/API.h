@@ -10,15 +10,15 @@ class API {
 public:
     explicit API(Interpreter *interpreter) : interpreter(interpreter) {}
 
-    Object *getVariable(const std::string &name) {
+    ObjPtr getVariable(const std::string &name) {
         return interpreter->getVariable(name);
     }
 
-    void setVariable(const std::string &name, Object *value) {
+    void setVariable(const std::string &name, ObjPtr value) {
         interpreter->setVariable(name, value);
     }
 
-    Object *call(Object *object, const std::vector<Object *> &arguments) {
+    ObjPtr call(ObjPtr object, const std::vector<ObjPtr > &arguments) {
         return interpreter->callOperator(object, arguments);
     }
 

@@ -7,21 +7,23 @@
 #include "../Callable.h"
 
 // macros
-#define $class(ClassName) struct ClassName : public NativeObject<ClassName, NoSuperClass> {\
-    explicit ClassName(Class * classPtr) : NativeObject(classPtr) {};
+#define New(object) ObjPtr(new object)
+#define $this(ClassName) std::static_pointer_cast<ClassName>(shared_from_this())
 
 #define $subclass(ClassName, Base) struct ClassName : public NativeObject<ClassName, Base> {\
-    explicit ClassName(Class * classPtr) : NativeObject(classPtr) {};
+    explicit ClassName(Class::ptr classPtr) : NativeObject(std::move(classPtr)) {};
+
+#define $class(ClassName) $subclass(ClassName, NoSuperClass)
 
 #define $method(name, type) \
-static Object *(name)(Object *_self, ArgsList args, API *api) { \
+static ObjPtr (name)(ObjPtr _self, ArgsList args, API *api) { \
     auto self = type::cast(_self, true);
 
-#define $lambda [](ArgsList args, API *api) -> Object *
+#define $lambda [](ArgsList args, API *api) -> ObjPtr
 
 // types
-typedef Object *(*nativeFunction)(ArgsList, API *);
-typedef Object *(*nativeMethod)(Object *, ArgsList, API *);
+typedef ObjPtr(*nativeFunction)(ArgsList, API *);
+typedef ObjPtr(*nativeMethod)(ObjPtr, ArgsList, API *);
 
 // callables
 template<typename T>
@@ -34,7 +36,7 @@ protected:
 
 public:
     explicit NativeCallable(T function, int argumentsCount, bool unlimited = false);
-    Object *call(ArgsList args, API *api) override;
+    ObjPtr call(ArgsList args, API *api) override;
 };
 
 typedef NativeCallable<nativeFunction> NativeFunction;
