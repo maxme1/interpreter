@@ -1,5 +1,5 @@
-#ifndef INTERPRETER_NATIVEOBJECT_H
-#define INTERPRETER_NATIVEOBJECT_H
+#ifndef INTERPRETER_NATIVE_OBJECT_H
+#define INTERPRETER_NATIVE_OBJECT_H
 
 #include "Native.h"
 #include "../Class.h"
@@ -19,7 +19,7 @@ class NativeObject : public Instance {
     friend class Class;
     struct LocalNative : public NativeClass {
         inline static Class::ptr getClass() {
-            static Class::ptr instance = std::make_shared<Class>(Base::build());
+            static Class::ptr instance = Class::ptr(new LocalNative(Base::build()));
             return instance;
         }
 
@@ -28,8 +28,9 @@ class NativeObject : public Instance {
 
         Instance::ptr makeInstance(const ptr &instanceClass) override {
             if (instanceClass)
-                return new T(instanceClass);
-            return new T(getClass());
+                return Instance::ptr(new T(instanceClass));
+            auto s = getClass();
+            return Instance::ptr(new T(getClass()));
         }
 
     private:
@@ -40,7 +41,7 @@ class NativeObject : public Instance {
 protected:
     static void addMethod(const std::string &name, nativeMethod method, int argumentsCount = 0,
                           bool unlimited = false) {
-        LocalNative::getClass()->setAttribute(name, ObjPtr(new NativeMethod(method, argumentsCount, unlimited)));
+        LocalNative::getClass()->setAttribute(name, New(NativeMethod(method, argumentsCount, unlimited)));
     }
 
 public:
@@ -70,4 +71,4 @@ template<typename T, typename Base>
 bool NativeObject<T, Base>::populated = false;
 
 
-#endif //INTERPRETER_NATIVEOBJECT_H
+#endif //INTERPRETER_NATIVE_OBJECT_H

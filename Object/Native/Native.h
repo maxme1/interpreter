@@ -7,10 +7,11 @@
 #include "../Callable.h"
 
 // macros
-#define New(object) ObjPtr(new Object)
+#define New(object) ObjPtr(new object)
+#define $this(ClassName) std::static_pointer_cast<ClassName>(shared_from_this())
 
 #define $subclass(ClassName, Base) struct ClassName : public NativeObject<ClassName, Base> {\
-    explicit ClassName(Class::ptr classPtr) : NativeObject(classPtr) {};
+    explicit ClassName(Class::ptr classPtr) : NativeObject(std::move(classPtr)) {};
 
 #define $class(ClassName) $subclass(ClassName, NoSuperClass)
 

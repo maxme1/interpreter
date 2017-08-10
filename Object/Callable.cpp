@@ -1,22 +1,18 @@
 #include "Callable.h"
 
-#include <utility>
 #include "Types/Array.h"
 #include "../Parser/Statement/Statement.h"
 
-Callable::Callable(Scope::ptr context) : context(context) {}
+Callable::Callable(Scope::ptr context) : context(std::move(context)) {}
 
 Function::Function(std::vector<std::string> &arguments, Statement *body, bool unlimited, Scope::ptr context) :
-        Callable(context), body(body), arguments(arguments), unlimited(unlimited) {}
+        Callable(std::move(context)), body(body), arguments(arguments), unlimited(unlimited) {}
 
 bool Function::checkArguments(int count) {
     int size = arguments.size();
     if (unlimited)
         size--;
-    bool t = size == count or (arguments.size() <= count and unlimited);
-    if (!t)
-        std::cout << "expected: " << arguments.size();
-    return t;
+    return size == count or (arguments.size() <= count and unlimited);
 }
 
 ObjPtr Function::call(ArgsList args, API *api) {
@@ -39,8 +35,11 @@ bool ClassMethod::checkArguments(int count) {
 
 ObjPtr ClassMethod::call(ArgsList args, API *api) {
     api->setVariable("this", instance);
+    auto super = instance->getClass()->getSuperClass();
+    if (super)
+        api->setVariable("super", super);
     return function->call(args, api);
 }
 
 ClassMethod::ClassMethod(Callable::ptr function, Instance::ptr instance) :
-        function(function), instance(instance) {}
+        function(std::move(function)), instance(std::move(instance)) {}

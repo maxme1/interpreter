@@ -3,6 +3,7 @@
 
 #include <string>
 #include <stack>
+#include <utility>
 #include <vector>
 #include <cassert>
 #include <iostream>
@@ -96,7 +97,7 @@ private:
     struct ReturnException {
         ObjPtr content;
 
-        explicit ReturnException(ObjPtr content = nullptr) : content(content) {}
+        explicit ReturnException(ObjPtr content = nullptr) : content(std::move(content)) {}
     };
     struct FlowException {
     };

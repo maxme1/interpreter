@@ -21,7 +21,7 @@ std::string Exception::getString(ObjPtr target) {
 }
 
 std::string Exception::asString() {
-    return getString(std::static_pointer_cast<Exception>(shared_from_this()));
+    return getString(shared_from_this());
 }
 
 void Exception::setName(ObjPtr target, const std::string &name) {

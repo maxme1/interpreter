@@ -8,7 +8,6 @@ class Instance : public Object {
 protected:
     std::shared_ptr<Class> classPtr;
 public:
-    Instance() = default;
     explicit Instance(std::shared_ptr<Class> classPtr);
 
     std::string asString() override;

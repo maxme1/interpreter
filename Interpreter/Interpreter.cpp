@@ -95,7 +95,7 @@ Scope::ptr Interpreter::getContext() {
 }
 
 void Interpreter::setVariable(const std::string &name, ObjPtr value) {
-    scopes.back()->setAttribute(name, value);
+    scopes.back()->setAttribute(name, std::move(value));
 }
 
 void Interpreter::evaluateStatements(std::vector<Statement *> &statements) {
@@ -131,7 +131,7 @@ ObjPtr Interpreter::call(Callable::ptr callable, ArgsList arguments) {
 }
 
 ObjPtr Interpreter::callFunction(ObjPtr object, const std::vector<Expression *> &argsList) {
-    auto callable = getCallable(object);
+    auto callable = getCallable(std::move(object));
     checkArguments(callable, argsList.size());
 
 //    TODO: create a single function
@@ -153,7 +153,7 @@ ObjPtr Interpreter::callFunction(ObjPtr object, const std::vector<Expression *> 
 }
 
 ObjPtr Interpreter::callOperator(ObjPtr object, ArgsList arguments) {
-    auto callable = getCallable(object);
+    auto callable = getCallable(std::move(object));
     checkArguments(callable, arguments.size());
 
     addScope(callable->context);
@@ -196,9 +196,10 @@ bool Interpreter::isDerived(ObjPtr derived, Class::ptr base) {
 }
 
 Interpreter::ExceptionWrapper::ExceptionWrapper(Object *exception) {
-    if (!isDerived(ObjPtr(exception), Exception::build()))
+    auto temp = ObjPtr(exception);
+    if (!isDerived(temp, Exception::build()))
         throw Wrap(new ValueError("Only objects derived from Exception can be raised"));
-    this->exception = ObjPtr(exception);
+    this->exception = temp;
 }
 
 Interpreter::ExceptionWrapper::ExceptionWrapper(const ObjPtr &exception) {

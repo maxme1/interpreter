@@ -1,6 +1,7 @@
 #ifndef INTERPRETER_SCOPE_H
 #define INTERPRETER_SCOPE_H
 
+#include <utility>
 #include "Object.h"
 
 class Scope : public Object {
@@ -16,7 +17,7 @@ public:
 
     void setUpper(Scope::ptr scope) {
         if (!upper)
-            upper = scope;
+            upper = std::move(scope);
     }
 
 private:

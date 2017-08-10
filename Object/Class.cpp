@@ -1,6 +1,5 @@
 #include "Class.h"
 
-#include <utility>
 #include "Native/NativeObject.h"
 
 // Instance
@@ -18,11 +17,11 @@ ObjPtr Instance::findAttribute(const std::string &name) {
 //        creating a class method
     auto method = std::dynamic_pointer_cast<Callable>(result);
     if (method)
-        return New(ClassMethod(method, std::static_pointer_cast<Instance>(shared_from_this())));
+        return New(ClassMethod(method, $this(Instance)));
     return result;
 }
 
-Instance::Instance(Class::ptr classPtr) : classPtr(classPtr) {}
+Instance::Instance(Class::ptr classPtr) : classPtr(std::move(classPtr)) {}
 
 Class::ptr Instance::getClass() {
     assert(classPtr);
@@ -34,14 +33,14 @@ Class::ptr Instance::getClass() {
 Instance::ptr Class::makeInstance(const ptr &instanceClass) {
     if (instanceClass)
         return std::make_shared<Instance>(instanceClass);
-    Class::ptr theClass(this);
+    auto theClass = $this(Class);
     while (theClass->superclass)
         theClass = theClass->superclass;
-    return theClass->makeInstance(std::static_pointer_cast<Class>(shared_from_this()));
+    return theClass->makeInstance($this(Class));
 }
 
 Class::Class(const std::string &name, Scope::ptr body, Class::ptr superclass, Scope::ptr context) :
-        superclass(superclass) {
+        superclass(std::move(superclass)) {
     for (auto &&attribute : body->attributes)
         setAttribute(attribute.first, attribute.second);
 }
@@ -65,4 +64,4 @@ std::string Class::asString() {
     return result + ">";
 }
 
-Class::Class(Class::ptr superclass) : superclass(superclass) {}
+Class::Class(Class::ptr superclass) : superclass(std::move(superclass)) {}

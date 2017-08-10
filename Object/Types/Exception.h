@@ -12,7 +12,7 @@ $subclass(ClassName, Base) \
         Exception::setName(ClassName::build(), #ClassName); \
     } \
     std::string asString() override { \
-        return Exception::getString(std::static_pointer_cast<Exception>(shared_from_this())); \
+        return Exception::getString(shared_from_this()); \
     } \
 };
 
@@ -33,6 +33,7 @@ $class(Exception)
     static void populate() {
         addMethod("init", init, 1);
         addMethod("str", str);
+        Exception::setName(Exception::build(), "Exception");
     }
 };
 

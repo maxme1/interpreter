@@ -94,7 +94,7 @@ ObjPtr Interpreter::evaluate(Variable *expression) {
 ObjPtr Interpreter::evaluate(FunctionExpression *expression) {
     ObjPtr object = expression->target->evaluate(this);
 
-    auto classObject = std::dynamic_pointer_cast<Class, Object>(object);
+    auto classObject = std::dynamic_pointer_cast<Class>(object);
     if (classObject) {
         auto instance = classObject->makeInstance(nullptr);
         auto init = instance->findAttribute("init");
