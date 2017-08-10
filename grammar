@@ -2,10 +2,11 @@ program = statement*
 
 statement = (StmtBody? DELIMITER) | block | ifStmt | whileStmt | tryStmt | funcDef | classDef
 
-StmtBody = expression | 'break' | 'continue' | returnStmt | raiseStmt
+StmtBody = expression | 'break' | 'continue' | returnStmt | raiseStmt | importStmt
 returnStmt = 'return' expression?
 raiseStmt = 'raise' expression?
 
+importStmt = 'import' IDENTIFIER
 tryStmt = 'try' block ('catch' '(' argsValues ')' block)*
 # TODO: possibly optional first statement
 ifStmt = 'if' '(' expression ')' (statement ('else' statement)? )?
@@ -16,14 +17,14 @@ funcDef = 'def' IDENTIFIER '(' argsList? ')' block
 argsList = IDENTIFIER (SEPARATOR IDENTIFIER)*
 
 classDef = 'class' IDENTIFIER superclass? block
-superclass = '(' expression ')'
+superclass = '(' expression? ')'
 
 -- expression --
 
 expression = comparison | assignment
 
-assignment = assignable '=' expression
-assignable = ( primary attribute ) | IDENTIFIER
+assignment = assignable | IDENTIFIER '=' expression
+assignable = primary attribute | item
 
 comparison = term (( '==' | '>=' | '<=' | '<' | '>' | '!=' ) term )*
 term = factor ( ('+' | '-') factor )*

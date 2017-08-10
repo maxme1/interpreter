@@ -1,5 +1,5 @@
 #include "Exception.h"
-#include "String.h"
+#include "Types/String.h"
 
 ObjPtr Exception::init(ObjPtr _self, ArgsList args, API *api) {
     _self->setAttribute("message", args[0]);

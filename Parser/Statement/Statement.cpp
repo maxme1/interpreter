@@ -80,6 +80,12 @@ std::string RaiseStatement::str() {
     return result;
 }
 
+ImportStatement::ImportStatement(std::string path) : path(std::move(path)) {}
+
+std::string ImportStatement::str() {
+    return "import " + path;
+}
+
 FunctionDefinition::FunctionDefinition(const std::string &name, const std::vector<std::string> &arguments,
                                        Statement *body, bool unlimited) :
         body(body), arguments(arguments), name(name), unlimited(unlimited) {}

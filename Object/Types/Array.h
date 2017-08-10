@@ -28,14 +28,14 @@ $class(Array)
     $method(getItem, Array)
         auto idx = Int::getValue(args[0]);
         if (idx >= self->array.size())
-            throw Wrap(new Exception("IndexError"));
+            throw Wrap(new IndexError(std::to_string(idx)));
         return self->array[idx];
     }
 
     $method(setItem, Array)
         auto idx = Int::getValue(args[0]);
         if (idx >= self->array.size())
-            throw Wrap(new Exception("IndexError"));
+            throw Wrap(new IndexError(std::to_string(idx)));
 
         return self->array[idx] = args[1];
     }
@@ -55,10 +55,10 @@ $class(Array)
 
     static void populate() {
         addMethod("init", init, 0, -1);
+        addMethod("str", str, 0);
         addMethod("push", push, 1);
         addMethod("setitem", setItem, 2);
         addMethod("getitem", getItem, 1);
-        addMethod("str", str, 0);
     }
 };
 

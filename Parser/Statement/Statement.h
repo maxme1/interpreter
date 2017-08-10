@@ -142,6 +142,19 @@ public:
     std::string str() override;
 };
 
+class ImportStatement : public Statement {
+    friend class Interpreter;
+    std::string path;
+
+    void evaluate(Interpreter *interpreter) override {
+        interpreter->evaluate(this);
+    }
+
+public:
+    explicit ImportStatement(std::string path);
+    std::string str() override;
+};
+
 class FunctionDefinition : public Statement {
     friend class Interpreter;
     Statement *body;

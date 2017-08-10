@@ -68,6 +68,7 @@ std::map<std::string, Token::tokenType> reserved = {
         {"raise",    Token::RAISE},
         {"def",      Token::FUNCTION},
         {"class",    Token::CLASS},
+        {"import",   Token::IMPORT},
 };
 
 Token Tokenizer::nextToken() {

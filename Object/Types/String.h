@@ -4,7 +4,7 @@
 #include <utility>
 
 #include "../Native/Native.h"
-#include "Exception.h"
+#include "../Exception.h"
 
 $class(String)
     std::string string{};

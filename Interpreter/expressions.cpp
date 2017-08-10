@@ -34,6 +34,8 @@ ObjPtr Interpreter::evaluate(Binary *expression) {
 
     if (expression->ofType(Token::EQUAL))
         return New(Bool(left == right));
+    if (expression->ofType(Token::NOT_EQUAL))
+        return New(Bool(left != right));
 
     throw Wrap(new Exception("Operator not defined"));
 }
@@ -96,11 +98,19 @@ ObjPtr Interpreter::evaluate(FunctionExpression *expression) {
 
     auto classObject = std::dynamic_pointer_cast<Class>(object);
     if (classObject) {
+        addScope(classObject->context);
         auto instance = classObject->makeInstance(nullptr);
-        auto init = instance->findAttribute("init");
-        if (init)
-            callFunction(init, expression->argsList);
-        else if (!expression->argsList.empty())
+        try {
+            auto init = instance->findAttribute("init");
+            if (init) {
+                callFunction(init, expression->argsList);
+                return instance;
+            }
+        } catch (ExceptionWrapper &e) {
+            deleteScope();
+            throw;
+        }
+        if (!expression->argsList.empty())
             throw Wrap(new Exception("Default constructor does not receive arguments"));
         return instance;
     }

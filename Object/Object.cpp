@@ -1,7 +1,7 @@
 #include <iostream>
 #include <utility>
 #include "Object.h"
-#include "Types/Exception.h"
+#include "Exception.h"
 
 void Object::setAttribute(const std::string &name, ObjPtr value) {
     attributes[name] = value;

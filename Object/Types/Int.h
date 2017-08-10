@@ -1,7 +1,7 @@
 #ifndef INTERPRETER_INT_H
 #define INTERPRETER_INT_H
 
-#include "Exception.h"
+#include "../Exception.h"
 #include "../Native/Native.h"
 #include "String.h"
 #include "Bool.h"
@@ -25,7 +25,13 @@ $class(Int)
     }
 
     $method(init, Int)
-        self->value = Int::getValue(args[0]);
+        if (cast(args[0]))
+            self->value = Int::getValue(args[0]);
+        else if (String::cast(args[0]))
+            self->value = std::stoi(args[0]->asString());
+        else if (Bool::cast(args[0]))
+            self->value = (int) args[0]->asBool();
+        else throw Wrap(new ValueError("Could not convert to Int"));
         return nullptr;
     }
 

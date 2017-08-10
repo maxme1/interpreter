@@ -19,6 +19,7 @@ public:
 };
 
 class Class : public Object {
+    friend class Interpreter;
 public:
     typedef std::shared_ptr<Class> ptr;
 
@@ -30,8 +31,8 @@ public:
     Class::ptr getSuperClass();
 
 private:
-    friend class Interpreter;
     ptr superclass{nullptr};
+    Scope::ptr context;
 protected:
     virtual Instance::ptr makeInstance(const ptr &instanceClass);
 };

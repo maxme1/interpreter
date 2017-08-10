@@ -1,35 +1,17 @@
 #include <iostream>
 #include <utility>
+#include <fstream>
 #include "Interpreter.h"
 #include "../Tokenizer/Tokenizer.h"
 #include "../Parser/Parser.h"
 #include "../Object/Native/Native.h"
 #include "../Object/Types/Int.h"
-#include "../Object/Types/Array.h"
 #include "../Object/Types/None.h"
 
 Interpreter::Interpreter() {
     api = new API(this);
     addScope();
-    setVariable("print", New(NativeFunction($lambda {
-            bool first = true;
-            for (auto &&arg : args) {
-                if (not first) {
-                    std::cout << " ";
-                } else
-                    first = false;
-                std::cout << String::toString({arg}, api);
-            }
-            std::cout << std::endl;
-            return nullptr;
-    }, 0, true)));
-
-    setVariable("Int", Int::build());
-    setVariable("Array", Array::build());
-    setVariable("String", String::build());
-    setVariable("Bool", Bool::build());
-    setVariable("Exception", Exception::build());
-    setVariable("AttributeError", AttributeError::build());
+    populate();
 }
 
 Interpreter::~Interpreter() {
@@ -81,13 +63,12 @@ void Interpreter::deleteScope() {
 
 ObjPtr Interpreter::getVariable(const std::string &name) {
     assert(!scopes.empty());
-    auto end = scopes.rend() - 1;
-    for (auto scope = scopes.rbegin(); scope != end; scope++) {
+    for (auto scope = scopes.rbegin(); scope != scopes.rend(); scope++) {
         auto result = (*scope)->findAttribute(name);
         if (result)
             return result;
     }
-    return scopes[0]->getAttribute(name);
+    throw Wrap(new VariableError(name));
 }
 
 Scope::ptr Interpreter::getContext() {
@@ -195,12 +176,18 @@ bool Interpreter::isDerived(ObjPtr derived, Class::ptr base) {
     return theClass.get() == base.get();
 }
 
-Interpreter::ExceptionWrapper::ExceptionWrapper(Object *exception) {
-    auto temp = ObjPtr(exception);
-    if (!isDerived(temp, Exception::build()))
-        throw Wrap(new ValueError("Only objects derived from Exception can be raised"));
-    this->exception = temp;
+bool Interpreter::interpretFile(const std::string &path) {
+    std::ifstream source(path);
+    if (!source.good())
+        return false;
+    std::string text((std::istreambuf_iterator<char>(source)),
+                     (std::istreambuf_iterator<char>()));
+    interpret(text);
+    source.close();
+    return true;
 }
+
+Interpreter::ExceptionWrapper::ExceptionWrapper(Object *exception) : ExceptionWrapper(ObjPtr(exception)) {}
 
 Interpreter::ExceptionWrapper::ExceptionWrapper(const ObjPtr &exception) {
     if (!isDerived(exception, Exception::build()))

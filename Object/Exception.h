@@ -1,7 +1,7 @@
 #ifndef INTERPRETER_EXCEPTION_H
 #define INTERPRETER_EXCEPTION_H
 
-#include "../Native/Native.h"
+#include "Native/Native.h"
 
 #define $exception(ClassName, Base) \
 $subclass(ClassName, Base) \
@@ -37,7 +37,12 @@ $class(Exception)
     }
 };
 
-$exception(AttributeError, Exception)
+$exception(AccessError, Exception)
+$exception(AttributeError, AccessError)
+$exception(VariableError, AccessError)
+$exception(IndexError, AccessError)
+
+$exception(ImportError, Exception)
 $exception(ValueError, Exception)
 $exception(SyntaxError, Exception)
 

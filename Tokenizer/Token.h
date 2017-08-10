@@ -15,10 +15,10 @@ struct Token {
         BRACKET_OPEN, BRACKET_CLOSE, BRACKET,
         ITEM_OPEN, ITEM_CLOSE,
         BLOCK_OPEN, BLOCK_CLOSE,
-        IF, ELSE, WHILE, TRY, CATCH,
+        IF, ELSE, WHILE, TRY, CATCH, IMPORT,
         FUNCTION, CLASS,
         BREAK, CONTINUE, RETURN, RAISE,
-        PROGRAM_END, ERROR, COMMENT
+        PROGRAM_END, ERROR, COMMENT, PATH
     };
 
     tokenType type;

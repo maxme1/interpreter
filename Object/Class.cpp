@@ -40,7 +40,8 @@ Instance::ptr Class::makeInstance(const ptr &instanceClass) {
 }
 
 Class::Class(const std::string &name, Scope::ptr body, Class::ptr superclass, Scope::ptr context) :
-        superclass(std::move(superclass)) {
+        superclass(std::move(superclass)), context(std::move(context)) {
+//    copy the scope
     for (auto &&attribute : body->attributes)
         setAttribute(attribute.first, attribute.second);
 }

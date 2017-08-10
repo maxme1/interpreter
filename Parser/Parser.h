@@ -41,6 +41,8 @@ class Parser {
             return returnStatement();
         if (matches({Token::RAISE}))
             return raiseStatement();
+        if (matches({Token::IMPORT}))
+            return importStatement();
         if (matches({Token::BREAK, Token::CONTINUE})) {
             auto control = advance();
             return new ControlFlow(control.type, control.body);
@@ -58,6 +60,11 @@ class Parser {
     Statement *raiseStatement() {
         require({Token::RAISE});
         return new RaiseStatement(expression());
+    }
+
+    Statement *importStatement() {
+        require({Token::IMPORT});
+        return new ImportStatement(require({Token::IDENTIFIER}).body);
     }
 
     Statement *ifStatement() {
@@ -145,7 +152,8 @@ class Parser {
         Expression *superclass = nullptr;
         if (matches({Token::BRACKET_OPEN})) {
             advance();
-            superclass = expression();
+            if (!matches({Token::BRACKET_CLOSE}))
+                superclass = expression();
             require({Token::BRACKET_CLOSE});
         }
         auto body = block();

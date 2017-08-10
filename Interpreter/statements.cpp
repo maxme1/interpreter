@@ -2,7 +2,7 @@
 #include "Interpreter.h"
 #include "../Parser/Parser.h"
 #include "../Object/Native/Native.h"
-#include "../Object/Types/Exception.h"
+#include "../Object/Exception.h"
 
 void Interpreter::evaluate(ReturnStatement *statement) {
     if (statement->expression)
@@ -12,6 +12,15 @@ void Interpreter::evaluate(ReturnStatement *statement) {
 
 void Interpreter::evaluate(RaiseStatement *statement) {
     throw Wrap(statement->expression->evaluate(this));
+}
+
+void Interpreter::evaluate(ImportStatement *statement) {
+    auto path = statement->path;
+//    TODO: for now the imported file must be in the same directory with the executable
+    Interpreter source = Interpreter();
+    if (!source.interpretFile(path))
+        throw Wrap(new ImportError("Could not import " + path));
+    setVariable(path, source.getContext());
 }
 
 void Interpreter::evaluate(ExpressionStatement *statement) {
@@ -107,7 +116,6 @@ void Interpreter::evaluate(ClassDefinition *statement) {
         deleteScope();
         throw;
     }
-//    TODO: for now the class does nothing with its context
     auto classScope = std::make_shared<Class>(statement->name, getContext(), superclass, context);
     deleteScope();
     setVariable(statement->name, classScope);

@@ -30,6 +30,7 @@ class FunctionDefinition;
 class ClassDefinition;
 class ReturnStatement;
 class RaiseStatement;
+class ImportStatement;
 class ControlFlow;
 class Block;
 
@@ -43,6 +44,7 @@ public:
     Interpreter();
     ~Interpreter();
     void interpret(std::string text);
+    bool interpretFile(const std::string &path);
 
     ObjPtr evaluate(Binary *expression);
     ObjPtr evaluate(Unary *expression);
@@ -63,10 +65,14 @@ public:
     void evaluate(ClassDefinition *statement);
     void evaluate(ReturnStatement *statement);
     void evaluate(RaiseStatement *statement);
+    void evaluate(ImportStatement *statement);
     void evaluate(ControlFlow *statement);
     void evaluate(Block *block);
 private:
     API *api;
+    void populate();
+    void addFunction(const std::string &name, ObjPtr(*function)(const std::vector<ObjPtr> &, API *),
+                     int argumentsCount = 0, bool unlimited = false);
 
     std::vector<std::shared_ptr<Scope> > scopes;
     void addScope(std::shared_ptr<Scope> context = nullptr);
@@ -89,7 +95,6 @@ private:
 
 //    Exceptions
     struct ExceptionWrapper {
-//        TODO: maybe should keep only instances
         ObjPtr exception;
         explicit ExceptionWrapper(Object *exception);
         explicit ExceptionWrapper(const ObjPtr &exception);
