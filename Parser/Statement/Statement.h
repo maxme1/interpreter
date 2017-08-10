@@ -61,6 +61,29 @@ public:
     std::string str() override;
 };
 
+struct TryStatement : public Statement {
+    friend class Interpreter;
+
+    struct CatchStatement {
+        std::vector<Expression *> arguments;
+        Statement *block;
+
+        CatchStatement(std::vector<Expression *> &arguments, Statement *block) : block(block), arguments(arguments) {};
+
+        ~CatchStatement();
+    };
+    std::vector<CatchStatement *> catches;
+
+    Statement *block;
+
+    void evaluate(Interpreter *interpreter) override {
+        interpreter->evaluate(this);
+    }
+    TryStatement(const std::vector<CatchStatement *> &catches, Statement *block);
+    ~TryStatement() override;
+    std::string str() override;
+};
+
 class WhileStatement : public Statement {
     friend class Interpreter;
 
@@ -100,8 +123,22 @@ class ReturnStatement : public Statement {
     }
 
 public:
-    ReturnStatement(Expression *expression = nullptr);
+    explicit ReturnStatement(Expression *expression = nullptr);
     ~ReturnStatement() override;
+    std::string str() override;
+};
+
+class RaiseStatement : public Statement {
+    friend class Interpreter;
+    Expression *expression;
+
+    void evaluate(Interpreter *interpreter) override {
+        interpreter->evaluate(this);
+    }
+
+public:
+    explicit RaiseStatement(Expression *expression);
+    ~RaiseStatement() override;
     std::string str() override;
 };
 

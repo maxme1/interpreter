@@ -3,17 +3,19 @@
 
 #include <iostream>
 #include <utility>
-#include "../Callable.h"
-#include "../Class.h"
 #include <cassert>
+#include "../Callable.h"
 
 // macros
-#define $class(type) struct type : public NativeObject<type>
+#define $class(ClassName) struct ClassName : public NativeObject<ClassName, NoSuperClass> {\
+    explicit ClassName(Class * classPtr) : NativeObject(classPtr) {};
+
+#define $subclass(ClassName, Base) struct ClassName : public NativeObject<ClassName, Base> {\
+    explicit ClassName(Class * classPtr) : NativeObject(classPtr) {};
 
 #define $method(name, type) \
 static Object *(name)(Object *_self, ArgsList args, API *api) { \
-    auto self = type::cast(_self, true); \
-    assert(self);
+    auto self = type::cast(_self, true);
 
 #define $lambda [](ArgsList args, API *api) -> Object *
 
@@ -32,7 +34,7 @@ protected:
 
 public:
     explicit NativeCallable(T function, int argumentsCount, bool unlimited = false);
-    Object *__call__(ArgsList args, API *api) override;
+    Object *call(ArgsList args, API *api) override;
 };
 
 typedef NativeCallable<nativeFunction> NativeFunction;

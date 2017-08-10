@@ -2,36 +2,36 @@
 #define INTERPRETER_CLASS_H
 
 #include "Callable.h"
-#include "Types/Exception.h"
-#include "Types/None.h"
 
 class Class;
 class Instance : public Object {
-    Class *classPtr;
 protected:
-
+    Class *classPtr;
 public:
+    Instance() = default;
     explicit Instance(Class *classPtr);
     ~Instance() override;
 
+    std::string asString() override;
     Object *findAttribute(const std::string &name) override;
-    Object *getSuperClass();
+
+    virtual Class *getClass();
 };
 
-class Class : public Callable {
+class Class : public Object {
     friend class Interpreter;
-    friend class Instance;
-    Object *superclass;
+    Class *superclass = nullptr;
 protected:
-    bool checkArguments(int count) override;
-    Object *__call__(ArgsList args, API *api) override;
+    virtual Object *makeInstance(Class *instanceClass);
 
 public:
-    Class() = default;
-    Class(Object *context, Class *superclass);
-    virtual ~Class();
-
+    explicit Class(Class *superclass);
+    Class(const std::string &name, Scope *body, Class *superclass, Scope *context);
+    ~Class() override;
+    std::string asString() override;
     Object *findAttribute(const std::string &name) override;
+
+    Class *getSuperClass();
 };
 
 #endif //INTERPRETER_CLASS_H

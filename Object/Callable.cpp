@@ -1,26 +1,29 @@
 #include "Callable.h"
 #include "Types/Array.h"
+#include "../Parser/Statement/Statement.h"
 
-Callable::Callable(Object *context) : context(context) {
+Callable::Callable(Scope *context) : context(context) {
     context->save();
 }
 
 Callable::~Callable() {
-    if (context and context->canDelete())
-        delete context;
+    Object::remove(context);
 }
 
-Function::Function(std::vector<std::string> arguments, Statement *body, bool unlimited, Object *context) :
+Function::Function(std::vector<std::string> arguments, Statement *body, bool unlimited, Scope *context) :
         Callable(context), body(body), arguments(std::move(arguments)), unlimited(unlimited) {}
 
 bool Function::checkArguments(int count) {
     int size = arguments.size();
     if (unlimited)
         size--;
-    return size == count or (arguments.size() <= count and unlimited);
+    bool t = size == count or (arguments.size() <= count and unlimited);
+    if (!t)
+        std::cout << "expected: " << arguments.size();
+    return t;
 }
 
-Object *Function::__call__(ArgsList args, API *api) {
+Object *Function::call(ArgsList args, API *api) {
 //        populating with arguments
     int size = arguments.size(), i;
     if (unlimited)
@@ -42,27 +45,18 @@ bool ClassMethod::checkArguments(int count) {
     return function->checkArguments(count);
 }
 
-Object *ClassMethod::__call__(ArgsList args, API *api) {
-    api->setVariable("this", source);
-//    TODO: better inheritance ramification
-    auto instance = dynamic_cast<Instance *>(source);
-    if (instance) {
-        auto super = instance->getSuperClass();
-        if (super)
-            api->setVariable("super", super);
-    }
-    return function->__call__(args, api);
+Object *ClassMethod::call(ArgsList args, API *api) {
+    api->setVariable("this", instance);
+    return function->call(args, api);
 }
 
-ClassMethod::ClassMethod(Object *source, Callable *function) :
-        function(function), source(source) {
+ClassMethod::ClassMethod(Callable *function, Instance *instance) :
+        function(function), instance(instance) {
     function->save();
-    source->save();
+    instance->save();
 }
 
 ClassMethod::~ClassMethod() {
-    if (function->canDelete())
-        delete function;
-    if (source->canDelete())
-        delete source;
+    Object::remove(function);
+    Object::remove(instance);
 }

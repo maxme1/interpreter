@@ -60,9 +60,12 @@ std::map<std::string, Token::tokenType> reserved = {
         {"if",       Token::IF},
         {"else",     Token::ELSE},
         {"while",    Token::WHILE},
+        {"try",      Token::TRY},
+        {"catch",    Token::CATCH},
         {"break",    Token::BREAK},
         {"continue", Token::CONTINUE},
         {"return",   Token::RETURN},
+        {"raise",    Token::RAISE},
         {"def",      Token::FUNCTION},
         {"class",    Token::CLASS},
 };

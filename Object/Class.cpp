@@ -3,58 +3,63 @@
 
 // Instance
 
-Instance::Instance(Class *classPtr) : classPtr(classPtr) {
-    classPtr->save();
-}
-
-Instance::~Instance() {
-    if (classPtr->canDelete())
-        delete classPtr;
+std::string Instance::asString() {
+    return "<" + getClass()->asString() + " instance>";
 }
 
 Object *Instance::findAttribute(const std::string &name) {
     auto result = Object::findAttribute(name);
-    if (!result and classPtr)
-        result = classPtr->findAttribute(name);
+    if (!result)
+        result = getClass()->findAttribute(name);
     if (!result)
         return nullptr;
 //        creating a class method
     auto method = dynamic_cast<Callable *> (result);
     if (method)
-        return new ClassMethod(this, method);
+        return new ClassMethod(method, this);
     return result;
 }
 
-Object *Instance::getSuperClass() {
-    if (classPtr and classPtr->superclass)
-        return classPtr->superclass;
-    return nullptr;
+Instance::Instance(Class *classPtr) : classPtr(classPtr) {
+    assert(classPtr);
+    classPtr->save();
+}
+
+Instance::~Instance() {
+    Object::remove(classPtr);
+}
+
+Class *Instance::getClass() {
+    assert(classPtr);
+    return classPtr;
 }
 
 // Class
 
-bool Class::checkArguments(int count) { return count == 0; }
-
-Object *Class::__call__(ArgsList args, API *api) {
-    return new Instance(this);
+Object *Class::makeInstance(Class *instanceClass) {
+    if (instanceClass)
+        return new Instance(instanceClass);
+    Class *theClass = this;
+    while (theClass->superclass != nullptr)
+        theClass = theClass->superclass;
+    return theClass->makeInstance(this);
 }
 
-Class::Class(Object *context, Class *superclass) : Callable(context) {
+Class::Class(const std::string &name, Scope *body, Class *superclass, Scope *context) {
+    for (auto &&attribute : body->attributes)
+        setAttribute(attribute.first, attribute.second);
+
+//    TODO: refactor
     if (!superclass) {
         this->superclass = nullptr;
         return;
     }
-    auto native = dynamic_cast<NativeClass *>(superclass);
-    if (native) {
-        this->superclass = native->__call__({}, nullptr);
-    } else
-        this->superclass = superclass;
+    this->superclass = superclass;
     this->superclass->save();
 }
 
 Class::~Class() {
-    if (superclass and superclass->canDelete())
-        delete superclass;
+    Object::remove(superclass);
 }
 
 Object *Class::findAttribute(const std::string &name) {
@@ -63,3 +68,18 @@ Object *Class::findAttribute(const std::string &name) {
         return superclass->findAttribute(name);
     return result;
 }
+
+Class *Class::getSuperClass() {
+    return superclass;
+}
+
+std::string Class::asString() {
+    auto name = findAttribute("@name");
+    std::string result = "<class";
+    if (name)
+        result += " " + name->asString();
+    return result + ">";
+}
+
+Class::Class(Class *superclass) : superclass(superclass) {}
+

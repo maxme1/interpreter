@@ -6,7 +6,7 @@
 #include "String.h"
 #include "Bool.h"
 
-$class(Int) {
+$class(Int)
     int value;
     Int() = default;
 
@@ -40,7 +40,7 @@ $class(Int) {
     $method(divide, Int)
         int val = Int::getValue(args[0]);
         if (val == 0)
-            throw Exception("Division by zero");
+            throw Wrap(new Exception("Division by zero"));
         return new Int(self->value / val);
     }
 

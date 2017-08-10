@@ -4,8 +4,9 @@
 #include <utility>
 
 #include "../Native/Native.h"
+#include "Exception.h"
 
-$class(String) {
+$class(String)
     std::string string{};
     String() = default;
 
@@ -20,6 +21,9 @@ $class(String) {
     }
 
     static std::string toString(Object *object, API *api) {
+        auto aClass = dynamic_cast<Class *>(object);
+        if (aClass)
+            return aClass->asString();
         auto method = object->findAttribute("str");
         if (!method)
             return object->asString();

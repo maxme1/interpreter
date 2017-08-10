@@ -27,6 +27,20 @@ std::string IfStatement::str() {
     return result;
 }
 
+TryStatement::TryStatement(const std::vector<TryStatement::CatchStatement *> &catches, Statement *block) :
+        catches(catches), block(block) {}
+
+TryStatement::~TryStatement() {
+    delete block;
+    for (auto &&item : catches) {
+        delete item;
+    }
+}
+
+std::string TryStatement::str() {
+    return "try - catch. i'm too lazy";
+}
+
 WhileStatement::WhileStatement(Expression *condition, Statement *body) : condition(condition), body(body) {}
 
 WhileStatement::~WhileStatement() {
@@ -49,9 +63,20 @@ ReturnStatement::ReturnStatement(Expression *expression) : expression(expression
 ReturnStatement::~ReturnStatement() { delete expression; }
 
 std::string ReturnStatement::str() {
-    std::string result = "return ";
+    std::string result = "return";
     if (expression)
-        result += expression->str();
+        result += " " + expression->str();
+    return result;
+}
+
+RaiseStatement::RaiseStatement(Expression *expression) : expression(expression) {}
+
+RaiseStatement::~RaiseStatement() { delete expression; }
+
+std::string RaiseStatement::str() {
+    std::string result = "raise";
+    if (expression)
+        result += " " + expression->str();
     return result;
 }
 
@@ -98,4 +123,10 @@ std::string Block::str() {
 
 Block::~Block() {
     statements.clear();
+}
+
+TryStatement::CatchStatement::~CatchStatement() {
+    for (auto argument : arguments)
+        delete argument;
+    delete block;
 }

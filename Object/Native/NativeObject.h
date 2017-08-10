@@ -2,70 +2,72 @@
 #define INTERPRETER_NATIVEOBJECT_H
 
 #include "Native.h"
+#include "../Class.h"
 
 struct NativeClass : public Class {
+    explicit NativeClass(Class *superclass) : Class(superclass) {}
 };
 
-template<typename T>
-class NativeObject : public Object {
+struct NoSuperClass {
+    static Class *build() {
+        return nullptr;
+    }
+};
+
+template<typename T, typename Base>
+class NativeObject : public Instance {
     friend class Class;
     struct LocalNative : public NativeClass {
         inline static LocalNative &getClass() {
-            static LocalNative Instance;
-            return Instance;
+            static LocalNative LocalClass(Base::build());
+            return LocalClass;
         }
 
         LocalNative(LocalNative const &) = delete;
         void operator=(LocalNative const &)  = delete;
-    protected:
-        Object *__call__(const std::vector<Object *> &args, API *api) override {
-            return new T();
+
+        Object *makeInstance(Class *instanceClass) override {
+            if (instanceClass)
+                return new T(instanceClass);
+            return new T(&getClass());
         }
 
     private:
-        LocalNative() = default;
+        explicit LocalNative(Class *superclass) : NativeClass(superclass) {};
     };
 
-    static Object *classPtr;
+    static bool populated;
 protected:
     static void addMethod(const std::string &name, nativeMethod method, int argumentsCount = 0,
                           bool unlimited = false) {
-        classPtr->setAttribute(name, new NativeMethod(method, argumentsCount, unlimited));
+        LocalNative::getClass().setAttribute(name, new NativeMethod(method, argumentsCount, unlimited));
     }
 
 public:
+    explicit NativeObject(Class *classPtr) : Instance(classPtr) {}
+
+    NativeObject() : Instance(build()) {}
+
     static T *cast(Object *object, bool strict = false) {
         auto result = dynamic_cast<T *>(object);
-        if (strict and !result)
-            throw Exception("Could not convert object");
+        assert(not strict or (result != nullptr));
         return result;
     }
 
     static void populate() {}
 
-    Object *findAttribute(const std::string &name) override {
-        auto result = Object::findAttribute(name);
-        if (!result and classPtr)
-            result = classPtr->findAttribute(name);
-        if (!result)
-            return nullptr;
-//        creating a class method
-        auto method = dynamic_cast<Callable *> (result);
-        if (method)
-            return new ClassMethod(this, method);
-        return result;
-    }
-
-    static Object *getClass() {
-        if (!classPtr) {
-            classPtr = &LocalNative::getClass();
+    static Class *build() {
+        auto result = &LocalNative::getClass();
+        if (!populated) {
+            populated = true;
             T::populate();
         }
-        return classPtr;
+        return result;
     }
 };
 
-template<typename T>
-Object *NativeObject<T>::classPtr = nullptr;
+template<typename T, typename Base>
+bool NativeObject<T, Base>::populated = false;
+
 
 #endif //INTERPRETER_NATIVEOBJECT_H

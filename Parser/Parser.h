@@ -24,6 +24,8 @@ class Parser {
             return ifStatement();
         if (matches({Token::WHILE}))
             return whileStatement();
+        if (matches({Token::TRY}))
+            return tryStatement();
         if (matches({Token::FUNCTION}))
             return functionDefinition();
         if (matches({Token::CLASS}))
@@ -37,6 +39,8 @@ class Parser {
     Statement *statementBody() {
         if (matches({Token::RETURN}))
             return returnStatement();
+        if (matches({Token::RAISE}))
+            return raiseStatement();
         if (matches({Token::BREAK, Token::CONTINUE})) {
             auto control = advance();
             return new ControlFlow(control.type, control.body);
@@ -49,6 +53,11 @@ class Parser {
         if (!matches({Token::DELIMITER}))
             return new ReturnStatement(expression());
         return new ReturnStatement();
+    }
+
+    Statement *raiseStatement() {
+        require({Token::RAISE});
+        return new RaiseStatement(expression());
     }
 
     Statement *ifStatement() {
@@ -69,6 +78,19 @@ class Parser {
         advance();
         auto right = statement();
         return new IfStatement(condition, left, right);
+    }
+
+    Statement *tryStatement() {
+        require({Token::TRY});
+        auto mainBody = block();
+        auto catches = std::vector<TryStatement::CatchStatement *>();
+        while (matches({Token::CATCH})) {
+            advance();
+            auto args = arguments();
+            auto body = block();
+            catches.push_back(new TryStatement::CatchStatement(args, body));
+        }
+        return new TryStatement(catches, mainBody);
     }
 
     Statement *whileStatement() {
@@ -208,7 +230,7 @@ class Parser {
         auto left = literal();
         while (matches({Token::BRACKET_OPEN, Token::ATTRIBUTE, Token::ITEM_OPEN})) {
             if (matches({Token::BRACKET_OPEN})) {
-                auto token = advance();
+                auto token = *position;
                 auto args = arguments();
                 left = new FunctionExpression(token, left, args);
             } else if (matches({Token::ATTRIBUTE})) {
@@ -226,6 +248,7 @@ class Parser {
     }
 
     std::vector<Expression *> arguments() {
+        require({Token::BRACKET_OPEN});
         auto result = std::vector<Expression *>();
         while (!matches({Token::BRACKET_CLOSE})) {
             result.push_back(expression());

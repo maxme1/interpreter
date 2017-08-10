@@ -4,7 +4,7 @@
 #include "../Native/Native.h"
 #include "Int.h"
 
-$class(Array) {
+$class(Array)
     std::vector<Object *> array;
     Array() = default;
 
@@ -42,8 +42,7 @@ $class(Array) {
 
         args[1]->save();
         auto old = self->array[idx];
-        if (old->canDelete())
-            delete old;
+        Object::remove(old);
 
         self->array[idx] = args[1];
         return args[1];

@@ -2,7 +2,7 @@
 #define INTERPRETER_API_H
 
 #include "../Object/Object.h"
-#include "../Object/Callable.h"
+#include "Interpreter.h"
 
 class API {
     friend class Function;
@@ -21,6 +21,10 @@ public:
     Object *call(Object *object, const std::vector<Object *> &arguments) {
         return interpreter->callOperator(object, arguments);
     }
+
+    typedef Interpreter::ExceptionWrapper Wrap;
 };
+
+typedef API::Wrap Wrap;
 
 #endif //INTERPRETER_API_H

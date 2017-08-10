@@ -1,7 +1,7 @@
 #ifndef INTERPRETER_BOOL_H
 #define INTERPRETER_BOOL_H
 
-$class(Bool) {
+$class(Bool)
     bool value;
     Bool() = default;
 

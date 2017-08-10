@@ -1,10 +1,12 @@
 program = statement*
 
-statement = (StmtBody? DELIMITER) | block | ifStmt | whileStmt | funcDef | classDef
+statement = (StmtBody? DELIMITER) | block | ifStmt | whileStmt | tryStmt | funcDef | classDef
 
-StmtBody = expression | 'break' | 'continue' | returnStmt
+StmtBody = expression | 'break' | 'continue' | returnStmt | raiseStmt
 returnStmt = 'return' expression?
+raiseStmt = 'raise' expression?
 
+tryStmt = 'try' block ('catch' '(' argsValues ')' block)*
 # TODO: possibly optional first statement
 ifStmt = 'if' '(' expression ')' (statement ('else' statement)? )?
 whileStmt = 'while' '(' expression ')' statement

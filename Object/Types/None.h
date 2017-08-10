@@ -2,10 +2,11 @@
 #define INTERPRETER_NONE_H
 
 
-#include "../Object.h"
+#include "../Native/Native.h"
 
-class None : public Object {
-public:
+$class(None)
+    None() = default;
+
     bool asBool() override { return false; }
 
     std::string asString() override { return "None"; }

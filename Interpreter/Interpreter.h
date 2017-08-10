@@ -4,6 +4,9 @@
 #include <string>
 #include <stack>
 #include <vector>
+#include <cassert>
+#include <iostream>
+#include "../Object/Scope.h"
 
 class Expression;
 class Binary;
@@ -20,15 +23,18 @@ class GetItem;
 class Statement;
 class ExpressionStatement;
 class IfStatement;
+class TryStatement;
 class WhileStatement;
 class FunctionDefinition;
 class ClassDefinition;
 class ReturnStatement;
+class RaiseStatement;
 class ControlFlow;
 class Block;
 
 class Object;
 class Callable;
+class Class;
 class API;
 class Interpreter {
     friend class API;
@@ -50,19 +56,21 @@ public:
 
     void evaluate(ExpressionStatement *statement);
     void evaluate(IfStatement *statement);
+    void evaluate(TryStatement *statement);
     void evaluate(WhileStatement *statement);
     void evaluate(FunctionDefinition *statement);
     void evaluate(ClassDefinition *statement);
     void evaluate(ReturnStatement *statement);
+    void evaluate(RaiseStatement *statement);
     void evaluate(ControlFlow *statement);
     void evaluate(Block *block);
 private:
     API *api;
 
-    std::vector<Object *> scopes;
-    void addScope(Object *context = nullptr);
+    std::vector<Scope *> scopes;
+    void addScope(Scope *context = nullptr);
     void deleteScope();
-    Object *getContext();
+    Scope *getContext();
 
     std::stack<Object *> garbage;
     Object *track(Object *object);
@@ -76,14 +84,42 @@ private:
     Object *callFunction(Object *object, const std::vector<Expression *> &argsList);
 
     Object *call(Callable *callable, const std::vector<Object *> &arguments);
+    std::vector<Object *> evaluateArguments(const std::vector<Expression *> &argsList);
     Callable *getCallable(Object *object);
     void checkArguments(Callable *callable, int count);
 
-//    Control Flow
+    static bool isDerived(Object *derived, Class *base);
+
+//    Exceptions
+    struct ExceptionWrapper {
+//        TODO: maybe should keep only instances
+        Object *exception;
+
+        explicit ExceptionWrapper(Object *exception);
+
+        ExceptionWrapper(const ExceptionWrapper &exceptionWrapper) {
+            std::cout << "COPY!";
+            assert(false);
+        }
+
+        ~ExceptionWrapper();
+    };
     struct ReturnException {
         Object *content;
 
-        explicit ReturnException(Object *content = nullptr) : content(content) {}
+        explicit ReturnException(Object *content = nullptr) : content(content) {
+            if (content)
+                content->save();
+        }
+
+        ReturnException(const ExceptionWrapper &exceptionWrapper) {
+            std::cout << "COPY!";
+            assert(false);
+        }
+
+        ~ReturnException() {
+            Object::remove(content);
+        }
     };
     struct FlowException {
     };

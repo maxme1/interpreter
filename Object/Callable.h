@@ -5,24 +5,25 @@
 #include <utility>
 
 #include "Object.h"
-#include "../Parser/Statement/Statement.h"
 #include "../Interpreter/API.h"
+#include "Scope.h"
 
 typedef const std::vector<Object *> &ArgsList;
 
 class Callable : public Object {
     friend class Interpreter;
     friend class ClassMethod;
-    Object *context = nullptr;
+    Scope *context = nullptr;
 protected:
     virtual bool checkArguments(int count) = 0;
-    virtual Object *__call__(ArgsList args, API *api) = 0;
+    virtual Object *call(ArgsList args, API *api) = 0;
 public:
     Callable() = default;
-    explicit Callable(Object *context);
+    explicit Callable(Scope *context);
     ~Callable() override;
 };
 
+class Statement;
 class Function : public Callable {
     friend class Interpreter;
     Statement *body = nullptr;
@@ -31,23 +32,25 @@ class Function : public Callable {
 
 protected:
     bool checkArguments(int count) override;
-    Object *__call__(ArgsList args, API *api) override;
+    Object *call(ArgsList args, API *api) override;
 
 public:
-    explicit Function(std::vector<std::string> arguments, Statement *body, bool unlimited, Object *context);
+    explicit Function(std::vector<std::string> arguments, Statement *body, bool unlimited, Scope *context);
     ~Function() override;
 };
 
+// TODO: subclass
+class Instance;
 class ClassMethod : public Callable {
     friend class Interpreter;
     Callable *function;
-    Object *source;
+    Instance *instance;
 protected:
     bool checkArguments(int count) override;
-    Object *__call__(ArgsList args, API *api) override;
+    Object *call(ArgsList args, API *api) override;
 
 public:
-    ClassMethod(Object *source, Callable *function);
+    ClassMethod(Callable *function, Instance *instance);
     ~ClassMethod() override;
 };
 

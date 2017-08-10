@@ -1,4 +1,5 @@
 #include <iostream>
+#include <utility>
 #include "Object.h"
 #include "Types/Exception.h"
 
@@ -34,5 +35,12 @@ Object *Object::getAttribute(const std::string &name) {
     auto result = findAttribute(name);
     if (result)
         return result;
-    throw Exception("AttributeError");
+    throw Wrap(new AttributeError(name));
 }
+
+void Object::remove(Object *object) {
+    if (object and object->canDelete())
+        delete object;
+}
+
+void Object::save() { mentions++; }

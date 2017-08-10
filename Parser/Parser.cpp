@@ -6,7 +6,7 @@ Parser::Parser(const std::vector<Token> &tokens) : tokens(tokens) {
 
 bool Parser::matches(std::initializer_list<Token::tokenType> types) {
     if (position == tokens.end())
-        return false;
+        throw "Unexpected end of program";
 
     for (auto type : types)
         if (type == position->type)
