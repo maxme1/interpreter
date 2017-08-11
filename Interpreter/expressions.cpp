@@ -24,7 +24,6 @@ std::map<Token::tokenType, std::string> unary = {
 
 ObjPtr Interpreter::evaluate(Binary *expression) {
     ObjPtr left = expression->left->evaluate(this), right = expression->right->evaluate(this);
-//    user-defined methods
     auto name = binary.find(expression->token.type);
     if (name != binary.end()) {
         auto method = left->findAttribute(name->second);
@@ -32,6 +31,7 @@ ObjPtr Interpreter::evaluate(Binary *expression) {
             return callOperator(method, {right});
     }
 
+//    default behavior
     if (expression->ofType(Token::EQUAL))
         return New(Bool(left == right));
     if (expression->ofType(Token::NOT_EQUAL))
@@ -42,7 +42,6 @@ ObjPtr Interpreter::evaluate(Binary *expression) {
 
 ObjPtr Interpreter::evaluate(Unary *expression) {
     ObjPtr argument = expression->argument->evaluate(this);
-    //    user-defined methods
     auto name = unary.find(expression->token.type);
     if (name != unary.end()) {
         auto method = argument->findAttribute(name->second);
@@ -98,19 +97,19 @@ ObjPtr Interpreter::evaluate(FunctionExpression *expression) {
 
     auto classObject = std::dynamic_pointer_cast<Class>(object);
     if (classObject) {
-        addScope(classObject->context);
         auto instance = classObject->makeInstance(nullptr);
+        ObjPtr init;
+        addScope(classObject->context);
         try {
-            auto init = instance->findAttribute("init");
-            if (init) {
+            init = instance->findAttribute("init");
+            if (init)
                 callFunction(init, expression->argsList);
-                return instance;
-            }
         } catch (ExceptionWrapper &e) {
             deleteScope();
             throw;
         }
-        if (!expression->argsList.empty())
+        deleteScope();
+        if (!init and !expression->argsList.empty())
             throw Wrap(new Exception("Default constructor does not receive arguments"));
         return instance;
     }
