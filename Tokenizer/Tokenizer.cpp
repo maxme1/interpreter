@@ -2,27 +2,26 @@
 #include <map>
 #include "Tokenizer.h"
 
-#define tk(a) Token(a, std::string(begin, position), position - text.begin())
+#define tk(a) queue.push(Token(a, std::string(begin, position), position - text.begin())); return true;
 
-Tokenizer::Tokenizer(std::string text) : text(std::move(text)) {
+Tokenizer::Tokenizer(const std::string &text) : text(text) {
+    if (this->text.back() != '\n')
+        this->text.push_back('\n');
     position = this->text.begin();
 }
 
 std::vector<Token> Tokenizer::tokenize() {
+    while (getNextToken());
     auto result = std::vector<Token>();
-    auto next = nextToken();
-//    filtering DELIMITER duplicates
-    bool add = true;
-    while (next.type != Token::PROGRAM_END) {
-        if (add and next.type != Token::COMMENT)
-            result.push_back(next);
-        if (next.type == Token::ERROR) {
-            error = true;
-            return result;
-        }
-        next = nextToken();
-//        add the DELIMITER if only it doesn't repeat itself
-        add = not(result.back().type == Token::DELIMITER and next.type == Token::DELIMITER);
+    while (!queue.empty()) {
+        auto next = queue.front();
+        queue.pop();
+        if (!result.empty())
+            if (result.back().type == Token::DELIMITER) {
+                if (next.type == Token::BLOCK_OPEN)
+                    result.pop_back();
+            }
+        result.push_back(next);
     }
     return result;
 }
@@ -40,8 +39,8 @@ std::map<char, Token::tokenType> one_symbol = {
         {'[', Token::ITEM_OPEN},
         {']', Token::ITEM_CLOSE},
         {'.', Token::ATTRIBUTE},
-        {'{', Token::BLOCK_OPEN},
-        {'}', Token::BLOCK_CLOSE},
+//        {'{', Token::BLOCK_OPEN},
+//        {'}', Token::BLOCK_CLOSE},
         {'>', Token::GREATER},
         {'<', Token::LESS},
 };
@@ -69,24 +68,50 @@ std::map<std::string, Token::tokenType> reserved = {
         {"def",      Token::FUNCTION},
         {"class",    Token::CLASS},
         {"import",   Token::IMPORT},
+        {"extends",  Token::EXTENDS},
 };
 
-Token Tokenizer::nextToken() {
-//    blanks
-    while (position != text.end() and (*position == ' ' or *position == '\n' or *position == '\r'))
+bool Tokenizer::getNextToken() {
+    auto begin = position;
+    while (position != text.end() and *position == ' ')
         position++;
 
-
-    if (position == text.end())
-        return Token(Token::PROGRAM_END, "<<<", text.size() - 1);
-
-    auto begin = position;
-//    comments
+//    comment
     if (*position == '#') {
         while (position != text.end() and *position != '\n')
             position++;
-        return tk(Token::COMMENT);
+        return true;
     }
+
+    if (atBegin) {
+//        blank lines
+        if (*position == '\n') {
+            while (position != text.end() and *position == '\n')
+                position++;
+            return true;
+        }
+
+        atBegin = false;
+        int indent = position - begin;
+        int diff = currentIndent - indent;
+        if (diff % indentLength) {
+            error = true;
+            return false;
+        }
+        int amount = abs(diff) / indentLength;
+        for (int i = 0; i < amount; ++i)
+            if (diff > 0)
+                queue.push(Token(Token::BLOCK_CLOSE, "}", position - text.begin()));
+            else
+                queue.push(Token(Token::BLOCK_OPEN, "{", position - text.begin()));
+        currentIndent = indent;
+        return true;
+    }
+    begin = position;
+
+    if (position == text.end())
+        return false;
+
 //    string
     if (*position == '\'') {
         position++;
@@ -94,15 +119,15 @@ Token Tokenizer::nextToken() {
             position++;
         if (*position == '\'') {
             position++;
-            return tk(Token::STRING);
+            tk(Token::STRING);
         }
-        return tk(Token::ERROR);
+        tk(Token::ERROR);
     }
 //    number
     if (isdigit(*position)) {
         while (isdigit(*position))
             position++;
-        return tk(Token::NUMBER);
+        tk(Token::NUMBER);
     }
 //    identifier or reserved
     if (isalpha(*position) or *position == '_') {
@@ -110,16 +135,16 @@ Token Tokenizer::nextToken() {
             position++;
         auto result = reserved.find(std::string(begin, position));
         if (result != reserved.end()) {
-            return tk(result->second);
+            tk(result->second);
         }
-        return tk(Token::IDENTIFIER);
+        tk(Token::IDENTIFIER);
     }
 //    two symbols
     if ((position + 1) != text.end()) {
         auto result = two_symbols.find(std::string(begin, position + 2));
         if (result != two_symbols.end()) {
             position += 2;
-            return tk(result->second);
+            tk(result->second);
         }
     }
 //    one symbol
@@ -127,10 +152,18 @@ Token Tokenizer::nextToken() {
         auto result = one_symbol.find(*position);
         if (result != one_symbol.end()) {
             position++;
-            return tk(result->second);
+            tk(result->second);
         }
     }
 
+    if (*position == '\n') {
+        position++;
+        atBegin = true;
+        tk(Token::DELIMITER);
+    }
+
     position++;
-    return tk(Token::ERROR);
+    queue.push(Token(Token::ERROR, std::string(begin, position), position - text.begin()));
+    error = true;
+    return false;
 }

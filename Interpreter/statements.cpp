@@ -27,6 +27,9 @@ void Interpreter::evaluate(ExpressionStatement *statement) {
     statement->expression->evaluate(this);
 }
 
+void Interpreter::evaluate(Statement *statement) {
+}
+
 void Interpreter::evaluate(IfStatement *statement) {
     auto cond = statement->condition->evaluate(this);
     if (cond->asBool()) {

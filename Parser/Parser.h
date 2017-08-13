@@ -17,8 +17,6 @@ class Parser {
     Token require(std::initializer_list<Token::tokenType> types);
 
     Statement *statement() {
-        if (matches({Token::BLOCK_OPEN}))
-            return block();
         if (matches({Token::IF}))
             return ifStatement();
         if (matches({Token::WHILE}))
@@ -29,6 +27,10 @@ class Parser {
             return functionDefinition();
         if (matches({Token::CLASS}))
             return classDefinition();
+        if (matches({Token::DELIMITER})) {
+            advance();
+            return new Statement();
+        }
 
         auto body = statementBody();
         require({Token::DELIMITER});
@@ -88,11 +90,16 @@ class Parser {
 
     Statement *tryStatement() {
         require({Token::TRY});
-        auto mainBody = block();
         auto catches = std::vector<TryStatement::CatchStatement *>();
+        if (!matches({Token::BLOCK_OPEN})) {
+            auto args = simplerArgsList();
+            auto body = new Block(std::vector<Statement *>());
+            catches.push_back(new TryStatement::CatchStatement(args, body));
+        }
+        auto mainBody = block();
         while (matches({Token::CATCH})) {
             advance();
-            auto args = arguments();
+            auto args = simplerArgsList();
             auto body = block();
             catches.push_back(new TryStatement::CatchStatement(args, body));
         }
@@ -117,30 +124,33 @@ class Parser {
     Statement *functionDefinition() {
         require({Token::FUNCTION});
         auto name = require({Token::IDENTIFIER}).body;
-        require({Token::BRACKET_OPEN});
         auto arguments = std::vector<std::string>();
-        bool first = true, unlimited = false;
-        while (!matches({Token::BRACKET_CLOSE})) {
-            if (!first)
-                require({Token::SEPARATOR});
-            if (matches({Token::MUL})) {
+        bool unlimited = false;
+        if (matches({Token::BRACKET_OPEN})) {
+            advance();
+            bool first = true;
+            while (!matches({Token::BRACKET_CLOSE})) {
+                if (!first)
+                    require({Token::SEPARATOR});
+                if (matches({Token::MUL})) {
 //                unlimited arguments
-                advance();
-                unlimited = true;
-            }
-            auto local = require({Token::IDENTIFIER});
-            //        checking uniqueness
-            for (auto &argument : arguments) {
-                if (argument == local.body)
-                    throw "Duplicate argument";
-            }
+                    advance();
+                    unlimited = true;
+                }
+                auto local = require({Token::IDENTIFIER});
+                //        checking uniqueness
+                for (auto &argument : arguments) {
+                    if (argument == local.body)
+                        throw "Duplicate argument";
+                }
 
-            arguments.push_back(local.body);
-            if (unlimited)
-                break;
-            first = false;
+                arguments.push_back(local.body);
+                if (unlimited)
+                    break;
+                first = false;
+            }
+            require({Token::BRACKET_CLOSE});
         }
-        require({Token::BRACKET_CLOSE});
         auto body = block();
         return new FunctionDefinition(name, arguments, body, unlimited);
     }
@@ -149,11 +159,9 @@ class Parser {
         require({Token::CLASS});
         auto name = require({Token::IDENTIFIER}).body;
         Expression *superclass = nullptr;
-        if (matches({Token::BRACKET_OPEN})) {
+        if (matches({Token::EXTENDS})) {
             advance();
-            if (!matches({Token::BRACKET_CLOSE}))
-                superclass = expression();
-            require({Token::BRACKET_CLOSE});
+            superclass = expression();
         }
         auto body = block();
         return new ClassDefinition(name, body, superclass);
@@ -238,7 +246,7 @@ class Parser {
         while (matches({Token::BRACKET_OPEN, Token::ATTRIBUTE, Token::ITEM_OPEN})) {
             if (matches({Token::BRACKET_OPEN})) {
                 auto token = *position;
-                auto args = arguments();
+                auto args = argsList();
                 left = new FunctionExpression(token, left, args);
             } else if (matches({Token::ATTRIBUTE})) {
                 auto token = advance();
@@ -254,7 +262,8 @@ class Parser {
         return left;
     }
 
-    std::vector<Expression *> arguments() {
+//    TODO: unify
+    std::vector<Expression *> argsList() {
         require({Token::BRACKET_OPEN});
         auto result = std::vector<Expression *>();
         while (!matches({Token::BRACKET_CLOSE})) {
@@ -263,6 +272,25 @@ class Parser {
                 require({Token::SEPARATOR});
         }
         advance();
+        return result;
+    }
+
+    std::vector<Expression *> simplerArgsList() {
+        bool close = matches({Token::BRACKET_OPEN});
+        if (close)
+            advance();
+
+        auto result = std::vector<Expression *>();
+//        if not empty
+        if (!matches({Token::BLOCK_OPEN, Token::BRACKET_CLOSE})) {
+            result.push_back(expression());
+            while (matches({Token::SEPARATOR})) {
+                advance();
+                result.push_back(expression());
+            }
+        }
+        if (close)
+            require({Token::BRACKET_CLOSE});
         return result;
     }
 
@@ -298,7 +326,7 @@ public:
 //            TODO: no memory is being freed whatsoever
             error = true;
             this->message = message;
-        } catch (std::string message) {
+        } catch (std::string &message) {
 //            TODO: no memory is being freed whatsoever
             error = true;
             this->message = message;

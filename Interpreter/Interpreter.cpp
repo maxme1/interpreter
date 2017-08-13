@@ -26,7 +26,7 @@ void Interpreter::interpret(std::string text) {
     if (t.error) {
         int position = tokens.back().position;
         int begin = std::max<int>(0, position - textRange);
-        std::cout << text.substr(begin, textRange);
+        std::cout << text.substr(begin, position - begin);
         std::cout << " <<<\n==========\nUndefined token: " << tokens.back().body;
         return;
     }
@@ -35,8 +35,10 @@ void Interpreter::interpret(std::string text) {
     auto statements = p.build();
     if (p.error) {
         int position = p.position->position;
-        int begin = std::max<int>(0, position - textRange);
-        std::cout << text.substr(begin, textRange);
+        if (position < text.size()) {
+            int begin = std::max<int>(0, position - textRange);
+            std::cout << text.substr(begin, position - begin);
+        }
         std::cout << " <<<\n==========\n" << p.message;
         return;
     }

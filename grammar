@@ -1,23 +1,24 @@
 program = statement*
 
-statement = (StmtBody? DELIMITER) | block | ifStmt | whileStmt | tryStmt | funcDef | classDef
+statement = (StmtBody? DELIMITER) | ifStmt | whileStmt | tryStmt | funcDef | classDef
 
 StmtBody = expression | 'break' | 'continue' | returnStmt | raiseStmt | importStmt
 returnStmt = 'return' expression?
 raiseStmt = 'raise' expression?
 
 importStmt = 'import' IDENTIFIER
-tryStmt = 'try' block ('catch' '(' argsValues ')' block)*
+tryStmt = 'try' argsValues? block ('catch' argsValues block)*
 # TODO: possibly optional first statement
 ifStmt = 'if' '(' expression ')' (statement ('else' statement)? )?
 whileStmt = 'while' '(' expression ')' statement
 block = '{' statement* '}'
 
-funcDef = 'def' IDENTIFIER '(' argsList? ')' block
+funcDef = 'def' IDENTIFIER arguments? block
+arguments = '(' argsList? ')'
 argsList = IDENTIFIER (SEPARATOR IDENTIFIER)*
 
 classDef = 'class' IDENTIFIER superclass? block
-superclass = '(' expression? ')'
+superclass = EXTENDS expression
 
 -- expression --
 
@@ -48,6 +49,7 @@ STRING = "'[^']*'"
 BOOL = 'True' | 'False'
 NONE = 'None'
 IDENTIFIER = '[a-zA-Z_]\w*'
-DELIMITER = ';'
+DELIMITER = '[;\n]'
 SEPARATOR = ','
+EXTENDS = 'extends'
 COMMENT = '#[^\n]*'

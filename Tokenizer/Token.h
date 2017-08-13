@@ -17,10 +17,10 @@ struct Token {
         BLOCK_OPEN, BLOCK_CLOSE,
 
         IF, ELSE, WHILE, TRY, CATCH, IMPORT,
-        FUNCTION, CLASS,
+        FUNCTION, CLASS, EXTENDS,
         BREAK, CONTINUE, RETURN, RAISE,
 
-        PROGRAM_END, ERROR, COMMENT
+        ERROR
     };
 
     tokenType type;

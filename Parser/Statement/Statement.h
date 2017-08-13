@@ -10,9 +10,14 @@ class Expression;
 
 class Statement {
 public:
-    virtual void evaluate(Interpreter *interpreter) = 0;
+    virtual void evaluate(Interpreter *interpreter) {
+        interpreter->evaluate(this);
+    };
     virtual ~Statement() = default;
-    virtual std::string str() = 0;
+
+    virtual std::string str() {
+        return ";";
+    };
 };
 
 class Block : public Statement {
@@ -79,6 +84,7 @@ struct TryStatement : public Statement {
     void evaluate(Interpreter *interpreter) override {
         interpreter->evaluate(this);
     }
+
     TryStatement(const std::vector<CatchStatement *> &catches, Statement *block);
     ~TryStatement() override;
     std::string str() override;

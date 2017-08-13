@@ -57,6 +57,7 @@ public:
     ObjPtr evaluate(GetAttribute *expression);
     ObjPtr evaluate(GetItem *expression);
 
+    void evaluate(Statement *statement);
     void evaluate(ExpressionStatement *statement);
     void evaluate(IfStatement *statement);
     void evaluate(TryStatement *statement);
