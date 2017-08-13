@@ -34,6 +34,8 @@ class ImportStatement;
 class ControlFlow;
 class Block;
 
+typedef std::shared_ptr<Expression> ExprPtr;
+
 class Object;
 class Callable;
 class Class;
@@ -53,9 +55,9 @@ public:
     ObjPtr evaluate(SetAttribute *expression);
     ObjPtr evaluate(SetItem *expression);
     ObjPtr evaluate(Variable *expression);
-    ObjPtr evaluate(FunctionExpression *expression);
-    ObjPtr evaluate(GetAttribute *expression);
-    ObjPtr evaluate(GetItem *expression);
+    ObjPtr evaluate(FunctionExpression *ExprPtr );
+    ObjPtr evaluate(GetAttribute *ExprPtr );
+    ObjPtr evaluate(GetItem *ExprPtr );
 
     void evaluate(Statement *statement);
     void evaluate(ExpressionStatement *statement);
@@ -84,13 +86,13 @@ private:
 
     ObjPtr getVariable(const std::string &name);
     void setVariable(const std::string &name, ObjPtr value);
-    void evaluateStatements(std::vector<Statement *> &statements);
+    void evaluateStatements(std::vector<std::shared_ptr<Statement>> &statements);
 
     ObjPtr callOperator(ObjPtr object, const std::vector<ObjPtr> &arguments);
-    ObjPtr callFunction(ObjPtr object, const std::vector<Expression *> &argsList);
+    ObjPtr callFunction(ObjPtr object, const std::vector<ExprPtr> &argsList);
 
     ObjPtr call(std::shared_ptr<Callable> callable, const std::vector<ObjPtr> &arguments);
-    std::vector<ObjPtr> evaluateArguments(const std::vector<Expression *> &argsList);
+    std::vector<ObjPtr> evaluateArguments(const std::vector<ExprPtr> &argsList);
     std::shared_ptr<Callable> getCallable(ObjPtr object);
     void checkArguments(std::shared_ptr<Callable> callable, int count);
 

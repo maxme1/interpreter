@@ -9,21 +9,23 @@
 #include "../../Interpreter/Interpreter.h"
 #include "../Statement/Statement.h"
 
-
 class Object;
+
 class Expression {
     friend class Interpreter;
+
     virtual ObjPtr evaluate(Interpreter *interpreter) = 0;
 
     Token token;
 public:
     explicit Expression(Token token) : token(std::move(token)) {};
-    virtual ~Expression() = default;
 
     bool ofType(Token::tokenType type) { return type == token.type; }
 
     virtual std::string str() { return token.body; };
 };
+
+typedef std::shared_ptr<Expression> ExprPtr;
 
 class Binary : public Expression {
     friend class Interpreter;
@@ -32,10 +34,10 @@ class Binary : public Expression {
         return interpreter->evaluate(this);
     }
 
-    Expression *left, *right;
+    ExprPtr left, right;
 public:
-    Binary(Token token, Expression *left, Expression *right);
-    ~Binary() override;
+    Binary(Token token, ExprPtr left, ExprPtr right);
+
     std::string str() override;
 };
 
@@ -46,15 +48,16 @@ class Unary : public Expression {
         return interpreter->evaluate(this);
     }
 
-    Expression *argument;
+    ExprPtr argument;
 public:
-    Unary(Token token, Expression *argument);
-    ~Unary() override;
+    Unary(Token token, ExprPtr argument);
+
     std::string str() override;
 };
 
 class Literal : public Expression {
     friend class Interpreter;
+
 private:
     ObjPtr evaluate(Interpreter *interpreter) override {
         return interpreter->evaluate(this);
@@ -84,43 +87,45 @@ class FunctionExpression : public Expression {
         return interpreter->evaluate(this);
     }
 
-    Expression *target;
-    std::vector<Expression *> argsList;
+    ExprPtr target;
+    std::vector<ExprPtr> argsList;
 public:
-    FunctionExpression(Token token, Expression *target, std::vector<Expression *> argsList);
-    ~FunctionExpression() override;
+    FunctionExpression(Token token, ExprPtr target, std::vector<ExprPtr> argsList);
+
     std::string str() override;
 };
 
 class GetItem : public Expression {
     friend class Interpreter;
+
     friend class SetItem;
 
     ObjPtr evaluate(Interpreter *interpreter) override {
         return interpreter->evaluate(this);
     }
 
-    Expression *target;
-    Expression *argument;
+    ExprPtr target;
+    ExprPtr argument;
 public:
-    GetItem(Token token, Expression *target, Expression *argument);
-    ~GetItem() override;
+    GetItem(Token token, ExprPtr target, ExprPtr argument);
+
     std::string str() override;
 };
 
 class GetAttribute : public Expression {
     friend class Interpreter;
+
     friend class SetAttribute;
 
     ObjPtr evaluate(Interpreter *interpreter) override {
         return interpreter->evaluate(this);
     }
 
-    Expression *target;
+    ExprPtr target;
     std::string name;
 public:
-    GetAttribute(Token token, Expression *target, std::string name);
-    ~GetAttribute() override;
+    GetAttribute(Token token, ExprPtr target, std::string name);
+
     std::string str() override;
 };
 
@@ -132,11 +137,11 @@ class SetVariable : public Expression {
     }
 
     std::string name;
-    Expression *value;
+    ExprPtr value;
 
 public:
-    SetVariable(Token token, std::string name, Expression *value);
-    ~SetVariable() override;
+    SetVariable(Token token, std::string name, ExprPtr value);
+
     std::string str() override;
 };
 
@@ -147,12 +152,12 @@ class SetAttribute : public Expression {
         return interpreter->evaluate(this);
     }
 
-    Expression *value;
-    GetAttribute *target;
+    ExprPtr value;
+    std::shared_ptr<GetAttribute> target;
 
 public:
-    SetAttribute(const Token &token, GetAttribute *target, Expression *value);
-    ~SetAttribute() override;
+    SetAttribute(const Token &token, std::shared_ptr<GetAttribute> target, ExprPtr value);
+
     std::string str() override;
 };
 
@@ -163,12 +168,12 @@ class SetItem : public Expression {
         return interpreter->evaluate(this);
     }
 
-    Expression *value;
-    GetItem *target;
+    ExprPtr value;
+    std::shared_ptr<GetItem> target;
 
 public:
-    SetItem(const Token &token, GetItem *target, Expression *value);
-    ~SetItem() override;
+    SetItem(const Token &token, std::shared_ptr<GetItem> target, ExprPtr value);
+
     std::string str() override;
 };
 

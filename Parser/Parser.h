@@ -1,22 +1,25 @@
 #ifndef INTERPRETER_PARSER_H
 #define INTERPRETER_PARSER_H
 
-
 #include <vector>
 #include <initializer_list>
 #include <iostream>
 #include <cassert>
 #include "Expression/Expression.h"
 
+#define $s(a) StmtPtr(new a)
+#define $e(a) ExprPtr(new a)
+
 class Parser {
-    typedef std::initializer_list<Token::tokenType> TokenTypes;
     std::vector<Token> tokens;
 
     bool matches(std::initializer_list<Token::tokenType> types);
+
     Token advance();
+
     Token require(std::initializer_list<Token::tokenType> types);
 
-    Statement *statement() {
+    StmtPtr statement() {
         if (matches({Token::IF}))
             return ifStatement();
         if (matches({Token::WHILE}))
@@ -29,7 +32,7 @@ class Parser {
             return classDefinition();
         if (matches({Token::DELIMITER})) {
             advance();
-            return new Statement();
+            return $s(Statement());
         }
 
         auto body = statementBody();
@@ -37,7 +40,7 @@ class Parser {
         return body;
     };
 
-    Statement *statementBody() {
+    StmtPtr statementBody() {
         if (matches({Token::RETURN}))
             return returnStatement();
         if (matches({Token::RAISE}))
@@ -46,29 +49,29 @@ class Parser {
             return importStatement();
         if (matches({Token::BREAK, Token::CONTINUE})) {
             auto control = advance();
-            return new ControlFlow(control.type, control.body);
+            return $s(ControlFlow(control.type, control.body));
         }
-        return new ExpressionStatement(expression());
+        return $s(ExpressionStatement(expression()));
     }
 
-    Statement *returnStatement() {
+    StmtPtr returnStatement() {
         require({Token::RETURN});
         if (!matches({Token::DELIMITER}))
-            return new ReturnStatement(expression());
-        return new ReturnStatement();
+            return $s(ReturnStatement(expression()));
+        return $s(ReturnStatement());
     }
 
-    Statement *raiseStatement() {
+    StmtPtr raiseStatement() {
         require({Token::RAISE});
-        return new RaiseStatement(expression());
+        return $s(RaiseStatement(expression()));
     }
 
-    Statement *importStatement() {
+    StmtPtr importStatement() {
         require({Token::IMPORT});
-        return new ImportStatement(require({Token::IDENTIFIER}).body);
+        return $s(ImportStatement(require({Token::IDENTIFIER}).body));
     }
 
-    Statement *ifStatement() {
+    StmtPtr ifStatement() {
         require({Token::IF});
         require({Token::BRACKET_OPEN});
         auto condition = expression();
@@ -76,37 +79,38 @@ class Parser {
 //        empty if
         if (matches({Token::DELIMITER})) {
             advance();
-            return new IfStatement(condition);
+            return $s(IfStatement(condition));
         }
         auto left = statement();
 //        only left block
         if (!matches({Token::ELSE}))
-            return new IfStatement(condition, left);
+            return $s(IfStatement(condition, left));
 //        both blocks
         advance();
         auto right = statement();
-        return new IfStatement(condition, left, right);
+        return $s(IfStatement(condition, left, right));
     }
 
-    Statement *tryStatement() {
+    StmtPtr tryStatement() {
         require({Token::TRY});
-        auto catches = std::vector<TryStatement::CatchStatement *>();
+        typedef std::shared_ptr<TryStatement::CatchStatement> CatchPtr;
+        auto catches = std::vector<CatchPtr>();
         if (!matches({Token::BLOCK_OPEN})) {
             auto args = simplerArgsList();
-            auto body = new Block(std::vector<Statement *>());
-            catches.push_back(new TryStatement::CatchStatement(args, body));
+            auto body = $s(Block(std::vector<StmtPtr>()));
+            catches.push_back(CatchPtr(new TryStatement::CatchStatement(args, body)));
         }
         auto mainBody = block();
         while (matches({Token::CATCH})) {
             advance();
             auto args = simplerArgsList();
             auto body = block();
-            catches.push_back(new TryStatement::CatchStatement(args, body));
+            catches.push_back(CatchPtr(new TryStatement::CatchStatement(args, body)));
         }
-        return new TryStatement(catches, mainBody);
+        return $s(TryStatement(catches, mainBody));
     }
 
-    Statement *whileStatement() {
+    StmtPtr whileStatement() {
         require({Token::WHILE});
         require({Token::BRACKET_OPEN});
         auto condition = expression();
@@ -114,14 +118,14 @@ class Parser {
 //        empty body
         if (matches({Token::DELIMITER})) {
             advance();
-            return new WhileStatement(condition);
+            return $s(WhileStatement(condition));
         }
         auto body = statement();
-        return new WhileStatement(condition, body);
+        return $s(WhileStatement(condition, body));
     }
 
 //    TODO: this function got too large
-    Statement *functionDefinition() {
+    StmtPtr functionDefinition() {
         require({Token::FUNCTION});
         auto name = require({Token::IDENTIFIER}).body;
         auto arguments = std::vector<std::string>();
@@ -152,48 +156,48 @@ class Parser {
             require({Token::BRACKET_CLOSE});
         }
         auto body = block();
-        return new FunctionDefinition(name, arguments, body, unlimited);
+        return $s(FunctionDefinition(name, arguments, body, unlimited));
     }
 
-    Statement *classDefinition() {
+    StmtPtr classDefinition() {
         require({Token::CLASS});
         auto name = require({Token::IDENTIFIER}).body;
-        Expression *superclass = nullptr;
+        ExprPtr superclass = nullptr;
         if (matches({Token::EXTENDS})) {
             advance();
             superclass = expression();
         }
         auto body = block();
-        return new ClassDefinition(name, body, superclass);
+        return $s(ClassDefinition(name, body, superclass));
     }
 
-    Statement *block() {
+    StmtPtr block() {
         require({Token::BLOCK_OPEN});
-        auto statements = std::vector<Statement *>();
+        auto statements = std::vector<StmtPtr>();
         while (position != tokens.end() and !matches({Token::BLOCK_CLOSE}))
             statements.push_back(statement());
         require({Token::BLOCK_CLOSE});
-        return new Block(statements);
+        return $s(Block(statements));
     };
 
-    Expression *expression() {
+    ExprPtr expression() {
         auto left = comparison();
         if (matches({Token::ASSIGNMENT})) {
             Token previous = *(position - 1);
             auto token = advance();
             auto right = expression();
             if (left->ofType(Token::IDENTIFIER)) {
-                return new SetVariable(token, previous.body, right);
+                return $e(SetVariable(token, previous.body, right));
             }
             if (left->ofType(Token::ATTRIBUTE)) {
-                auto lookup = dynamic_cast<GetAttribute *>(left);
+                auto lookup = std::dynamic_pointer_cast<GetAttribute>(left);
                 assert(lookup);
-                return new SetAttribute(token, lookup, right);
+                return $e(SetAttribute(token, lookup, right));
             }
             if (left->ofType(Token::ITEM_OPEN)) {
-                auto lookup = dynamic_cast<GetItem *>(left);
+                auto lookup = std::dynamic_pointer_cast<GetItem>(left);
                 assert(lookup);
-                return new SetItem(token, lookup, right);
+                return $e(SetItem(token, lookup, right));
             }
 
             throw "Bad assignment";
@@ -202,60 +206,60 @@ class Parser {
         return left;
     }
 
-    Expression *comparison() {
+    ExprPtr comparison() {
         auto left = term();
         while (matches({Token::EQUAL, Token::GREATER, Token::GREATER_OR_EQUAL, Token::LESS,
                         Token::LESS_OR_EQUAL, Token::NOT_EQUAL})) {
             auto current = advance();
             auto right = term();
-            left = new Binary(current, left, right);
+            left = $e(Binary(current, left, right));
         }
         return left;
     }
 
-    Expression *term() {
+    ExprPtr term() {
         auto left = factor();
         while (matches({Token::ADD, Token::SUB})) {
             auto current = advance();
             auto right = factor();
-            left = new Binary(current, left, right);
+            left = $e(Binary(current, left, right));
         }
         return left;
     }
 
-    Expression *factor() {
+    ExprPtr factor() {
         auto left = unary();
         while (matches({Token::MUL, Token::DIV})) {
             auto current = advance();
             auto right = unary();
-            left = new Binary(current, left, right);
+            left = $e(Binary(current, left, right));
         }
         return left;
     }
 
-    Expression *unary() {
+    ExprPtr unary() {
         if (!matches({Token::ADD, Token::SUB}))
             return primary();
         auto current = advance();
         auto argument = primary();
-        return new Unary(current, argument);
+        return $e(Unary(current, argument));
     }
 
-    Expression *primary() {
+    ExprPtr primary() {
         auto left = literal();
         while (matches({Token::BRACKET_OPEN, Token::ATTRIBUTE, Token::ITEM_OPEN})) {
             if (matches({Token::BRACKET_OPEN})) {
                 auto token = *position;
                 auto args = argsList();
-                left = new FunctionExpression(token, left, args);
+                left = $e(FunctionExpression(token, left, args));
             } else if (matches({Token::ATTRIBUTE})) {
                 auto token = advance();
                 auto name = require({Token::IDENTIFIER}).body;
-                left = new GetAttribute(token, left, name);
+                left = $e(GetAttribute(token, left, name));
             } else if (matches({Token::ITEM_OPEN})) {
                 auto token = advance();
                 auto arg = expression();
-                left = new GetItem(token, left, arg);
+                left = $e(GetItem(token, left, arg));
                 require({Token::ITEM_CLOSE});
             }
         }
@@ -263,9 +267,9 @@ class Parser {
     }
 
 //    TODO: unify
-    std::vector<Expression *> argsList() {
+    std::vector<ExprPtr> argsList() {
         require({Token::BRACKET_OPEN});
-        auto result = std::vector<Expression *>();
+        auto result = std::vector<ExprPtr>();
         while (!matches({Token::BRACKET_CLOSE})) {
             result.push_back(expression());
             if (!matches({Token::BRACKET_CLOSE}))
@@ -275,12 +279,12 @@ class Parser {
         return result;
     }
 
-    std::vector<Expression *> simplerArgsList() {
+    std::vector<ExprPtr> simplerArgsList() {
         bool close = matches({Token::BRACKET_OPEN});
         if (close)
             advance();
 
-        auto result = std::vector<Expression *>();
+        auto result = std::vector<ExprPtr>();
 //        if not empty
         if (!matches({Token::BLOCK_OPEN, Token::BRACKET_CLOSE})) {
             result.push_back(expression());
@@ -294,19 +298,19 @@ class Parser {
         return result;
     }
 
-    Expression *literal() {
+    ExprPtr literal() {
         if (matches({Token::NUMBER, Token::BOOL, Token::NONE, Token::STRING})) {
             auto current = advance();
-            return new Literal(current);
+            return $e(Literal(current));
         }
         if (matches({Token::IDENTIFIER})) {
             auto current = advance();
-            return new Variable(current);
+            return $e(Variable(current));
         }
         auto bracket = require({Token::BRACKET_OPEN});
         auto result = expression();
         require({Token::BRACKET_CLOSE});
-        return new Unary(bracket, result);
+        return $e(Unary(bracket, result));
     }
 
 public:
@@ -317,8 +321,8 @@ public:
     explicit Parser(const std::vector<Token> &tokens);
 
 //    TODO: combine build and block
-    std::vector<Statement *> build() {
-        auto statements = std::vector<Statement *>();
+    std::vector<StmtPtr> build() {
+        auto statements = std::vector<StmtPtr>();
         try {
             while (position != tokens.end())
                 statements.push_back(statement());
@@ -334,6 +338,5 @@ public:
         return statements;
     };
 };
-
 
 #endif //INTERPRETER_PARSER_H

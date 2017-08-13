@@ -1,22 +1,14 @@
 #include "Statement.h"
 #include "../Expression/Expression.h"
 
-ExpressionStatement::ExpressionStatement(Expression *expression) : expression(expression) {}
+ExpressionStatement::ExpressionStatement(ExprPtr expression) : expression(expression) {}
 
 std::string ExpressionStatement::str() {
     return expression->str() + ";";
 }
 
-ExpressionStatement::~ExpressionStatement() {
-    delete expression;
-}
-
-IfStatement::IfStatement(Expression *condition, Statement *left, Statement *right) : condition(condition), left(left),
-                                                                                     right(right) {}
-
-IfStatement::~IfStatement() {
-    delete condition, left, right;
-}
+IfStatement::IfStatement(ExprPtr condition, StmtPtr left, StmtPtr right) : condition(condition), left(left),
+                                                                           right(right) {}
 
 std::string IfStatement::str() {
     std::string result = "if(" + condition->str() + ")";
@@ -27,25 +19,11 @@ std::string IfStatement::str() {
     return result;
 }
 
-TryStatement::TryStatement(const std::vector<TryStatement::CatchStatement *> &catches, Statement *block) :
-        catches(catches), block(block) {}
-
-TryStatement::~TryStatement() {
-    delete block;
-    for (auto &&item : catches) {
-        delete item;
-    }
-}
-
 std::string TryStatement::str() {
     return "try - catch. i'm too lazy";
 }
 
-WhileStatement::WhileStatement(Expression *condition, Statement *body) : condition(condition), body(body) {}
-
-WhileStatement::~WhileStatement() {
-    delete condition, body;
-}
+WhileStatement::WhileStatement(ExprPtr condition, StmtPtr body) : condition(condition), body(body) {}
 
 std::string WhileStatement::str() {
     std::string result = "while(" + condition->str() + ")";
@@ -58,9 +36,7 @@ ControlFlow::ControlFlow(Token::tokenType type, const std::string &body) : type(
 
 std::string ControlFlow::str() { return body; }
 
-ReturnStatement::ReturnStatement(Expression *expression) : expression(expression) {}
-
-ReturnStatement::~ReturnStatement() { delete expression; }
+ReturnStatement::ReturnStatement(ExprPtr expression) : expression(expression) {}
 
 std::string ReturnStatement::str() {
     std::string result = "return";
@@ -69,9 +45,7 @@ std::string ReturnStatement::str() {
     return result;
 }
 
-RaiseStatement::RaiseStatement(Expression *expression) : expression(expression) {}
-
-RaiseStatement::~RaiseStatement() { delete expression; }
+RaiseStatement::RaiseStatement(ExprPtr expression) : expression(expression) {}
 
 std::string RaiseStatement::str() {
     std::string result = "raise";
@@ -87,7 +61,7 @@ std::string ImportStatement::str() {
 }
 
 FunctionDefinition::FunctionDefinition(const std::string &name, const std::vector<std::string> &arguments,
-                                       Statement *body, bool unlimited) :
+                                       StmtPtr body, bool unlimited) :
         body(body), arguments(arguments), name(name), unlimited(unlimited) {}
 
 std::string FunctionDefinition::str() {
@@ -102,22 +76,14 @@ std::string FunctionDefinition::str() {
     return result + ")" + body->str();
 }
 
-FunctionDefinition::~FunctionDefinition() {
-    delete body;
-}
-
-ClassDefinition::ClassDefinition(std::string name, Statement *body, Expression *superclass)
+ClassDefinition::ClassDefinition(std::string name, StmtPtr body, ExprPtr superclass)
         : body(body), name(std::move(name)), superclass(superclass) {}
 
 std::string ClassDefinition::str() {
     return "class " + name + body->str();
 }
 
-ClassDefinition::~ClassDefinition() {
-    delete body, superclass;
-}
-
-Block::Block(const std::vector<Statement *> &statements) : statements(statements) {}
+Block::Block(const std::vector<StmtPtr> &statements) : statements(statements) {}
 
 std::string Block::str() {
     std::string result = "{\n";
@@ -125,14 +91,4 @@ std::string Block::str() {
         result += "    " + statement->str() + "\n";
     }
     return result + "}\n";
-}
-
-Block::~Block() {
-    statements.clear();
-}
-
-TryStatement::CatchStatement::~CatchStatement() {
-    for (auto argument : arguments)
-        delete argument;
-    delete block;
 }

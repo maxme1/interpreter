@@ -88,7 +88,7 @@ void Interpreter::setVariable(const std::string &name, ObjPtr value) {
     scopes.back()->setAttribute(name, std::move(value));
 }
 
-void Interpreter::evaluateStatements(std::vector<Statement *> &statements) {
+void Interpreter::evaluateStatements(std::vector<StmtPtr> &statements) {
     for (auto statement : statements)
         statement->evaluate(this);
 }
@@ -120,7 +120,7 @@ ObjPtr Interpreter::call(Callable::ptr callable, ArgsList arguments) {
     return returnObject;
 }
 
-ObjPtr Interpreter::callFunction(ObjPtr object, const std::vector<Expression *> &argsList) {
+ObjPtr Interpreter::callFunction(ObjPtr object, const std::vector<ExprPtr> &argsList) {
     auto callable = getCallable(std::move(object));
     checkArguments(callable, argsList.size());
 
@@ -162,7 +162,7 @@ ObjPtr Interpreter::callOperator(ObjPtr object, ArgsList arguments) {
     }
 }
 
-std::vector<ObjPtr> Interpreter::evaluateArguments(const std::vector<Expression *> &argsList) {
+std::vector<ObjPtr> Interpreter::evaluateArguments(const std::vector<ExprPtr> &argsList) {
     auto result = std::vector<ObjPtr>();
     for (auto &&argument : argsList)
         result.push_back(argument->evaluate(this));
