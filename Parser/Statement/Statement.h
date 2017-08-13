@@ -8,61 +8,64 @@
 
 class Expression;
 
+typedef std::shared_ptr<Expression> ExprPtr;
+
 class Statement {
 public:
     virtual void evaluate(Interpreter *interpreter) {
         interpreter->evaluate(this);
     };
-    virtual ~Statement() = default;
 
     virtual std::string str() {
         return ";";
     };
 };
 
+typedef std::shared_ptr<Statement> StmtPtr;
+
 class Block : public Statement {
     friend class Interpreter;
 
-    std::vector<Statement *> statements;
+    std::vector<StmtPtr> statements;
 
     void evaluate(Interpreter *interpreter) override {
         interpreter->evaluate(this);
     }
 
 public:
-    explicit Block(const std::vector<Statement *> &statements);
-    ~Block() override;
+    explicit Block(const std::vector<StmtPtr> &statements);
+
     std::string str() override;
 };
 
 class ExpressionStatement : public Statement {
     friend class Interpreter;
 
-    Expression *expression;
+    ExprPtr expression;
 
     void evaluate(Interpreter *interpreter) override {
         interpreter->evaluate(this);
     }
 
 public:
-    explicit ExpressionStatement(Expression *expression);
-    ~ExpressionStatement() override;
+    explicit ExpressionStatement(ExprPtr expression);
+
     std::string str() override;
 };
 
 class IfStatement : public Statement {
     friend class Interpreter;
 
-    Expression *condition;
-    Statement *left, *right;
+    ExprPtr condition;
+    StmtPtr left, right;
 
     void evaluate(Interpreter *interpreter) override {
         interpreter->evaluate(this);
     }
 
 public:
-    explicit IfStatement(Expression *condition, Statement *left = nullptr, Statement *right = nullptr);
-    ~IfStatement() override;
+    explicit IfStatement(ExprPtr condition, StmtPtr left = nullptr, StmtPtr right = nullptr);
+
     std::string str() override;
 };
 
@@ -70,44 +73,45 @@ struct TryStatement : public Statement {
     friend class Interpreter;
 
     struct CatchStatement {
-        std::vector<Expression *> arguments;
-        Statement *block;
+        std::vector<ExprPtr> arguments;
+        StmtPtr block;
 
-        CatchStatement(std::vector<Expression *> &arguments, Statement *block) : block(block), arguments(arguments) {};
-
-        ~CatchStatement();
+        CatchStatement(std::vector<ExprPtr> &arguments, StmtPtr block) : block(block), arguments(arguments) {};
     };
-    std::vector<CatchStatement *> catches;
 
-    Statement *block;
+    std::vector<std::shared_ptr<CatchStatement>> catches;
+
+    StmtPtr block;
 
     void evaluate(Interpreter *interpreter) override {
         interpreter->evaluate(this);
     }
 
-    TryStatement(const std::vector<CatchStatement *> &catches, Statement *block);
-    ~TryStatement() override;
+    TryStatement(const std::vector<std::shared_ptr<CatchStatement>> catches, StmtPtr block) :
+            catches(catches), block(block) {}
+
     std::string str() override;
 };
 
 class WhileStatement : public Statement {
     friend class Interpreter;
 
-    Expression *condition;
-    Statement *body;
+    ExprPtr condition;
+    StmtPtr body;
 
     void evaluate(Interpreter *interpreter) override {
         interpreter->evaluate(this);
     }
 
 public:
-    explicit WhileStatement(Expression *condition, Statement *body = nullptr);
-    ~WhileStatement() override;
+    explicit WhileStatement(ExprPtr condition, StmtPtr body = nullptr);
+
     std::string str() override;
 };
 
 class ControlFlow : public Statement {
     friend class Interpreter;
+
     Token::tokenType type;
     std::string body;
 
@@ -117,39 +121,43 @@ class ControlFlow : public Statement {
 
 public:
     ControlFlow(Token::tokenType type, const std::string &body);
+
     std::string str() override;
 };
 
 class ReturnStatement : public Statement {
     friend class Interpreter;
-    Expression *expression;
+
+    ExprPtr expression;
 
     void evaluate(Interpreter *interpreter) override {
         interpreter->evaluate(this);
     }
 
 public:
-    explicit ReturnStatement(Expression *expression = nullptr);
-    ~ReturnStatement() override;
+    explicit ReturnStatement(ExprPtr expression = nullptr);
+
     std::string str() override;
 };
 
 class RaiseStatement : public Statement {
     friend class Interpreter;
-    Expression *expression;
+
+    ExprPtr expression;
 
     void evaluate(Interpreter *interpreter) override {
         interpreter->evaluate(this);
     }
 
 public:
-    explicit RaiseStatement(Expression *expression);
-    ~RaiseStatement() override;
+    explicit RaiseStatement(ExprPtr expression);
+
     std::string str() override;
 };
 
 class ImportStatement : public Statement {
     friend class Interpreter;
+
     std::string path;
 
     void evaluate(Interpreter *interpreter) override {
@@ -158,12 +166,14 @@ class ImportStatement : public Statement {
 
 public:
     explicit ImportStatement(std::string path);
+
     std::string str() override;
 };
 
 class FunctionDefinition : public Statement {
     friend class Interpreter;
-    Statement *body;
+
+    StmtPtr body;
     std::vector<std::string> arguments;
     std::string name;
     bool unlimited;
@@ -173,16 +183,18 @@ class FunctionDefinition : public Statement {
     }
 
 public:
-    FunctionDefinition(const std::string &name, const std::vector<std::string> &arguments, Statement *body,
+    FunctionDefinition(const std::string &name, const std::vector<std::string> &arguments, StmtPtr body,
                        bool unlimited);
-    ~FunctionDefinition() override;
+
+
     std::string str() override;
 };
 
 class ClassDefinition : public Statement {
     friend class Interpreter;
-    Statement *body;
-    Expression *superclass;
+
+    StmtPtr body;
+    ExprPtr superclass;
     std::string name;
 
     void evaluate(Interpreter *interpreter) override {
@@ -190,8 +202,8 @@ class ClassDefinition : public Statement {
     }
 
 public:
-    ClassDefinition(std::string name, Statement *body, Expression *superclass);
-    ~ClassDefinition() override;
+    ClassDefinition(std::string name, StmtPtr body, ExprPtr superclass);
+
     std::string str() override;
 };
 

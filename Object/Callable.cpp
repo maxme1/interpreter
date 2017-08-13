@@ -5,7 +5,7 @@
 
 Callable::Callable(Scope::ptr context) : context(std::move(context)) {}
 
-Function::Function(std::vector<std::string> &arguments, Statement *body, bool unlimited, Scope::ptr context) :
+Function::Function(std::vector<std::string> &arguments, StmtPtr body, bool unlimited, Scope::ptr context) :
         Callable(std::move(context)), body(body), arguments(arguments), unlimited(unlimited) {}
 
 bool Function::checkArguments(int count) {
