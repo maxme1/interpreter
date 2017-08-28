@@ -5,6 +5,7 @@
 
 #define $exception(ClassName, Base) \
 $subclass(ClassName, Base) \
+    ClassName() = default; \
     explicit ClassName(const std::string &body) { \
         Exception::setMessage(this, body); \
     } \
@@ -43,6 +44,7 @@ $exception(VariableError, AccessError)
 $exception(IndexError, AccessError)
 
 $exception(ImportError, Exception)
+$exception(StopIteration, Exception)
 $exception(ValueError, Exception)
 $exception(SyntaxError, Exception)
 

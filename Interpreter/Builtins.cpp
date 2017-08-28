@@ -2,12 +2,15 @@
 #include "../Object/Types/String.h"
 #include "../Object/Types/Int.h"
 #include "../Object/Types/Array.h"
+#include "../Object/Types/Range.h"
 
 void Interpreter::populate() {
     setVariable("Int", Int::build());
     setVariable("String", String::build());
     setVariable("Bool", Bool::build());
     setVariable("Array", Array::build());
+
+    setVariable("range", Range::build());
 
 //    TODO: populate the rest of the exceptions
     setVariable("Exception", Exception::build());

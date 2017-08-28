@@ -1,19 +1,21 @@
 #ifndef INTERPRETER_INT_H
 #define INTERPRETER_INT_H
 
+#include <utility>
+
 #include "../Exception.h"
 #include "../Native/Native.h"
 #include "String.h"
 #include "Bool.h"
 
 $class(Int)
-    int value;
+    long value = 0;
     Int() = default;
 
-    explicit Int(int value) : value(value) {}
+    explicit Int(long value) : value(value) {}
 
-    static int getValue(ObjPtr object) {
-        return cast(object, true)->value;
+    static long getValue(ObjPtr object) {
+        return cast(std::move(object), true)->value;
     }
 
     bool asBool() override {
@@ -44,7 +46,7 @@ $class(Int)
     }
 
     $method(divide, Int)
-        int val = Int::getValue(args[0]);
+        auto val = Int::getValue(args[0]);
         if (val == 0)
             throw Wrap(new Exception("Division by zero"));
         return New(Int(self->value / val));
@@ -101,10 +103,13 @@ $class(Int)
         addMethod("init", init, 1);
         addMethod("str", str, 0);
         addMethod("add", add, 1);
+        addMethod("sub", subtract, 1);
+        addMethod("mul", multiply, 1);
         addMethod("div", divide, 1);
+
         addMethod("eq", equal, 1);
+        addMethod("leq", less_or_equal, 1);
     }
 };
-
 
 #endif //INTERPRETER_INT_H

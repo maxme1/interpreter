@@ -32,6 +32,16 @@ std::string WhileStatement::str() {
     return result;
 }
 
+ForStatement::ForStatement(Token variable, ExprPtr target, StmtPtr body) :
+        variable(variable), target(target), body(body) {}
+
+std::string ForStatement::str() {
+    std::string result = "for " + variable.body + " in " + target->str();
+    if (body)
+        result += body->str();
+    return result;
+}
+
 ControlFlow::ControlFlow(Token::tokenType type, const std::string &body) : type(type), body(body) {}
 
 std::string ControlFlow::str() { return body; }

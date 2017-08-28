@@ -35,9 +35,9 @@ bool ClassMethod::checkArguments(int count) {
 
 ObjPtr ClassMethod::call(ArgsList args, API *api) {
     api->setVariable("this", instance);
-    auto super = instance->getClass()->getSuperClass();
-    if (super)
-        api->setVariable("super", super);
+//    auto super = instance->getClass()->getSuperClass();
+//    if (super)
+//        api->setVariable("super", super);
     return function->call(args, api);
 }
 

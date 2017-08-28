@@ -24,6 +24,8 @@ class Parser {
             return ifStatement();
         if (matches({Token::WHILE}))
             return whileStatement();
+        if (matches({Token::FOR}))
+            return forStatement();
         if (matches({Token::TRY}))
             return tryStatement();
         if (matches({Token::FUNCTION}))
@@ -73,21 +75,14 @@ class Parser {
 
     StmtPtr ifStatement() {
         require({Token::IF});
-        require({Token::BRACKET_OPEN});
         auto condition = expression();
-        require({Token::BRACKET_CLOSE});
-//        empty if
-        if (matches({Token::DELIMITER})) {
-            advance();
-            return $s(IfStatement(condition));
-        }
-        auto left = statement();
+        auto left = block();
 //        only left block
         if (!matches({Token::ELSE}))
             return $s(IfStatement(condition, left));
 //        both blocks
         advance();
-        auto right = statement();
+        auto right = block();
         return $s(IfStatement(condition, left, right));
     }
 
@@ -112,16 +107,25 @@ class Parser {
 
     StmtPtr whileStatement() {
         require({Token::WHILE});
-        require({Token::BRACKET_OPEN});
         auto condition = expression();
-        require({Token::BRACKET_CLOSE});
 //        empty body
-        if (matches({Token::DELIMITER})) {
-            advance();
-            return $s(WhileStatement(condition));
-        }
-        auto body = statement();
+//        if (matches({Token::DELIMITER})) {
+//            advance();
+//            return $s(WhileStatement(condition));
+//        }
+        auto body = block();
         return $s(WhileStatement(condition, body));
+    }
+
+    StmtPtr forStatement() {
+//        TODO: possibly reimplement with while
+        require({Token::FOR});
+        auto variable = require({Token::IDENTIFIER});
+        require({Token::IN});
+        auto target = expression();
+        auto body = block();
+
+        return $s(ForStatement(variable, target, body));
     }
 
 //    TODO: this function got too large
@@ -181,7 +185,7 @@ class Parser {
     };
 
     ExprPtr expression() {
-        auto left = comparison();
+        auto left = logicOr();
         if (matches({Token::ASSIGNMENT})) {
             Token previous = *(position - 1);
             auto token = advance();
@@ -203,6 +207,26 @@ class Parser {
             throw "Bad assignment";
         }
 //        here may be a leak
+        return left;
+    }
+
+    ExprPtr logicOr() {
+        auto left = logicAnd();
+        while (matches({Token::OR})) {
+            auto current = advance();
+            auto right = logicAnd();
+            left = $e(Binary(current, left, right));
+        }
+        return left;
+    }
+
+    ExprPtr logicAnd() {
+        auto left = comparison();
+        while (matches({Token::AND})) {
+            auto current = advance();
+            auto right = comparison();
+            left = $e(Binary(current, left, right));
+        }
         return left;
     }
 
@@ -238,7 +262,7 @@ class Parser {
     }
 
     ExprPtr unary() {
-        if (!matches({Token::ADD, Token::SUB}))
+        if (!matches({Token::ADD, Token::SUB, Token::NOT}))
             return primary();
         auto current = advance();
         auto argument = primary();
@@ -327,11 +351,9 @@ public:
             while (position != tokens.end())
                 statements.push_back(statement());
         } catch (char const *message) {
-//            TODO: no memory is being freed whatsoever
             error = true;
             this->message = message;
         } catch (std::string &message) {
-//            TODO: no memory is being freed whatsoever
             error = true;
             this->message = message;
         }

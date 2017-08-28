@@ -109,6 +109,23 @@ public:
     std::string str() override;
 };
 
+class ForStatement : public Statement {
+    friend class Interpreter;
+
+    Token variable;
+    StmtPtr body;
+    ExprPtr target;
+
+    void evaluate(Interpreter *interpreter) override {
+        interpreter->evaluate(this);
+    }
+
+public:
+    explicit ForStatement(Token variable, ExprPtr target, StmtPtr body = nullptr);
+
+    std::string str() override;
+};
+
 class ControlFlow : public Statement {
     friend class Interpreter;
 

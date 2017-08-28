@@ -65,10 +65,11 @@ public:
         }
         return result;
     }
+
+    typedef std::shared_ptr<T> ptr;
 };
 
 template<typename T, typename Base>
 bool NativeObject<T, Base>::populated = false;
-
 
 #endif //INTERPRETER_NATIVE_OBJECT_H

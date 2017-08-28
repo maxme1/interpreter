@@ -4,6 +4,7 @@
 
 #include "../Native/Native.h"
 
+//TODO: None should be a singleton
 $class(None)
     None() = default;
 

@@ -1,6 +1,7 @@
 #include "Class.h"
 
 #include "Native/NativeObject.h"
+#include "Types/String.h"
 
 // Instance
 
@@ -10,14 +11,16 @@ std::string Instance::asString() {
 
 ObjPtr Instance::findAttribute(const std::string &name) {
     auto result = Object::findAttribute(name);
-    if (!result)
-        result = getClass()->findAttribute(name);
-    if (!result)
-        return nullptr;
+    if (result)
+        return result;
+    result = getClass()->findAttribute(name);
+    if (result) {
 //        creating a class method
-    auto method = std::dynamic_pointer_cast<Callable>(result);
-    if (method)
-        return New(ClassMethod(method, $this(Instance)));
+        auto method = std::dynamic_pointer_cast<Callable>(result);
+        if (method)
+            result = New(ClassMethod(method, $this(Instance)));
+        setAttribute(name, result);
+    }
     return result;
 }
 
@@ -44,6 +47,7 @@ Class::Class(const std::string &name, Scope::ptr body, Class::ptr superclass, Sc
 //    copy the scope
     for (auto &&attribute : body->attributes)
         setAttribute(attribute.first, attribute.second);
+    setAttribute("@name", New(String(name)));
 }
 
 ObjPtr Class::findAttribute(const std::string &name) {

@@ -26,6 +26,7 @@ class ExpressionStatement;
 class IfStatement;
 class TryStatement;
 class WhileStatement;
+class ForStatement;
 class FunctionDefinition;
 class ClassDefinition;
 class ReturnStatement;
@@ -64,6 +65,7 @@ public:
     void evaluate(IfStatement *statement);
     void evaluate(TryStatement *statement);
     void evaluate(WhileStatement *statement);
+    void evaluate(ForStatement *statement);
     void evaluate(FunctionDefinition *statement);
     void evaluate(ClassDefinition *statement);
     void evaluate(ReturnStatement *statement);

@@ -1,6 +1,7 @@
 program = statement*
 
-statement = (StmtBody? DELIMITER) | ifStmt | whileStmt | tryStmt | funcDef | classDef
+statement = (StmtBody? DELIMITER) | ifStmt | whileStmt | forStmt | tryStmt
+        | funcDef | classDef
 
 StmtBody = expression | 'break' | 'continue' | returnStmt | raiseStmt | importStmt
 returnStmt = 'return' expression?
@@ -8,10 +9,10 @@ raiseStmt = 'raise' expression?
 
 importStmt = 'import' IDENTIFIER
 tryStmt = 'try' argsValues? block ('catch' argsValues block)*
-# TODO: possibly optional first statement
-ifStmt = 'if' '(' expression ')' (statement ('else' statement)? )?
-whileStmt = 'while' '(' expression ')' statement
-block = '{' statement* '}'
+ifStmt = 'if' expression block ('else' block)?
+whileStmt = 'while' expression block
+forStmt = 'for' IDENTIFIER 'in' expression block
+block = BLOCK_BEGIN statement* BLOCK_END
 
 funcDef = 'def' IDENTIFIER arguments? block
 arguments = '(' argsList? ')'
@@ -22,19 +23,22 @@ superclass = EXTENDS expression
 
 -- expression --
 
-expression = comparison | assignment
+expression = logicOr | assignment
 
 assignment = assignable | IDENTIFIER '=' expression
 assignable = primary attribute | item
 
+logicOr = logicAnd ( 'and' logicAnd )*
+logicAnd = comparison ( 'and' comparison )*
 comparison = term (( '==' | '>=' | '<=' | '<' | '>' | '!=' ) term )*
 term = factor ( ('+' | '-') factor )*
-factor = unary ( ('*' | '/') unary )*
+factor = unary ( ('*' | '/' | 'not' ) unary )*
 # TODO: maybe add unlimited unary operations
 unary = ('+' | '-')? primary
 
 primary = literal suffix*
-literal = NUMBER | '(' expression ')' | IDENTIFIER | BOOL | NONE | STRING
+literal = NUMBER | IDENTIFIER | BOOL | NONE | STRING | bracket
+bracket = '(' expression ')'
 
 suffix = call | attribute | item
 attribute = '.' IDENTIFIER
@@ -53,3 +57,5 @@ DELIMITER = '[;\n]'
 SEPARATOR = ','
 EXTENDS = 'extends'
 COMMENT = '#[^\n]*'
+BLOCK_BEGIN = `indent up`
+BLOCK_END = `indent down`

@@ -14,41 +14,61 @@ std::map<Token::tokenType, std::string> binary = {
         {Token::GREATER_OR_EQUAL, "geq"},
         {Token::LESS,             "ls"},
         {Token::LESS_OR_EQUAL,    "leq"},
-        {Token::NOT_EQUAL,        "neq"}
+        {Token::NOT_EQUAL,        "neq"},
+        {Token::AND,              "and"},
+        {Token::OR,               "or"},
 };
 
 std::map<Token::tokenType, std::string> unary = {
         {Token::ADD, "uadd"},
         {Token::SUB, "usub"},
+        {Token::NOT, "not"},
 };
 
 ObjPtr Interpreter::evaluate(Binary *expression) {
     ObjPtr left = expression->left->evaluate(this), right = expression->right->evaluate(this);
     auto name = binary.find(expression->token.type);
-    if (name != binary.end()) {
-        auto method = left->findAttribute(name->second);
-        if (method)
-            return callOperator(method, {right});
-    }
+    assert(name != binary.end());
+
+    auto method = left->findAttribute(name->second);
+    if (method)
+        return callOperator(method, {right});
 
 //    default behavior
     if (expression->ofType(Token::EQUAL))
         return New(Bool(left == right));
     if (expression->ofType(Token::NOT_EQUAL))
         return New(Bool(left != right));
+    if (expression->ofType(Token::AND)) {
+        if (left->asBool())
+            return right;
+        return New(Bool(false));
+    }
+    if (expression->ofType(Token::OR)) {
+        if (left->asBool())
+            return New(Bool(true));
+        return right;
+    }
 
-    throw Wrap(new Exception("Operator not defined"));
+    throw Wrap(new Exception("Operator " + name->second + " not defined"));
 }
 
 ObjPtr Interpreter::evaluate(Unary *expression) {
     ObjPtr argument = expression->argument->evaluate(this);
+    if (expression->ofType(Token::BRACKET_OPEN))
+        return argument;
+
     auto name = unary.find(expression->token.type);
-    if (name != unary.end()) {
-        auto method = argument->findAttribute(name->second);
-        if (method)
-            return callOperator(method, {});
-    }
-    throw Wrap(new Exception("Operator not defined"));
+    assert(name != unary.end());
+    auto method = argument->findAttribute(name->second);
+    if (method)
+        return callOperator(method, {});
+
+    //    default behavior
+    if (expression->ofType(Token::NOT))
+        return New(Bool(not argument->asBool()));
+
+    throw Wrap(new Exception("Operator " + name->second + " not defined"));
 }
 
 ObjPtr Interpreter::evaluate(Literal *expression) {

@@ -8,7 +8,7 @@ $class(Array)
     std::vector<ObjPtr> array;
     Array() = default;
 
-    Array(ArgsList array) : array(array) {}
+    explicit Array(ArgsList array) : array(array) {}
 
     bool asBool() override {
         return !array.empty();
@@ -32,6 +32,10 @@ $class(Array)
         return self->array[idx];
     }
 
+    $method(size, Array)
+        return New(Int(self->array.size()));
+    }
+
     $method(setItem, Array)
         auto idx = Int::getValue(args[0]);
         if (idx >= self->array.size())
@@ -53,12 +57,40 @@ $class(Array)
         return New(String(result + "]"));
     }
 
+    static ObjPtr iter(ObjPtr _self, ArgsList args, API *api);
+
     static void populate() {
-        addMethod("init", init, 0, -1);
-        addMethod("str", str, 0);
+        addMethod("init", init, 0, true);
+        addMethod("str", str);
         addMethod("push", push, 1);
         addMethod("setitem", setItem, 2);
         addMethod("getitem", getItem, 1);
+        addMethod("iter", iter);
+
+        addMethod("size", size);
+    }
+};
+
+$class(IndexIterator)
+    int index = -1;
+    Array::ptr target;
+
+    explicit IndexIterator(Array::ptr target) : target(std::move(target)) {}
+
+    $method(iter, IndexIterator)
+        return self;
+    }
+
+    $method(next, IndexIterator)
+        self->index++;
+        if (self->index >= self->target->array.size())
+            throw Wrap(new StopIteration());
+        return self->target->array[self->index];
+    }
+
+    static void populate() {
+        addMethod("iter", iter);
+        addMethod("next", next);
     }
 };
 

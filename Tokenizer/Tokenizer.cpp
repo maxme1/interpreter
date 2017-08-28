@@ -59,6 +59,8 @@ std::map<std::string, Token::tokenType> reserved = {
         {"if",       Token::IF},
         {"else",     Token::ELSE},
         {"while",    Token::WHILE},
+        {"for",      Token::FOR},
+        {"in",       Token::IN},
         {"try",      Token::TRY},
         {"catch",    Token::CATCH},
         {"break",    Token::BREAK},
@@ -69,6 +71,9 @@ std::map<std::string, Token::tokenType> reserved = {
         {"class",    Token::CLASS},
         {"import",   Token::IMPORT},
         {"extends",  Token::EXTENDS},
+        {"and",      Token::AND},
+        {"or",       Token::OR},
+        {"not",      Token::NOT},
 };
 
 bool Tokenizer::getNextToken() {

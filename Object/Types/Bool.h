@@ -3,7 +3,6 @@
 
 $class(Bool)
     bool value;
-    Bool() = default;
 
     explicit Bool(bool value) : value(value) {}
 
@@ -11,15 +10,8 @@ $class(Bool)
         return value;
     }
 
-    static bool toBool(ObjPtr object, API *api) {
-        auto method = object->findAttribute("bool");
-        if (!method)
-            return object->asBool();
-        return api->call(method, {})->asBool();
-    }
-
     $method(init, Bool)
-        self->value = Bool::toBool(args[0], api);
+        self->value = args[0]->asBool();
         return nullptr;
     }
 

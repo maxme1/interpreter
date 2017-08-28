@@ -27,8 +27,7 @@ void Interpreter::evaluate(ExpressionStatement *statement) {
     statement->expression->evaluate(this);
 }
 
-void Interpreter::evaluate(Statement *statement) {
-}
+void Interpreter::evaluate(Statement *statement) {}
 
 void Interpreter::evaluate(IfStatement *statement) {
     auto cond = statement->condition->evaluate(this);
@@ -79,6 +78,27 @@ void Interpreter::evaluate(WhileStatement *statement) {
             break;
         } catch (ContinueException) {}
         cond = statement->condition->evaluate(this);
+    }
+}
+
+void Interpreter::evaluate(ForStatement *statement) {
+    auto variable = statement->variable.body;
+    auto iter = statement->target->evaluate(this)->getAttribute("iter");
+    auto target = callFunction(iter, {});
+    while (true) {
+        try {
+            auto next = target->getAttribute("next");
+            auto value = callFunction(next, {});
+            setVariable(variable, value);
+            statement->body->evaluate(this);
+        } catch (Wrap &e) {
+            auto exc = std::dynamic_pointer_cast<StopIteration>(e.exception);
+            if (exc)
+                break;
+            throw;
+        } catch (BreakException) {
+            break;
+        } catch (ContinueException) {}
     }
 }
 
