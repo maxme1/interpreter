@@ -22,24 +22,18 @@ Interpreter::~Interpreter() {
 void Interpreter::interpret(std::string text) {
     Tokenizer t = Tokenizer(text);
     auto tokens = t.tokenize();
-//    TODO: now it's just a mess
     if (t.error) {
-        int position = tokens.back().position;
-        int begin = std::max<int>(0, position - textRange);
-        std::cout << text.substr(begin, textRange);
-        std::cout << " <<<\n==========\nUndefined token: " << tokens.back().body;
+        auto token = tokens.back();
+        printf("Unrecognized token %s at %li:%li", token.body.c_str(), token.line, token.column);
         return;
     }
-
     Parser p = Parser(tokens);
     auto statements = p.build();
     if (p.error) {
-        int position = p.position->position;
-        int begin = std::max<int>(0, position - textRange);
-        std::cout << text.substr(begin, textRange);
-        std::cout << " <<<\n==========\n" << p.message;
+        std::cout << "\n==========\n" << p.message;
         return;
     }
+
     try {
         evaluateStatements(statements);
     } catch (Wrap &e) {

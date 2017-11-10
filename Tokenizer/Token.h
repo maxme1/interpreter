@@ -25,10 +25,15 @@ struct Token {
 
     tokenType type;
     std::string body;
-    int position;
+    long line{}, column{};
 
-    Token(tokenType type, std::string body, int position) :
-            type(type), body(std::move(body)), position(position) {}
+    Token(tokenType type, std::string body) :
+            type(type), body(std::move(body)) {}
+
+    void set_position(long line, long column) {
+        this->line = line;
+        this->column = column;
+    }
 };
 
 #endif //INTERPRETER_TOKEN_H

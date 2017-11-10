@@ -1,7 +1,6 @@
 #ifndef INTERPRETER_PARSER_H
 #define INTERPRETER_PARSER_H
 
-
 #include <vector>
 #include <initializer_list>
 #include <iostream>
@@ -10,11 +9,15 @@
 
 class Parser {
     typedef std::initializer_list<Token::tokenType> TokenTypes;
+//    exceptions
+    class ProgramEnd {
+    };
+
     std::vector<Token> tokens;
 
-    bool matches(std::initializer_list<Token::tokenType> types);
+    bool matches(TokenTypes types);
     Token advance();
-    Token require(std::initializer_list<Token::tokenType> types);
+    Token require(TokenTypes types);
 
     Statement *statement() {
         if (matches({Token::BLOCK_OPEN}))
@@ -288,24 +291,24 @@ public:
 
     explicit Parser(const std::vector<Token> &tokens);
 
+
+//    TODO: no memory is being freed whatsoever
 //    TODO: combine build and block
     std::vector<Statement *> build() {
         auto statements = std::vector<Statement *>();
         try {
             while (position != tokens.end())
                 statements.push_back(statement());
-        } catch (char const *message) {
-//            TODO: no memory is being freed whatsoever
+        } catch (ProgramEnd &e) {
             error = true;
-            this->message = message;
-        } catch (std::string message) {
-//            TODO: no memory is being freed whatsoever
+            message = "Unexpected end of file";
+        } catch (Token &token) {
             error = true;
-            this->message = message;
+            message = "Unexpected token \"" + token.body + "\" at  " +
+                      std::to_string(token.line) + ":" + std::to_string(token.column);
         }
         return statements;
     };
 };
-
 
 #endif //INTERPRETER_PARSER_H
