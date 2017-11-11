@@ -9,37 +9,37 @@ Function::Function(std::vector<std::string> &arguments, Statement *body, bool un
         Callable(std::move(context)), body(body), arguments(arguments), unlimited(unlimited) {}
 
 bool Function::checkArguments(int count) {
-    int size = arguments.size();
+    auto size = arguments.size();
     if (unlimited)
         size--;
     return size == count or (arguments.size() <= count and unlimited);
 }
 
-ObjPtr Function::call(ArgsList args, API *api) {
+ObjPtr Function::call(ArgsList args, Interpreter *interpreter) {
 //        populating with arguments
-    int size = arguments.size(), i;
-    if (unlimited)
-        size--;
+    long size = arguments.size(), i;
+//    if (unlimited)
+//        size--;
     for (i = 0; i < size; ++i)
-        api->setVariable(arguments[i], args[i]);
-    if (unlimited) {
-        auto last = std::vector<ObjPtr>(args.begin() + size, args.end());
-        api->setVariable(arguments[size], New(Array(last)));
-    }
-    body->evaluate(api->interpreter);
+        interpreter->setVariable(arguments[i], args[i]);
+//    if (unlimited) {
+//        auto last = std::vector<ObjPtr>(args.begin() + size, args.end());
+//        interpreter->setVariable(arguments[size], New(Array(last)));
+//    }
+    body->visit(interpreter);
 }
 
-bool ClassMethod::checkArguments(int count) {
-    return function->checkArguments(count);
-}
-
-ObjPtr ClassMethod::call(ArgsList args, API *api) {
-    api->setVariable("this", instance);
-    auto super = instance->getClass()->getSuperClass();
-    if (super)
-        api->setVariable("super", super);
-    return function->call(args, api);
-}
-
-ClassMethod::ClassMethod(Callable::ptr function, Instance::ptr instance) :
-        function(std::move(function)), instance(std::move(instance)) {}
+//bool ClassMethod::checkArguments(int count) {
+//    return function->checkArguments(count);
+//}
+//
+//ObjPtr ClassMethod::call(ArgsList args, API *api) {
+//    api->setVariable("this", instance);
+//    auto super = instance->getClass()->getSuperClass();
+//    if (super)
+//        api->setVariable("super", super);
+//    return function->call(args, api);
+//}
+//
+//ClassMethod::ClassMethod(Callable::ptr function, Instance::ptr instance) :
+//        function(std::move(function)), instance(std::move(instance)) {}

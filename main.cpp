@@ -1,4 +1,4 @@
-#include "Interpreter/Interpreter.h"
+#include "TreeWalk/Interpreter/Interpreter.h"
 
 int main() {
     Interpreter interpreter = Interpreter();

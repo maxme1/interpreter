@@ -10,17 +10,16 @@ NativeCallable<T>::NativeCallable(T function, int argumentsCount, bool unlimited
         argumentsCount(argumentsCount), unlimited(unlimited), function(function) {}
 
 template<typename T>
-ObjPtr NativeCallable<T>::call(ArgsList args, API *api) {
-    return function(args, api);
+ObjPtr NativeCallable<T>::call(ArgsList args, Interpreter *interpreter) {
+    return function(args, interpreter);
 }
 
-template<>
-ObjPtr NativeCallable<nativeMethod>::call(const std::vector<ObjPtr> &args, API *api) {
-    auto self = api->getVariable("this");
-    return function(self, args, api);
-}
+//template<>
+//ObjPtr NativeCallable<nativeMethod>::call(const std::vector<ObjPtr> &args, Interpreter *interpreter) {
+//    auto self = interpreter->getVariable("this");
+//    return function(self, args, interpreter);
+//}
 
-template
-class NativeCallable<nativeFunction>;
-template
-class NativeCallable<nativeMethod>;
+template class NativeCallable<nativeFunction>;
+//template
+//class NativeCallable<nativeMethod>;

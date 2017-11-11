@@ -5,6 +5,7 @@
 #include <utility>
 #include <cassert>
 #include "../Callable.h"
+#include "../../TreeWalk/Interpreter/Interpreter.h"
 
 // macros
 #define New(object) ObjPtr(new object)
@@ -19,11 +20,11 @@
 static ObjPtr (name)(ObjPtr _self, ArgsList args, API *api) { \
     auto self = type::cast(_self, true);
 
-#define $lambda [](ArgsList args, API *api) -> ObjPtr
+#define $lambda [](ArgsList args, Interpreter *interpreter) -> ObjPtr
 
 // types
-typedef ObjPtr(*nativeFunction)(ArgsList, API *);
-typedef ObjPtr(*nativeMethod)(ObjPtr, ArgsList, API *);
+typedef ObjPtr(*nativeFunction)(ArgsList, Interpreter *);
+//typedef ObjPtr(*nativeMethod)(ObjPtr, ArgsList, Interpreter *);
 
 // callables
 template<typename T>
@@ -36,11 +37,11 @@ protected:
 
 public:
     explicit NativeCallable(T function, int argumentsCount, bool unlimited = false);
-    ObjPtr call(ArgsList args, API *api) override;
+    ObjPtr call(ArgsList args, Interpreter *interpreter) override;
 };
 
 typedef NativeCallable<nativeFunction> NativeFunction;
-typedef NativeCallable<nativeMethod> NativeMethod;
+//typedef NativeCallable<nativeMethod> NativeMethod;
 
 #include "NativeObject.h"
 

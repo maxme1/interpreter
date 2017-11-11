@@ -1,17 +1,18 @@
 #include <iostream>
 #include <map>
+#include <utility>
 #include "Tokenizer.h"
 
 #define tk(a) Token(a, std::string(begin, position))
 
 Tokenizer::Tokenizer(std::string text) : text(std::move(text)) {
+//    if (text.back() != '\n')
+//        text.push_back('\n');
     position = this->text.begin();
 }
 
 std::vector<Token> Tokenizer::tokenize() {
     auto result = std::vector<Token>();
-    if (text.back() != '\n')
-        text.push_back('\n');
 //    line by line
     int line = 1;
     while (position != text.end()) {
@@ -131,7 +132,6 @@ Token Tokenizer::nextToken() {
         }
     }
 
-//
     while (position != text.end() and *position != ' ' and *position != '\r')
         position++;
     return tk(Token::ERROR);

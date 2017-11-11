@@ -3,14 +3,14 @@
 
 
 #include <string>
-#include "../../Interpreter/Interpreter.h"
+#include "../../TreeWalk/Interpreter/Interpreter.h"
 #include "../../Tokenizer/Token.h"
 
 class Expression;
 
 class Statement {
 public:
-    virtual void evaluate(Interpreter *interpreter) = 0;
+    virtual void visit(TreeWalker *walker) = 0;
     virtual ~Statement() = default;
     virtual std::string str() = 0;
 };
@@ -20,8 +20,8 @@ class Block : public Statement {
 
     std::vector<Statement *> statements;
 
-    void evaluate(Interpreter *interpreter) override {
-        interpreter->evaluate(this);
+    void visit(TreeWalker *walker) override {
+        walker->visit(this);
     }
 
 public:
@@ -35,8 +35,8 @@ class ExpressionStatement : public Statement {
 
     Expression *expression;
 
-    void evaluate(Interpreter *interpreter) override {
-        interpreter->evaluate(this);
+    void visit(TreeWalker *walker) override {
+        walker->visit(this);
     }
 
 public:
@@ -51,8 +51,8 @@ class IfStatement : public Statement {
     Expression *condition;
     Statement *left, *right;
 
-    void evaluate(Interpreter *interpreter) override {
-        interpreter->evaluate(this);
+    void visit(TreeWalker *walker) override {
+        walker->visit(this);
     }
 
 public:
@@ -76,8 +76,8 @@ struct TryStatement : public Statement {
 
     Statement *block;
 
-    void evaluate(Interpreter *interpreter) override {
-        interpreter->evaluate(this);
+    void visit(TreeWalker *walker) override {
+        walker->visit(this);
     }
     TryStatement(const std::vector<CatchStatement *> &catches, Statement *block);
     ~TryStatement() override;
@@ -90,8 +90,8 @@ class WhileStatement : public Statement {
     Expression *condition;
     Statement *body;
 
-    void evaluate(Interpreter *interpreter) override {
-        interpreter->evaluate(this);
+    void visit(TreeWalker *walker) override {
+        walker->visit(this);
     }
 
 public:
@@ -105,8 +105,8 @@ class ControlFlow : public Statement {
     Token::tokenType type;
     std::string body;
 
-    void evaluate(Interpreter *interpreter) override {
-        interpreter->evaluate(this);
+    void visit(TreeWalker *walker) override {
+        walker->visit(this);
     }
 
 public:
@@ -118,8 +118,8 @@ class ReturnStatement : public Statement {
     friend class Interpreter;
     Expression *expression;
 
-    void evaluate(Interpreter *interpreter) override {
-        interpreter->evaluate(this);
+    void visit(TreeWalker *walker) override {
+        walker->visit(this);
     }
 
 public:
@@ -132,8 +132,8 @@ class RaiseStatement : public Statement {
     friend class Interpreter;
     Expression *expression;
 
-    void evaluate(Interpreter *interpreter) override {
-        interpreter->evaluate(this);
+    void visit(TreeWalker *walker) override {
+        walker->visit(this);
     }
 
 public:
@@ -146,8 +146,8 @@ class ImportStatement : public Statement {
     friend class Interpreter;
     std::string path;
 
-    void evaluate(Interpreter *interpreter) override {
-        interpreter->evaluate(this);
+    void visit(TreeWalker *walker) override {
+        walker->visit(this);
     }
 
 public:
@@ -162,8 +162,8 @@ class FunctionDefinition : public Statement {
     std::string name;
     bool unlimited;
 
-    void evaluate(Interpreter *interpreter) override {
-        interpreter->evaluate(this);
+    void visit(TreeWalker *walker) override {
+        walker->visit(this);
     }
 
 public:
@@ -179,8 +179,8 @@ class ClassDefinition : public Statement {
     Expression *superclass;
     std::string name;
 
-    void evaluate(Interpreter *interpreter) override {
-        interpreter->evaluate(this);
+    void visit(TreeWalker *walker) override {
+        walker->visit(this);
     }
 
 public:

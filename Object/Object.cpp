@@ -18,5 +18,6 @@ ObjPtr Object::getAttribute(const std::string &name) {
     auto result = findAttribute(name);
     if (result)
         return result;
-    throw Wrap(new AttributeError(name));
+    return nullptr;
+//    throw Wrap(new AttributeError(name));
 }

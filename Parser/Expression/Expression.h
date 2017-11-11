@@ -1,22 +1,21 @@
-#ifndef INTERPRETER_EXPRESSION_H
-#define INTERPRETER_EXPRESSION_H
+#ifndef walker_EXPRESSION_H
+#define walker_EXPRESSION_H
 
 #include <string>
 #include <iostream>
 #include <utility>
 #include "../../Object/Object.h"
 #include "../../Tokenizer/Token.h"
-#include "../../Interpreter/Interpreter.h"
+#include "../../TreeWalk/Interpreter/Interpreter.h"
 #include "../Statement/Statement.h"
 
-
-class Object;
-class Expression {
-    friend class Interpreter;
-    virtual ObjPtr evaluate(Interpreter *interpreter) = 0;
-
+struct Object;
+struct Expression {
     Token token;
 public:
+public:
+    virtual ObjPtr visit(TreeWalker *walker) = 0;
+
     explicit Expression(Token token) : token(std::move(token)) {};
     virtual ~Expression() = default;
 
@@ -25,25 +24,25 @@ public:
     virtual std::string str() { return token.body; };
 };
 
-class Binary : public Expression {
-    friend class Interpreter;
-
-    ObjPtr evaluate(Interpreter *interpreter) override {
-        return interpreter->evaluate(this);
-    }
-
+struct Binary : public Expression {
     Expression *left, *right;
 public:
+
+    ObjPtr visit(TreeWalker *walker) override {
+        return walker->visit(this);
+    }
+
     Binary(Token token, Expression *left, Expression *right);
     ~Binary() override;
     std::string str() override;
 };
 
-class Unary : public Expression {
-    friend class Interpreter;
+struct Unary : public Expression {
+    friend struct walker;
 
-    ObjPtr evaluate(Interpreter *interpreter) override {
-        return interpreter->evaluate(this);
+public:
+    ObjPtr visit(TreeWalker *walker) override {
+        return walker->visit(this);
     }
 
     Expression *argument;
@@ -53,22 +52,24 @@ public:
     std::string str() override;
 };
 
-class Literal : public Expression {
-    friend class Interpreter;
+struct Literal : public Expression {
+    friend struct walker;
 private:
-    ObjPtr evaluate(Interpreter *interpreter) override {
-        return interpreter->evaluate(this);
+public:
+    ObjPtr visit(TreeWalker *walker) override {
+        return walker->visit(this);
     }
 
 public:
     explicit Literal(const Token &token) : Expression(token) {}
 };
 
-class Variable : public Expression {
-    friend class Interpreter;
+struct Variable : public Expression {
+    friend struct walker;
 
-    ObjPtr evaluate(Interpreter *interpreter) override {
-        return interpreter->evaluate(this);
+public:
+    ObjPtr visit(TreeWalker *walker) override {
+        return walker->visit(this);
     }
 
 public:
@@ -77,11 +78,12 @@ public:
     std::string name;
 };
 
-class FunctionExpression : public Expression {
-    friend class Interpreter;
+struct FunctionExpression : public Expression {
+    friend struct walker;
 
-    ObjPtr evaluate(Interpreter *interpreter) override {
-        return interpreter->evaluate(this);
+public:
+    ObjPtr visit(TreeWalker *walker) override {
+        return walker->visit(this);
     }
 
     Expression *target;
@@ -92,12 +94,13 @@ public:
     std::string str() override;
 };
 
-class GetItem : public Expression {
-    friend class Interpreter;
-    friend class SetItem;
+struct GetItem : public Expression {
+    friend struct walker;
+    friend struct SetItem;
 
-    ObjPtr evaluate(Interpreter *interpreter) override {
-        return interpreter->evaluate(this);
+public:
+    ObjPtr visit(TreeWalker *walker) override {
+        return walker->visit(this);
     }
 
     Expression *target;
@@ -108,12 +111,13 @@ public:
     std::string str() override;
 };
 
-class GetAttribute : public Expression {
-    friend class Interpreter;
-    friend class SetAttribute;
+struct GetAttribute : public Expression {
+    friend struct walker;
+    friend struct SetAttribute;
 
-    ObjPtr evaluate(Interpreter *interpreter) override {
-        return interpreter->evaluate(this);
+public:
+    ObjPtr visit(TreeWalker *walker) override {
+        return walker->visit(this);
     }
 
     Expression *target;
@@ -124,11 +128,12 @@ public:
     std::string str() override;
 };
 
-class SetVariable : public Expression {
-    friend class Interpreter;
+struct SetVariable : public Expression {
+    friend struct walker;
 
-    ObjPtr evaluate(Interpreter *interpreter) override {
-        return interpreter->evaluate(this);
+public:
+    ObjPtr visit(TreeWalker *walker) override {
+        return walker->visit(this);
     }
 
     std::string name;
@@ -140,11 +145,12 @@ public:
     std::string str() override;
 };
 
-class SetAttribute : public Expression {
-    friend class Interpreter;
+struct SetAttribute : public Expression {
+    friend struct walker;
 
-    ObjPtr evaluate(Interpreter *interpreter) override {
-        return interpreter->evaluate(this);
+public:
+    ObjPtr visit(TreeWalker *walker) override {
+        return walker->visit(this);
     }
 
     Expression *value;
@@ -156,11 +162,12 @@ public:
     std::string str() override;
 };
 
-class SetItem : public Expression {
-    friend class Interpreter;
+struct SetItem : public Expression {
+    friend struct walker;
 
-    ObjPtr evaluate(Interpreter *interpreter) override {
-        return interpreter->evaluate(this);
+public:
+    ObjPtr visit(TreeWalker *walker) override {
+        return walker->visit(this);
     }
 
     Expression *value;
@@ -172,4 +179,4 @@ public:
     std::string str() override;
 };
 
-#endif //INTERPRETER_EXPRESSION_H
+#endif //walker_EXPRESSION_H
