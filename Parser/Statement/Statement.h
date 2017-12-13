@@ -1,21 +1,20 @@
 #ifndef INTERPRETER_STATEMENT_H
 #define INTERPRETER_STATEMENT_H
 
-
 #include <string>
 #include "../../TreeWalk/Interpreter/Interpreter.h"
 #include "../../Tokenizer/Token.h"
 
 class Expression;
 
-class Statement {
+struct Statement {
 public:
     virtual void visit(TreeWalker *walker) = 0;
     virtual ~Statement() = default;
     virtual std::string str() = 0;
 };
 
-class Block : public Statement {
+struct Block : public Statement {
     friend class Interpreter;
 
     std::vector<Statement *> statements;
@@ -30,7 +29,7 @@ public:
     std::string str() override;
 };
 
-class ExpressionStatement : public Statement {
+struct ExpressionStatement : public Statement {
     friend class Interpreter;
 
     Expression *expression;
@@ -45,7 +44,7 @@ public:
     std::string str() override;
 };
 
-class IfStatement : public Statement {
+struct IfStatement : public Statement {
     friend class Interpreter;
 
     Expression *condition;
@@ -79,12 +78,13 @@ struct TryStatement : public Statement {
     void visit(TreeWalker *walker) override {
         walker->visit(this);
     }
+
     TryStatement(const std::vector<CatchStatement *> &catches, Statement *block);
     ~TryStatement() override;
     std::string str() override;
 };
 
-class WhileStatement : public Statement {
+struct WhileStatement : public Statement {
     friend class Interpreter;
 
     Expression *condition;
@@ -100,7 +100,7 @@ public:
     std::string str() override;
 };
 
-class ControlFlow : public Statement {
+struct ControlFlow : public Statement {
     friend class Interpreter;
     Token::tokenType type;
     std::string body;
@@ -114,7 +114,7 @@ public:
     std::string str() override;
 };
 
-class ReturnStatement : public Statement {
+struct ReturnStatement : public Statement {
     friend class Interpreter;
     Expression *expression;
 
@@ -128,7 +128,7 @@ public:
     std::string str() override;
 };
 
-class RaiseStatement : public Statement {
+struct RaiseStatement : public Statement {
     friend class Interpreter;
     Expression *expression;
 
@@ -155,7 +155,7 @@ public:
     std::string str() override;
 };
 
-class FunctionDefinition : public Statement {
+struct FunctionDefinition : public Statement {
     friend class Interpreter;
     Statement *body;
     std::vector<std::string> arguments;
@@ -173,7 +173,21 @@ public:
     std::string str() override;
 };
 
-class ClassDefinition : public Statement {
+struct VariableDefinition : public Statement {
+    friend class Interpreter;
+    Expression *assignee;
+    std::string name;
+
+    void visit(TreeWalker *walker) override {
+        walker->visit(this);
+    }
+
+public:
+    VariableDefinition(const std::string &name, Expression *assignee);
+    std::string str() override;
+};
+
+struct ClassDefinition : public Statement {
     friend class Interpreter;
     Statement *body;
     Expression *superclass;
@@ -188,6 +202,5 @@ public:
     ~ClassDefinition() override;
     std::string str() override;
 };
-
 
 #endif //INTERPRETER_STATEMENT_H

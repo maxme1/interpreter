@@ -1,6 +1,6 @@
 program = statement*
 
-statement = (StmtBody? DELIMITER) | block | ifStmt | whileStmt | tryStmt | funcDef | classDef
+statement = (StmtBody? DELIMITER) | block | ifStmt | whileStmt | tryStmt | funcDef | classDef | varDef
 
 StmtBody = expression | 'break' | 'continue' | returnStmt | raiseStmt | importStmt
 returnStmt = 'return' expression?
@@ -8,7 +8,6 @@ raiseStmt = 'raise' expression?
 
 importStmt = 'import' IDENTIFIER
 tryStmt = 'try' block ('catch' '(' argsValues ')' block)*
-# TODO: possibly optional first statement
 ifStmt = 'if' '(' expression ')' (statement ('else' statement)? )?
 whileStmt = 'while' '(' expression ')' statement
 block = '{' statement* '}'
@@ -18,6 +17,8 @@ argsList = IDENTIFIER (SEPARATOR IDENTIFIER)*
 
 classDef = 'class' IDENTIFIER superclass? block
 superclass = '(' expression? ')'
+
+varDef = 'var' IDENTIFIER ('=' expression)?
 
 -- expression --
 

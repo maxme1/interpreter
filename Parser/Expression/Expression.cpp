@@ -10,7 +10,7 @@ std::string Binary::str() {
 }
 
 Binary::~Binary() {
-    delete left, right;
+//    delete left, right;
 }
 
 Unary::Unary(Token token, Expression *argument) : Expression(std::move(token)), argument(argument) {}
@@ -22,7 +22,7 @@ std::string Unary::str() {
 }
 
 Unary::~Unary() {
-    delete argument;
+//    delete argument;
 }
 
 FunctionExpression::FunctionExpression(Token token, Expression *target, std::vector<Expression *> argsList) :
@@ -37,10 +37,10 @@ std::string FunctionExpression::str() {
 }
 
 FunctionExpression::~FunctionExpression() {
-    delete target;
-    for (auto &&item : argsList) {
-        delete item;
-    }
+//    delete target;
+//    for (auto &&item : argsList) {
+//        delete item;
+//    }
 }
 
 GetItem::GetItem(Token token, Expression *target, Expression *argument) :
@@ -51,7 +51,7 @@ std::string GetItem::str() {
 }
 
 GetItem::~GetItem() {
-    delete target, argument;
+//    delete target, argument;
 }
 
 GetAttribute::GetAttribute(Token token, Expression *target, std::string name) :
@@ -62,7 +62,7 @@ std::string GetAttribute::str() {
 }
 
 GetAttribute::~GetAttribute() {
-    delete target;
+//    delete target;
 }
 
 SetVariable::SetVariable(Token token, std::string name, Expression *value) :
@@ -73,7 +73,7 @@ std::string SetVariable::str() {
 }
 
 SetVariable::~SetVariable() {
-    delete value;
+//    delete value;
 }
 
 SetAttribute::SetAttribute(const Token &token, GetAttribute *target, Expression *value)
@@ -84,7 +84,7 @@ std::string SetAttribute::str() {
 }
 
 SetAttribute::~SetAttribute() {
-    delete target, value;
+//    delete target, value;
 }
 
 SetItem::SetItem(const Token &token, GetItem *target, Expression *value) :
@@ -95,5 +95,5 @@ std::string SetItem::str() {
 }
 
 SetItem::~SetItem() {
-    delete target, value;
+//    delete target, value;
 }

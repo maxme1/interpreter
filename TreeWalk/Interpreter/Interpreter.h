@@ -37,6 +37,7 @@ public:
     void visit(TryStatement *statement) override;
     void visit(WhileStatement *statement) override;
     void visit(FunctionDefinition *statement) override;
+    void visit(VariableDefinition *statement) override;
     void visit(ClassDefinition *statement) override;
     void visit(ReturnStatement *statement) override;
     void visit(RaiseStatement *statement) override;
@@ -48,13 +49,15 @@ public:
     void addFunction(const std::string &name, ObjPtr(*function)(const std::vector<ObjPtr> &, Interpreter *),
                      int argumentsCount, bool unlimited = false);
 
-    std::vector<std::shared_ptr<Scope> > scopes;
-    void addScope(std::shared_ptr<Scope> context = nullptr);
-    void deleteScope();
-    std::shared_ptr<Scope> getContext();
+    std::vector<Scope::ptr> scopes;
+    void enterScope();
+    void addScope(std::shared_ptr<Scope> scope);
+    void leaveScope();
+    std::shared_ptr<Scope> getClosure();
 
-    ObjPtr getVariable(const std::string &name);
-    void setVariable(const std::string &name, ObjPtr value);
+    ObjPtr getVariable(const std::string &name, long level);
+    void setVariable(const std::string &name, ObjPtr value, long level);
+    void defineVariable(const std::string &name, ObjPtr value);
 
     ObjPtr callOperator(ObjPtr object, const std::vector<ObjPtr> &arguments);
     ObjPtr callFunction(ObjPtr object, const std::vector<Expression *> &argsList);

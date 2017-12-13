@@ -65,8 +65,7 @@ public:
 };
 
 struct Variable : public Expression {
-    friend struct walker;
-
+    long level{-1};
 public:
     ObjPtr visit(TreeWalker *walker) override {
         return walker->visit(this);
@@ -130,6 +129,7 @@ public:
 
 struct SetVariable : public Expression {
     friend struct walker;
+    long level = -1;
 
 public:
     ObjPtr visit(TreeWalker *walker) override {

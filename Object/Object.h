@@ -12,7 +12,8 @@ class Object : public std::enable_shared_from_this<Object> {
 protected:
     std::map<std::string, ObjPtr> attributes;
 public:
-    virtual void setAttribute(const std::string &name, ObjPtr value) final;
+    Object() = default;
+    virtual void setAttribute(const std::string &name, ObjPtr value);
     virtual ObjPtr getAttribute(const std::string &name) final;
     virtual ObjPtr findAttribute(const std::string &name);
 

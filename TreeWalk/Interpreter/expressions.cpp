@@ -24,13 +24,15 @@ std::map<Token::tokenType, std::string> unary = {
 };
 
 ObjPtr Interpreter::visit(Binary *expression) {
-    ObjPtr left = expression->left->visit(this), right = expression->right->visit(this);
+    auto left = expression->left->visit(this), right = expression->right->visit(this);
     auto name = binary.find(expression->token.type);
     if (name != binary.end()) {
         auto method = left->findAttribute(name->second);
         if (method)
             return callOperator(method, {right});
     }
+
+    assert(false);
 
 //    default behavior
 //    if (expression->ofType(Token::EQUAL))
@@ -68,7 +70,7 @@ ObjPtr Interpreter::visit(Literal *expression) {
 
 ObjPtr Interpreter::visit(SetVariable *expression) {
     auto value = expression->value->visit(this);
-    setVariable(expression->name, value);
+    setVariable(expression->name, value, expression->level);
     return value;
 }
 
@@ -90,7 +92,7 @@ ObjPtr Interpreter::visit(SetItem *expression) {
 }
 
 ObjPtr Interpreter::visit(Variable *expression) {
-    return getVariable(expression->name);
+    return getVariable(expression->name, expression->level);
 }
 
 ObjPtr Interpreter::visit(FunctionExpression *expression) {

@@ -3,6 +3,7 @@
 #include "../../Parser/Parser.h"
 #include "../../Object/Native/Native.h"
 #include "../../Object/Exception.h"
+#include "../../Object/Types/Int.h"
 
 void Interpreter::visit(ReturnStatement *statement) {
     if (statement->expression)
@@ -20,7 +21,7 @@ void Interpreter::visit(ImportStatement *statement) {
     Interpreter source = Interpreter();
 //    if (!source.interpretFile(path))
 //        throw Wrap(new ImportError("Could not import " + path));
-    setVariable(path, source.getContext());
+    setVariable(path, source.getClosure(), 0);
 }
 
 void Interpreter::visit(ExpressionStatement *statement) {
@@ -86,12 +87,22 @@ void Interpreter::visit(ControlFlow *statement) {
 }
 
 void Interpreter::visit(Block *block) {
+    enterScope();
     visitStatements(block->statements);
+    leaveScope();
 }
 
 void Interpreter::visit(FunctionDefinition *statement) {
-    setVariable(statement->name,
-                New(Function(statement->arguments, statement->body, statement->unlimited, getContext())));
+    defineVariable(statement->name,
+                   New(Function(statement->arguments, statement->body, statement->unlimited, getClosure())));
+}
+
+void Interpreter::visit(VariableDefinition *statement) {
+//    TODO: simplify
+    if (statement->assignee)
+        defineVariable(statement->name, statement->assignee->visit(this));
+    else
+        defineVariable(statement->name, New(None()));
 }
 
 void Interpreter::visit(ClassDefinition *statement) {

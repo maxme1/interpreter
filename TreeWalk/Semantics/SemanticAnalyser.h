@@ -4,8 +4,13 @@
 #include "../../Parser/Statement/Statement.h"
 
 class SemanticAnalysis : public TreeWalker {
+    std::vector<std::map<std::string, bool>> scopes;
+    void enterScope();
+    void leaveScope();
+    void setVariable(const std::string &name, bool value);
 public:
     explicit SemanticAnalysis(std::vector<Statement *> statements);
+    ~SemanticAnalysis();
 
     ObjPtr visit(Binary *expression) override;
     ObjPtr visit(Unary *expression) override;
@@ -23,6 +28,7 @@ public:
     void visit(TryStatement *statement) override;
     void visit(WhileStatement *statement) override;
     void visit(FunctionDefinition *statement) override;
+    void visit(VariableDefinition *statement) override;
     void visit(ClassDefinition *statement) override;
     void visit(ReturnStatement *statement) override;
     void visit(RaiseStatement *statement) override;

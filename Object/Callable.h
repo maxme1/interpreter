@@ -13,7 +13,7 @@ class Interpreter;
 class Callable : public Object {
     friend class Interpreter;
     friend class ClassMethod;
-    Scope::ptr context = nullptr;
+    Scope::ptr closure = nullptr;
 protected:
     virtual bool checkArguments(int count) = 0;
     virtual ObjPtr call(ArgsList args, Interpreter *interpreter) = 0;

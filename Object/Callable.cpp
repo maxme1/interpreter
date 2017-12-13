@@ -3,7 +3,7 @@
 #include "Types/Array.h"
 #include "../Parser/Statement/Statement.h"
 
-Callable::Callable(Scope::ptr context) : context(std::move(context)) {}
+Callable::Callable(Scope::ptr context) : closure(context) {}
 
 Function::Function(std::vector<std::string> &arguments, Statement *body, bool unlimited, Scope::ptr context) :
         Callable(std::move(context)), body(body), arguments(arguments), unlimited(unlimited) {}
@@ -21,7 +21,7 @@ ObjPtr Function::call(ArgsList args, Interpreter *interpreter) {
 //    if (unlimited)
 //        size--;
     for (i = 0; i < size; ++i)
-        interpreter->setVariable(arguments[i], args[i]);
+        interpreter->defineVariable(arguments[i], args[i]);
 //    if (unlimited) {
 //        auto last = std::vector<ObjPtr>(args.begin() + size, args.end());
 //        interpreter->setVariable(arguments[size], New(Array(last)));

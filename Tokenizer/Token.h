@@ -17,7 +17,7 @@ struct Token {
         BLOCK_OPEN, BLOCK_CLOSE,
 
         IF, ELSE, WHILE, TRY, CATCH, IMPORT,
-        FUNCTION, CLASS,
+        FUNCTION, CLASS, VAR,
         BREAK, CONTINUE, RETURN, RAISE,
 
         PROGRAM_END, ERROR, COMMENT

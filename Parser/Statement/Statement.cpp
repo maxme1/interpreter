@@ -8,14 +8,14 @@ std::string ExpressionStatement::str() {
 }
 
 ExpressionStatement::~ExpressionStatement() {
-    delete expression;
+//    delete expression;
 }
 
 IfStatement::IfStatement(Expression *condition, Statement *left, Statement *right) : condition(condition), left(left),
                                                                                      right(right) {}
 
 IfStatement::~IfStatement() {
-    delete condition, left, right;
+//    delete condition, left, right;
 }
 
 std::string IfStatement::str() {
@@ -31,10 +31,10 @@ TryStatement::TryStatement(const std::vector<TryStatement::CatchStatement *> &ca
         catches(catches), block(block) {}
 
 TryStatement::~TryStatement() {
-    delete block;
-    for (auto &&item : catches) {
-        delete item;
-    }
+//    delete block;
+//    for (auto &&item : catches) {
+//        delete item;
+//    }
 }
 
 std::string TryStatement::str() {
@@ -44,7 +44,7 @@ std::string TryStatement::str() {
 WhileStatement::WhileStatement(Expression *condition, Statement *body) : condition(condition), body(body) {}
 
 WhileStatement::~WhileStatement() {
-    delete condition, body;
+//    delete condition, body;
 }
 
 std::string WhileStatement::str() {
@@ -60,7 +60,9 @@ std::string ControlFlow::str() { return body; }
 
 ReturnStatement::ReturnStatement(Expression *expression) : expression(expression) {}
 
-ReturnStatement::~ReturnStatement() { delete expression; }
+ReturnStatement::~ReturnStatement() {
+//    delete expression;
+}
 
 std::string ReturnStatement::str() {
     std::string result = "return";
@@ -71,7 +73,9 @@ std::string ReturnStatement::str() {
 
 RaiseStatement::RaiseStatement(Expression *expression) : expression(expression) {}
 
-RaiseStatement::~RaiseStatement() { delete expression; }
+RaiseStatement::~RaiseStatement() {
+//    delete expression;
+}
 
 std::string RaiseStatement::str() {
     std::string result = "raise";
@@ -103,7 +107,15 @@ std::string FunctionDefinition::str() {
 }
 
 FunctionDefinition::~FunctionDefinition() {
-    delete body;
+//    delete body;
+}
+
+VariableDefinition::VariableDefinition(const std::string &name, Expression *assignee) : name(name), assignee(assignee) {
+
+}
+
+std::string VariableDefinition::str() {
+    return  "var " + name + " = " + assignee->str();
 }
 
 ClassDefinition::ClassDefinition(std::string name, Statement *body, Expression *superclass)
@@ -114,7 +126,7 @@ std::string ClassDefinition::str() {
 }
 
 ClassDefinition::~ClassDefinition() {
-    delete body, superclass;
+//    delete body, superclass;
 }
 
 Block::Block(const std::vector<Statement *> &statements) : statements(statements) {}
@@ -132,7 +144,7 @@ Block::~Block() {
 }
 
 TryStatement::CatchStatement::~CatchStatement() {
-    for (auto argument : arguments)
-        delete argument;
-    delete block;
+//    for (auto argument : arguments)
+//        delete argument;
+//    delete block;
 }

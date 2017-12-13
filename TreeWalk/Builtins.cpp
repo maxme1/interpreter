@@ -49,5 +49,5 @@ void Interpreter::populate() {
 }
 
 void Interpreter::addFunction(const std::string &name, nativeFunction function, int argumentsCount, bool unlimited) {
-    setVariable(name, New(NativeFunction(function, argumentsCount, unlimited)));
+    defineVariable(name, New(NativeFunction(function, argumentsCount, unlimited)));
 }

@@ -20,6 +20,7 @@ class IfStatement;
 class TryStatement;
 class WhileStatement;
 class FunctionDefinition;
+class VariableDefinition;
 class ClassDefinition;
 class ReturnStatement;
 class RaiseStatement;
@@ -45,6 +46,7 @@ public:
     virtual void visit(TryStatement *statement)=0;
     virtual void visit(WhileStatement *statement)=0;
     virtual void visit(FunctionDefinition *statement)=0;
+    virtual void visit(VariableDefinition *statement)=0;
     virtual void visit(ClassDefinition *statement)=0;
     virtual void visit(ReturnStatement *statement)=0;
     virtual void visit(RaiseStatement *statement)=0;

@@ -32,6 +32,8 @@ class Parser {
             return functionDefinition();
         if (matches({Token::CLASS}))
             return classDefinition();
+        if (matches({Token::VAR}))
+            return variableDefinition();
 
         auto body = statementBody();
         require({Token::DELIMITER});
@@ -82,7 +84,7 @@ class Parser {
         auto left = statement();
 //        only left block
         if (!matches({Token::ELSE}))
-            return new IfStatement(condition, left);
+            return new IfStatement(condition, nullptr, left);
 //        both blocks
         advance();
         auto right = statement();
@@ -162,10 +164,22 @@ class Parser {
         return new ClassDefinition(name, body, superclass);
     }
 
+    Statement *variableDefinition() {
+        require({Token::VAR});
+        auto name = require({Token::IDENTIFIER}).body;
+        Expression *assignee = nullptr;
+        if (matches({Token::ASSIGNMENT})) {
+            advance();
+            assignee = expression();
+        }
+        require({Token::DELIMITER});
+        return new VariableDefinition(name, assignee);
+    }
+
     Statement *block() {
         require({Token::BLOCK_OPEN});
         auto statements = std::vector<Statement *>();
-        while (position != tokens.end() and !matches({Token::BLOCK_CLOSE}))
+        while (!matches({Token::BLOCK_CLOSE}))
             statements.push_back(statement());
         require({Token::BLOCK_CLOSE});
         return new Block(statements);
@@ -191,7 +205,8 @@ class Parser {
                 return new SetItem(token, lookup, right);
             }
 
-            throw "Bad assignment";
+            assert(false);
+//            throw "Bad assignment";
         }
 //        here may be a leak
         return left;
@@ -290,7 +305,6 @@ public:
     std::vector<Token>::iterator position;
 
     explicit Parser(const std::vector<Token> &tokens);
-
 
 //    TODO: no memory is being freed whatsoever
 //    TODO: combine build and block
