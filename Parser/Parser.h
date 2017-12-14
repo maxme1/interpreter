@@ -160,8 +160,7 @@ class Parser {
                 superclass = expression();
             require({Token::BRACKET_CLOSE});
         }
-        auto body = block();
-        return new ClassDefinition(name, body, superclass);
+        return new ClassDefinition(name, block(), superclass);
     }
 
     Statement *variableDefinition() {
@@ -176,7 +175,7 @@ class Parser {
         return new VariableDefinition(name, assignee);
     }
 
-    Statement *block() {
+    Block *block() {
         require({Token::BLOCK_OPEN});
         auto statements = std::vector<Statement *>();
         while (!matches({Token::BLOCK_CLOSE}))

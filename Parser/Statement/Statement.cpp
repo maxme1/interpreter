@@ -118,7 +118,7 @@ std::string VariableDefinition::str() {
     return  "var " + name + " = " + assignee->str();
 }
 
-ClassDefinition::ClassDefinition(std::string name, Statement *body, Expression *superclass)
+ClassDefinition::ClassDefinition(std::string name, Block *body, Expression *superclass)
         : body(body), name(std::move(name)), superclass(superclass) {}
 
 std::string ClassDefinition::str() {

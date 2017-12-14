@@ -3,10 +3,10 @@
 #include "Types/Array.h"
 #include "../Parser/Statement/Statement.h"
 
-Callable::Callable(Scope::ptr context) : closure(context) {}
+Callable::Callable(Scope::ptr closure) : closure(closure) {}
 
-Function::Function(std::vector<std::string> &arguments, Statement *body, bool unlimited, Scope::ptr context) :
-        Callable(std::move(context)), body(body), arguments(arguments), unlimited(unlimited) {}
+Function::Function(std::vector<std::string> &arguments, Statement *body, bool unlimited, Scope::ptr closure) :
+        Callable(std::move(closure)), body(body), arguments(arguments), unlimited(unlimited) {}
 
 bool Function::checkArguments(int count) {
     auto size = arguments.size();
@@ -27,6 +27,7 @@ ObjPtr Function::call(ArgsList args, Interpreter *interpreter) {
 //        interpreter->setVariable(arguments[size], New(Array(last)));
 //    }
     body->visit(interpreter);
+    return nullptr;
 }
 
 //bool ClassMethod::checkArguments(int count) {

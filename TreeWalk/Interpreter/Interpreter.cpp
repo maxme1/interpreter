@@ -41,10 +41,6 @@ void Interpreter::interpret(std::string text) {
     visitStatements(statements);
 //    } catch (Wrap &e) {
 //        std::cout << "==========\n" << e.exception->asString();
-//    } catch (ControlFlow) {
-//        std::cout << "Control flow outside loop";
-//    } catch (ReturnException) {
-//        std::cout << "return outside function";
 //    }
 }
 
@@ -82,25 +78,22 @@ ObjPtr Interpreter::getVariable(const std::string &name, long level) {
 
 void Interpreter::setVariable(const std::string &name, ObjPtr value, long level) {
     assert(!scopes.empty());
-//    TODO: with level
     scopes.back()->setAttribute(name, std::move(value), level);
 }
 
 void Interpreter::defineVariable(const std::string &name, ObjPtr value) {
     assert(!scopes.empty());
-//    TODO: with level
     scopes.back()->defineVariable(name, std::move(value));
 }
 
 Callable::ptr Interpreter::getCallable(ObjPtr object) {
     auto callable = std::dynamic_pointer_cast<Callable>(object);
-    if (callable)
-        return callable;
-    return nullptr;
+    assert(callable);
+    return callable;
 //    throw Wrap(new ValueError("Object is not callable"));
 }
 
-void Interpreter::checkArguments(Callable::ptr callable, int count) {
+void Interpreter::checkArguments(Callable::ptr callable, long count) {
 //    if (!callable->checkArguments(count))
 //        throw Wrap(new ValueError("Number of arguments doesn't match: " + std::to_string(count)));
 }
@@ -121,33 +114,10 @@ ObjPtr Interpreter::call(Callable::ptr callable, ArgsList arguments) {
     return returnObject;
 }
 
-ObjPtr Interpreter::callFunction(ObjPtr object, const std::vector<Expression *> &argsList) {
-    auto callable = getCallable(std::move(object));
-    checkArguments(callable, argsList.size());
-
-    auto arguments = evaluateArguments(argsList);
-
-    if (callable->closure)
-        addScope(callable->closure);
-    else
-        enterScope();
-
-    auto result = call(callable, arguments);
-    leaveScope();
-    return result;
-}
-
 ObjPtr Interpreter::callOperator(ObjPtr object, ArgsList arguments) {
     auto callable = getCallable(std::move(object));
     checkArguments(callable, arguments.size());
-
-    try {
-        auto result = call(callable, arguments);
-        return result;
-    }
-    catch (ExceptionWrapper &e) {
-        throw;
-    }
+    return call(callable, arguments);
 }
 
 std::vector<ObjPtr> Interpreter::evaluateArguments(const std::vector<Expression *> &argsList) {

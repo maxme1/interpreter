@@ -51,6 +51,8 @@ ObjPtr Interpreter::visit(Unary *expression) {
         if (method)
             return callOperator(method, {});
     }
+    assert(false);
+    return nullptr;
 //    throw Wrap(new Exception("Operator not defined"));
 }
 
@@ -65,6 +67,7 @@ ObjPtr Interpreter::visit(Literal *expression) {
 //        auto body = expression->token.body;
 //        return New(String(body.substr(1, body.size() - 2)));
 //    }
+    assert(false);
     return nullptr;
 }
 
@@ -86,9 +89,10 @@ ObjPtr Interpreter::visit(SetItem *expression) {
     auto target = expression->target->target->visit(this);
     auto argument = expression->target->argument->visit(this);
     auto value = expression->value->visit(this);
-    //    user-defined method
-    auto method = target->getAttribute("setitem");
-    return callOperator(method, {argument, value});
+    //  TODO:  user-defined method
+//    auto method = target->getAttribute("setitem");
+//    return callOperator(method, {argument, value});
+    return nullptr;
 }
 
 ObjPtr Interpreter::visit(Variable *expression) {
@@ -98,34 +102,29 @@ ObjPtr Interpreter::visit(Variable *expression) {
 ObjPtr Interpreter::visit(FunctionExpression *expression) {
     ObjPtr object = expression->target->visit(this);
 
-//    auto classObject = std::dynamic_pointer_cast<Class>(object);
-//    if (classObject) {
-//        auto instance = classObject->makeInstance(nullptr);
-//        ObjPtr init;
-//        addScope(classObject->context);
-//        try {
-//            init = instance->findAttribute("init");
-//            if (init)
-//                callFunction(init, expression->argsList);
-//        } catch (ExceptionWrapper &e) {
-//            deleteScope();
-//            throw;
-//        }
-//        deleteScope();
-//        if (!init and !expression->argsList.empty())
-//            throw Wrap(new Exception("Default constructor does not receive arguments"));
-//        return instance;
-//    }
+    auto callable = getCallable(std::move(object));
+    checkArguments(callable, expression->argsList.size());
 
-    return callFunction(object, expression->argsList);
+    auto arguments = evaluateArguments(expression->argsList);
+
+//    TODO: better check if nativeFunction
+    if (callable->closure)
+        addScope(callable->closure);
+    else
+        enterScope();
+
+    auto result = call(callable, arguments);
+    leaveScope();
+    return result;
 }
 
 ObjPtr Interpreter::visit(GetItem *expression) {
     auto target = expression->target->visit(this);
     auto argument = expression->argument->visit(this);
-    //    user-defined method
-    auto method = target->getAttribute("getitem");
-    return callOperator(method, {argument});
+    //  TODO:  user-defined method
+//    auto method = target->getAttribute("getitem");
+//    return callOperator(method, {argument});
+    return nullptr;
 }
 
 ObjPtr Interpreter::visit(GetAttribute *expression) {

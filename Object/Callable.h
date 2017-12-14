@@ -10,7 +10,7 @@
 typedef const std::vector<ObjPtr> &ArgsList;
 
 class Interpreter;
-class Callable : public Object {
+struct Callable : public Object {
     friend class Interpreter;
     friend class ClassMethod;
     Scope::ptr closure = nullptr;
@@ -19,7 +19,7 @@ protected:
     virtual ObjPtr call(ArgsList args, Interpreter *interpreter) = 0;
 public:
     Callable() = default;
-    explicit Callable(Scope::ptr context);
+    explicit Callable(Scope::ptr closure);
 
     typedef std::shared_ptr<Callable> ptr;
 };
@@ -36,7 +36,7 @@ protected:
     ObjPtr call(ArgsList args, Interpreter *interpreter) override;
 
 public:
-    explicit Function(std::vector<std::string> &arguments, Statement *body, bool unlimited, Scope::ptr context);
+    explicit Function(std::vector<std::string> &arguments, Statement *body, bool unlimited, Scope::ptr closure);
 };
 
 //// TODO: subclass

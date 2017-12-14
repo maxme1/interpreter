@@ -21,6 +21,15 @@ void SemanticAnalysis::visit(FunctionDefinition *statement) {
     statement->body->visit(this);
 }
 
+void SemanticAnalysis::visit(ClassDefinition *statement) {
+    setVariable(statement->name, true);
+
+    if (statement->superclass)
+        statement->superclass->visit(this);
+
+    statement->body->visit(this);
+}
+
 void SemanticAnalysis::visit(ReturnStatement *statement) {
     if (statement->expression)
         statement->expression->visit(this);
@@ -56,9 +65,5 @@ void SemanticAnalysis::visit(WhileStatement *statement) {
 }
 
 void SemanticAnalysis::visit(ControlFlow *statement) {
-//    TODO: implement
-}
-
-void SemanticAnalysis::visit(ClassDefinition *statement) {
 //    TODO: implement
 }

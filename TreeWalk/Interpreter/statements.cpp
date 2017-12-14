@@ -4,6 +4,7 @@
 #include "../../Object/Native/Native.h"
 #include "../../Object/Exception.h"
 #include "../../Object/Types/Int.h"
+#include "../../Object/Class.h"
 
 void Interpreter::visit(ReturnStatement *statement) {
     if (statement->expression)
@@ -16,12 +17,13 @@ void Interpreter::visit(RaiseStatement *statement) {
 }
 
 void Interpreter::visit(ImportStatement *statement) {
+    assert(false);
     auto path = statement->path;
 //    TODO: for now the imported file must be in the same directory with the executable
     Interpreter source = Interpreter();
 //    if (!source.interpretFile(path))
 //        throw Wrap(new ImportError("Could not import " + path));
-    setVariable(path, source.getClosure(), 0);
+//    setVariable(path, source.getClosure(), 0);
 }
 
 void Interpreter::visit(ExpressionStatement *statement) {
@@ -106,28 +108,19 @@ void Interpreter::visit(VariableDefinition *statement) {
 }
 
 void Interpreter::visit(ClassDefinition *statement) {
-//    Class::ptr superclass;
-//    if (statement->superclass) {
-//        auto temp = statement->superclass->visit(this);
-//        superclass = std::dynamic_pointer_cast<Class>(temp);
-//        if (!superclass)
+    Class::ptr superclass;
+    if (statement->superclass) {
+        auto temp = statement->superclass->visit(this);
+        superclass = std::dynamic_pointer_cast<Class>(temp);
+        assert(superclass);
 //            throw Wrap(new ValueError("Cannot subclass instances"));
-//    }
-//    auto context = getContext();
-//    addScope();
-//    try {
-//        statement->body->visit(this);
-//    } catch (ReturnException &e) {
-////        TODO: move to syntactic errors
-//        throw Wrap(new Exception("Return outside function"));
-//    } catch (FlowException &e) {
-////        TODO: move to syntactic errors
-//        throw Wrap(new Exception("Control flow outside loop"));
-//    } catch (Wrap &e) {
-//        deleteScope();
-//        throw;
-//    }
-//    auto classScope = std::make_shared<Class>(statement->name, getContext(), superclass, context);
-//    deleteScope();
-//    setVariable(statement->name, classScope);
+    }
+    auto closure = getClosure();
+    enterScope();
+
+    visitStatements(statement->body->statements);
+    auto theClass = std::make_shared<Class>(statement->name, getClosure(), superclass, closure);
+
+    leaveScope();
+    defineVariable(statement->name, theClass);
 }

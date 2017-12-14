@@ -60,12 +60,11 @@ public:
     void defineVariable(const std::string &name, ObjPtr value);
 
     ObjPtr callOperator(ObjPtr object, const std::vector<ObjPtr> &arguments);
-    ObjPtr callFunction(ObjPtr object, const std::vector<Expression *> &argsList);
 
     ObjPtr call(std::shared_ptr<Callable> callable, const std::vector<ObjPtr> &arguments);
     std::vector<ObjPtr> evaluateArguments(const std::vector<Expression *> &argsList);
     std::shared_ptr<Callable> getCallable(ObjPtr object);
-    void checkArguments(std::shared_ptr<Callable> callable, int count);
+    void checkArguments(std::shared_ptr<Callable> callable, long count);
 
     static bool isDerived(ObjPtr derived, std::shared_ptr<Class> base);
 

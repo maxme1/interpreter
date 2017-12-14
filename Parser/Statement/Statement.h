@@ -189,7 +189,7 @@ public:
 
 struct ClassDefinition : public Statement {
     friend class Interpreter;
-    Statement *body;
+    Block *body;
     Expression *superclass;
     std::string name;
 
@@ -198,7 +198,7 @@ struct ClassDefinition : public Statement {
     }
 
 public:
-    ClassDefinition(std::string name, Statement *body, Expression *superclass);
+    ClassDefinition(std::string name, Block *body, Expression *superclass);
     ~ClassDefinition() override;
     std::string str() override;
 };
