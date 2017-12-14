@@ -3,14 +3,19 @@
 
 #include "../../Parser/Statement/Statement.h"
 
-class SemanticAnalysis : public TreeWalker {
+class SemanticAnalyser : public TreeWalker {
+    enum BlockType {
+        Class, Loop, Function
+    };
     std::vector<std::map<std::string, bool>> scopes;
+    std::vector<BlockType> types;
+
     void enterScope();
     void leaveScope();
     void setVariable(const std::string &name, bool value);
 public:
-    explicit SemanticAnalysis(std::vector<Statement *> statements);
-    ~SemanticAnalysis();
+    explicit SemanticAnalyser(std::vector<Statement *> statements);
+    ~SemanticAnalyser();
 
     ObjPtr visit(Binary *expression) override;
     ObjPtr visit(Unary *expression) override;
@@ -19,7 +24,7 @@ public:
     ObjPtr visit(SetAttribute *expression) override;
     ObjPtr visit(SetItem *expression) override;
     ObjPtr visit(Variable *expression) override;
-    ObjPtr visit(FunctionExpression *expression) override;
+    ObjPtr visit(CallExpression *expression) override;
     ObjPtr visit(GetAttribute *expression) override;
     ObjPtr visit(GetItem *expression) override;
 

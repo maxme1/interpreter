@@ -99,7 +99,7 @@ ObjPtr Interpreter::visit(Variable *expression) {
     return getVariable(expression->name, expression->level);
 }
 
-ObjPtr Interpreter::visit(FunctionExpression *expression) {
+ObjPtr Interpreter::visit(CallExpression *expression) {
     ObjPtr object = expression->target->visit(this);
 
     auto callable = getCallable(std::move(object));

@@ -8,7 +8,6 @@ struct Class : public Callable {
 public:
     typedef std::shared_ptr<Class> ptr;
 
-//    explicit Class(Class::ptr superclass);
     Class(const std::string &name, Scope::ptr body, Class::ptr superclass, Scope::ptr closure);
     std::string asString() override;
     ObjPtr findAttribute(const std::string &name) override;

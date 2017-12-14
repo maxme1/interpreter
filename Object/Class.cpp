@@ -14,12 +14,11 @@ ObjPtr Instance::findAttribute(const std::string &name) {
     if (!result)
         result = getClass()->findAttribute(name);
     assert(result);
+//     creating a class method
+    auto method = std::dynamic_pointer_cast<Callable>(result);
+    if (method)
+        return ObjPtr(new ClassMethod(method, $this(Instance)));
     return result;
-//     TODO:   creating a class method
-//    auto method = std::dynamic_pointer_cast<Callable>(result);
-//    if (method)
-//        return New(ClassMethod(method, $this(Instance)));
-//    return result;
 }
 
 Instance::Instance(Class::ptr theClass) : theClass(std::move(theClass)) {}
@@ -50,11 +49,7 @@ Class::ptr Class::getSuperClass() {
 }
 
 std::string Class::asString() {
-    auto name = findAttribute("@name");
-    std::string result = "<class";
-    if (name)
-        result += " " + name->asString();
-    return result + ">";
+    return "<class>";
 }
 
 ObjPtr Class::call(const std::vector<ObjPtr> &args, Interpreter *interpreter) {
@@ -78,7 +73,7 @@ ObjPtr Class::call(const std::vector<ObjPtr> &args, Interpreter *interpreter) {
 }
 
 bool Class::checkArguments(int count) {
-    return true;
+    return count == 0;
 }
 
 //Class::Class(Class::ptr superclass) : superclass(std::move(superclass)) {}

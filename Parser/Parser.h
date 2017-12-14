@@ -256,7 +256,7 @@ class Parser {
             if (matches({Token::BRACKET_OPEN})) {
                 auto token = *position;
                 auto args = arguments();
-                left = new FunctionExpression(token, left, args);
+                left = new CallExpression(token, left, args);
             } else if (matches({Token::ATTRIBUTE})) {
                 auto token = advance();
                 auto name = require({Token::IDENTIFIER}).body;

@@ -2,6 +2,7 @@
 
 #include "Types/Array.h"
 #include "../Parser/Statement/Statement.h"
+#include "Class.h"
 
 Callable::Callable(Scope::ptr closure) : closure(closure) {}
 
@@ -9,10 +10,11 @@ Function::Function(std::vector<std::string> &arguments, Statement *body, bool un
         Callable(std::move(closure)), body(body), arguments(arguments), unlimited(unlimited) {}
 
 bool Function::checkArguments(int count) {
-    auto size = arguments.size();
-    if (unlimited)
-        size--;
-    return size == count or (arguments.size() <= count and unlimited);
+    return arguments.size() == count;
+//    auto size = arguments.size();
+//    if (unlimited)
+//        size--;
+//    return size == count or (arguments.size() <= count and unlimited);
 }
 
 ObjPtr Function::call(ArgsList args, Interpreter *interpreter) {
@@ -30,17 +32,16 @@ ObjPtr Function::call(ArgsList args, Interpreter *interpreter) {
     return nullptr;
 }
 
-//bool ClassMethod::checkArguments(int count) {
-//    return function->checkArguments(count);
-//}
-//
-//ObjPtr ClassMethod::call(ArgsList args, API *api) {
-//    api->setVariable("this", instance);
-//    auto super = instance->getClass()->getSuperClass();
-//    if (super)
-//        api->setVariable("super", super);
-//    return function->call(args, api);
-//}
-//
-//ClassMethod::ClassMethod(Callable::ptr function, Instance::ptr instance) :
-//        function(std::move(function)), instance(std::move(instance)) {}
+bool ClassMethod::checkArguments(int count) {
+    return function->checkArguments(count);
+}
+
+ObjPtr ClassMethod::call(ArgsList args, Interpreter *interpreter) {
+    return function->call(args, interpreter);
+}
+
+ClassMethod::ClassMethod(Callable::ptr function, Instance::ptr instance) :
+        function(function), instance(instance) {
+    closure = std::make_shared<Scope>(function->closure);
+    closure->defineVariable("this", instance);
+}

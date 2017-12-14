@@ -25,10 +25,10 @@ Unary::~Unary() {
 //    delete argument;
 }
 
-FunctionExpression::FunctionExpression(Token token, Expression *target, std::vector<Expression *> argsList) :
+CallExpression::CallExpression(Token token, Expression *target, std::vector<Expression *> argsList) :
         Expression(std::move(token)), target(target), argsList(std::move(argsList)) {}
 
-std::string FunctionExpression::str() {
+std::string CallExpression::str() {
     std::string result = target->str() + "(";
     for (auto argument : argsList) {
         result += argument->str();
@@ -36,7 +36,7 @@ std::string FunctionExpression::str() {
     return result + ")";
 }
 
-FunctionExpression::~FunctionExpression() {
+CallExpression::~CallExpression() {
 //    delete target;
 //    for (auto &&item : argsList) {
 //        delete item;

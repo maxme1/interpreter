@@ -39,18 +39,17 @@ public:
     explicit Function(std::vector<std::string> &arguments, Statement *body, bool unlimited, Scope::ptr closure);
 };
 
-//// TODO: subclass
-//class Instance;
-//class ClassMethod : public Callable {
-//    friend class Interpreter;
-//    Callable::ptr function;
-//    std::shared_ptr<Instance> instance;
-//protected:
-//    bool checkArguments(int count) override;
-//    ObjPtr call(ArgsList args, Interpreter *interpreter) override;
-//
-//public:
-//    ClassMethod(Callable::ptr function, std::shared_ptr<Instance> instance);
-//};
+class Instance;
+class ClassMethod : public Callable {
+    friend class Interpreter;
+    Callable::ptr function;
+    std::shared_ptr<Instance> instance;
+protected:
+    bool checkArguments(int count) override;
+    ObjPtr call(ArgsList args, Interpreter *interpreter) override;
+
+public:
+    ClassMethod(Callable::ptr function, std::shared_ptr<Instance> instance);
+};
 
 #endif //INTERPRETER_FUNCTION_H

@@ -1,26 +1,26 @@
 #include "SemanticAnalyser.h"
 #include "../../Parser/Statement/Statement.h"
 
-SemanticAnalysis::SemanticAnalysis(std::vector<Statement *> statements) {
+SemanticAnalyser::SemanticAnalyser(std::vector<Statement *> statements) {
     scopes = std::vector<std::map<std::string, bool>>();
     enterScope();
     visitStatements(statements);
 }
 
-SemanticAnalysis::~SemanticAnalysis() {
+SemanticAnalyser::~SemanticAnalyser() {
     leaveScope();
 }
 
-void SemanticAnalysis::enterScope() {
+void SemanticAnalyser::enterScope() {
     scopes.emplace_back();
 }
 
-void SemanticAnalysis::leaveScope() {
+void SemanticAnalyser::leaveScope() {
     assert(!scopes.empty());
     scopes.pop_back();
 }
 
-void SemanticAnalysis::setVariable(const std::string &name, bool value) {
+void SemanticAnalyser::setVariable(const std::string &name, bool value) {
     assert(!scopes.empty());
     scopes.back()[name] = value;
 }

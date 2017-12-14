@@ -7,6 +7,19 @@
 
 class Scope : public Object {
 public:
+    typedef std::shared_ptr<Scope> ptr;
+
+    Scope() = default;
+
+    explicit Scope(ptr scope) {
+        if (scope) {
+            upper = scope->upper;
+            for (auto &&attribute : scope->attributes) {
+                attributes[attribute.first] = attribute.second;
+            }
+        }
+    };
+
     ObjPtr findAttribute(const std::string &name, long level) {
         assert(level >= 0);
         auto result = Object::findAttribute(name);
@@ -33,8 +46,6 @@ public:
         attributes[name] = value;
     }
 
-    typedef std::shared_ptr<Scope> ptr;
-
     ptr getUpper() {
         assert(upper);
         return upper;
@@ -51,6 +62,7 @@ public:
 
 private:
     friend class Class;
+
     ptr upper{nullptr};
 };
 

@@ -35,7 +35,7 @@ void Interpreter::interpret(std::string text) {
         return;
     }
 
-    auto sm = SemanticAnalysis(statements);
+    auto sm = SemanticAnalyser(statements);
 //
 //    try {
     visitStatements(statements);

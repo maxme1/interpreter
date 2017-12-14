@@ -10,7 +10,7 @@ class SetVariable;
 class SetAttribute;
 class SetItem;
 class Variable;
-class FunctionExpression;
+class CallExpression;
 class GetAttribute;
 class GetItem;
 
@@ -37,7 +37,7 @@ public:
     virtual ObjPtr visit(SetAttribute *expression)=0;
     virtual ObjPtr visit(SetItem *expression)=0;
     virtual ObjPtr visit(Variable *expression)=0;
-    virtual ObjPtr visit(FunctionExpression *expression)=0;
+    virtual ObjPtr visit(CallExpression *expression)=0;
     virtual ObjPtr visit(GetAttribute *expression)=0;
     virtual ObjPtr visit(GetItem *expression)=0;
 

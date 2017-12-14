@@ -2,8 +2,25 @@
 #include "SemanticAnalyser.h"
 #include "../../Parser/Parser.h"
 
-ObjPtr SemanticAnalysis::visit(Variable *expression) {
+ObjPtr SemanticAnalyser::visit(Variable *expression) {
     assert(expression->level == -1);
+
+//    TODO: too ugly
+    if (expression->name == "this") {
+        bool found = false, inClass = false;
+        for (auto type = types.rbegin(); type != types.rend(); type++) {
+            if (*type == BlockType::Function)
+                found = true;
+            if (*type == BlockType::Class)
+                inClass = true;
+            if (found and inClass)
+                break;
+        }
+        assert(found and inClass);
+        expression->level = 1;
+        return nullptr;
+    }
+
     for (int i = 0; i < scopes.size(); ++i) {
         auto scope = scopes[scopes.size() - i - 1];
         auto find = scope.find(expression->name);
@@ -21,7 +38,8 @@ ObjPtr SemanticAnalysis::visit(Variable *expression) {
     return nullptr;
 }
 
-ObjPtr SemanticAnalysis::visit(SetVariable *expression) {
+ObjPtr SemanticAnalyser::visit(SetVariable *expression) {
+    assert(expression->name != "this");
 //    TODO: combine
     assert(expression->level == -1);
     for (int i = 0; i < scopes.size(); ++i) {
@@ -42,7 +60,7 @@ ObjPtr SemanticAnalysis::visit(SetVariable *expression) {
     return nullptr;
 }
 
-ObjPtr SemanticAnalysis::visit(FunctionExpression *expression) {
+ObjPtr SemanticAnalyser::visit(CallExpression *expression) {
     expression->target->visit(this);
     for (auto &&argument : expression->argsList) {
         argument->visit(this);
@@ -50,29 +68,29 @@ ObjPtr SemanticAnalysis::visit(FunctionExpression *expression) {
     return nullptr;
 }
 
-ObjPtr SemanticAnalysis::visit(Binary *expression) {
+ObjPtr SemanticAnalyser::visit(Binary *expression) {
     expression->left->visit(this);
     expression->right->visit(this);
     return nullptr;
 }
 
-ObjPtr SemanticAnalysis::visit(Unary *expression) {
+ObjPtr SemanticAnalyser::visit(Unary *expression) {
     expression->argument->visit(this);
     return nullptr;
 }
 
-ObjPtr SemanticAnalysis::visit(Literal *expression) {
+ObjPtr SemanticAnalyser::visit(Literal *expression) {
     return nullptr;
 }
 
-ObjPtr SemanticAnalysis::visit(SetAttribute *expression) {
+ObjPtr SemanticAnalyser::visit(SetAttribute *expression) {
 //    TODO: also looks bad
     expression->target->target->visit(this);
     expression->value->visit(this);
     return nullptr;
 }
 
-ObjPtr SemanticAnalysis::visit(SetItem *expression) {
+ObjPtr SemanticAnalyser::visit(SetItem *expression) {
 //    TODO: also looks bad
     expression->target->target->visit(this);
     expression->target->argument->visit(this);
@@ -80,13 +98,13 @@ ObjPtr SemanticAnalysis::visit(SetItem *expression) {
     return nullptr;
 }
 
-ObjPtr SemanticAnalysis::visit(GetItem *expression) {
+ObjPtr SemanticAnalyser::visit(GetItem *expression) {
     expression->target->visit(this);
     expression->argument->visit(this);
     return nullptr;
 }
 
-ObjPtr SemanticAnalysis::visit(GetAttribute *expression) {
+ObjPtr SemanticAnalyser::visit(GetAttribute *expression) {
     expression->target->visit(this);
     return nullptr;
 }

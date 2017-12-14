@@ -77,7 +77,7 @@ public:
     std::string name;
 };
 
-struct FunctionExpression : public Expression {
+struct CallExpression : public Expression {
     friend struct walker;
 
 public:
@@ -88,8 +88,8 @@ public:
     Expression *target;
     std::vector<Expression *> argsList;
 public:
-    FunctionExpression(Token token, Expression *target, std::vector<Expression *> argsList);
-    ~FunctionExpression() override;
+    CallExpression(Token token, Expression *target, std::vector<Expression *> argsList);
+    ~CallExpression() override;
     std::string str() override;
 };
 
