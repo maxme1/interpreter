@@ -11,6 +11,7 @@ class SetAttribute;
 class SetItem;
 class Variable;
 class CallExpression;
+class SuperClass;
 class GetAttribute;
 class GetItem;
 
@@ -38,6 +39,7 @@ public:
     virtual ObjPtr visit(SetItem *expression)=0;
     virtual ObjPtr visit(Variable *expression)=0;
     virtual ObjPtr visit(CallExpression *expression)=0;
+    virtual ObjPtr visit(SuperClass *expression)=0;
     virtual ObjPtr visit(GetAttribute *expression)=0;
     virtual ObjPtr visit(GetItem *expression)=0;
 

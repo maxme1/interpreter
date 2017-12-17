@@ -4,21 +4,18 @@
 
 ObjPtr SemanticAnalyser::visit(Variable *expression) {
     assert(expression->level == -1);
-
-//    TODO: too ugly
     if (expression->name == "this") {
-        bool found = false, inClass = false;
+        long level = 1;
+//        if (expression->name == "super")
+//            level++;
         for (auto type = types.rbegin(); type != types.rend(); type++) {
-            if (*type == BlockType::Function)
-                found = true;
-            if (*type == BlockType::Class)
-                inClass = true;
-            if (found and inClass)
-                break;
+            if (*type == BlockType::Method) {
+                expression->level = level;
+                return nullptr;
+            }
+            level++;
         }
-        assert(found and inClass);
-        expression->level = 1;
-        return nullptr;
+        assert(false);
     }
 
     for (int i = 0; i < scopes.size(); ++i) {
@@ -39,7 +36,7 @@ ObjPtr SemanticAnalyser::visit(Variable *expression) {
 }
 
 ObjPtr SemanticAnalyser::visit(SetVariable *expression) {
-    assert(expression->name != "this");
+    assert(expression->name != "this" and expression->name != "super");
 //    TODO: combine
     assert(expression->level == -1);
     for (int i = 0; i < scopes.size(); ++i) {
@@ -65,6 +62,20 @@ ObjPtr SemanticAnalyser::visit(CallExpression *expression) {
     for (auto &&argument : expression->argsList) {
         argument->visit(this);
     }
+    return nullptr;
+}
+
+ObjPtr SemanticAnalyser::visit(SuperClass *expression) {
+    assert(expression->level == -1);
+    long level = 1;
+    for (auto type = types.rbegin(); type != types.rend(); type++) {
+        if (*type == BlockType::Method) {
+            expression->level = level;
+            return nullptr;
+        }
+        level++;
+    }
+    assert(false);
     return nullptr;
 }
 

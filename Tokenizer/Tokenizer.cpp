@@ -82,6 +82,7 @@ std::map<std::string, Token::tokenType> reserved = {
         {"return",   Token::RETURN},
         {"raise",    Token::RAISE},
         {"var",      Token::VAR},
+        {"super",    Token::SUPER},
         {"def",      Token::FUNCTION},
         {"class",    Token::CLASS},
         {"import",   Token::IMPORT},

@@ -12,19 +12,19 @@
 #define $this(ClassName) std::static_pointer_cast<ClassName>(shared_from_this())
 
 #define $subclass(ClassName, Base) struct ClassName : public NativeObject<ClassName, Base> {\
-    explicit ClassName(Class::ptr classPtr) : NativeObject(std::move(classPtr)) {};
+    explicit ClassName(Class::ptr classPtr) : NativeObject(classPtr) {};
 
 #define $class(ClassName) $subclass(ClassName, NoSuperClass)
 
 #define $method(name, type) \
-static ObjPtr (name)(ObjPtr _self, ArgsList args, API *api) { \
+static ObjPtr (name)(ObjPtr _self, ArgsList args, Interpreter *interpreter) { \
     auto self = type::cast(_self, true);
 
 #define $lambda [](ArgsList args, Interpreter *interpreter) -> ObjPtr
 
 // types
 typedef ObjPtr(*nativeFunction)(ArgsList, Interpreter *);
-//typedef ObjPtr(*nativeMethod)(ObjPtr, ArgsList, Interpreter *);
+typedef ObjPtr(*nativeMethod)(ObjPtr, ArgsList, Interpreter *);
 
 // callables
 template<typename T>
@@ -41,7 +41,7 @@ public:
 };
 
 typedef NativeCallable<nativeFunction> NativeFunction;
-//typedef NativeCallable<nativeMethod> NativeMethod;
+typedef NativeCallable<nativeMethod> NativeMethod;
 
 #include "NativeObject.h"
 

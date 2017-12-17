@@ -9,13 +9,11 @@ public:
     typedef std::shared_ptr<Class> ptr;
 
     Class(const std::string &name, Scope::ptr body, Class::ptr superclass, Scope::ptr closure);
+    explicit Class(Class::ptr superclass);
     std::string asString() override;
     ObjPtr findAttribute(const std::string &name) override;
-
-    Class::ptr getSuperClass();
-
 private:
-    ptr superclass{nullptr};
+    ptr superClass{nullptr};
 protected:
     bool checkArguments(int count) override;
     ObjPtr call(const std::vector<ObjPtr> &args, Interpreter *interpreter) override;

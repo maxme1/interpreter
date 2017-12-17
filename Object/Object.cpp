@@ -1,5 +1,6 @@
 #include <iostream>
 #include <utility>
+#include <cassert>
 #include "Object.h"
 #include "Exception.h"
 
@@ -16,8 +17,7 @@ ObjPtr Object::findAttribute(const std::string &name) {
 
 ObjPtr Object::getAttribute(const std::string &name) {
     auto result = findAttribute(name);
-    if (result)
-        return result;
-    return nullptr;
+    assert(result);
+    return result;
 //    throw Wrap(new AttributeError(name));
 }

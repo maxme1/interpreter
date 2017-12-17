@@ -14,12 +14,11 @@ ObjPtr NativeCallable<T>::call(ArgsList args, Interpreter *interpreter) {
     return function(args, interpreter);
 }
 
-//template<>
-//ObjPtr NativeCallable<nativeMethod>::call(const std::vector<ObjPtr> &args, Interpreter *interpreter) {
-//    auto self = interpreter->getVariable("this");
-//    return function(self, args, interpreter);
-//}
+template<>
+ObjPtr NativeCallable<nativeMethod>::call(const std::vector<ObjPtr> &args, Interpreter *interpreter) {
+    auto self = interpreter->getVariable("this", 0);
+    return function(self, args, interpreter);
+}
 
 template class NativeCallable<nativeFunction>;
-//template
-//class NativeCallable<nativeMethod>;
+template class NativeCallable<nativeMethod>;

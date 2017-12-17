@@ -18,7 +18,7 @@ protected:
     virtual bool checkArguments(int count) = 0;
     virtual ObjPtr call(ArgsList args, Interpreter *interpreter) = 0;
 public:
-    Callable() = default;
+    Callable();
     explicit Callable(Scope::ptr closure);
 
     typedef std::shared_ptr<Callable> ptr;

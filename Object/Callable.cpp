@@ -4,7 +4,13 @@
 #include "../Parser/Statement/Statement.h"
 #include "Class.h"
 
-Callable::Callable(Scope::ptr closure) : closure(closure) {}
+Callable::Callable() {
+    closure = std::make_shared<Scope>();
+}
+
+Callable::Callable(Scope::ptr closure) : closure(closure) {
+    assert(closure);
+}
 
 Function::Function(std::vector<std::string> &arguments, Statement *body, bool unlimited, Scope::ptr closure) :
         Callable(std::move(closure)), body(body), arguments(arguments), unlimited(unlimited) {}
@@ -41,7 +47,8 @@ ObjPtr ClassMethod::call(ArgsList args, Interpreter *interpreter) {
 }
 
 ClassMethod::ClassMethod(Callable::ptr function, Instance::ptr instance) :
-        function(function), instance(instance) {
-    closure = std::make_shared<Scope>(function->closure);
+        Callable(), function(function), instance(instance) {
+    if (function->closure)
+        closure = std::make_shared<Scope>(function->closure);
     closure->defineVariable("this", instance);
 }

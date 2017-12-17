@@ -5,6 +5,7 @@
 #include "../../Object/Exception.h"
 #include "../../Object/Types/Int.h"
 #include "../../Object/Class.h"
+#include "../../Object/Types/None.h"
 
 void Interpreter::visit(ReturnStatement *statement) {
     if (statement->expression)
@@ -118,6 +119,8 @@ void Interpreter::visit(ClassDefinition *statement) {
     auto closure = getClosure();
     enterScope();
 
+    if (statement->superclass)
+        defineVariable("super", superclass);
     visitStatements(statement->body->statements);
     auto theClass = std::make_shared<Class>(statement->name, getClosure(), superclass, closure);
 

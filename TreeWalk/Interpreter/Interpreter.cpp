@@ -101,12 +101,16 @@ void Interpreter::checkArguments(Callable::ptr callable, long count) {
 ObjPtr Interpreter::call(Callable::ptr callable, ArgsList arguments) {
 //    ObjPtr returnObject = nullptr;
 //    try {
+    if (callable->closure)
+        addScope(callable->closure);
+    else
+        enterScope();
+
     auto returnObject = callable->call(arguments, this);
+
+    leaveScope();
 //    } catch (ReturnException &e) {
 //        returnObject = e.content;
-//    } catch (FlowException &e) {
-//        TODO: move to syntactic errors
-//        throw Wrap(new SyntaxError("Control flow outside loop"));
 //    }
 
     if (!returnObject)

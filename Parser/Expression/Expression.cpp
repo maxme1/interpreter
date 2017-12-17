@@ -43,6 +43,19 @@ CallExpression::~CallExpression() {
 //    }
 }
 
+SuperClass::SuperClass(Token attribute) : Expression(attribute) {}
+
+std::string SuperClass::str() {
+    return "super." + token.body;
+}
+
+SuperClass::~SuperClass() {
+//    delete target;
+//    for (auto &&item : argsList) {
+//        delete item;
+//    }
+}
+
 GetItem::GetItem(Token token, Expression *target, Expression *argument) :
         Expression(std::move(token)), target(target), argument(argument) {}
 

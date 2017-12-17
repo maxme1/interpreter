@@ -29,6 +29,7 @@ public:
     ObjPtr visit(SetItem *expression) override;
     ObjPtr visit(Variable *expression) override;
     ObjPtr visit(CallExpression *expression) override;
+    ObjPtr visit(SuperClass *expression) override;
     ObjPtr visit(GetAttribute *expression) override;
     ObjPtr visit(GetItem *expression) override;
 

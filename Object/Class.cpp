@@ -13,8 +13,8 @@ ObjPtr Instance::findAttribute(const std::string &name) {
     auto result = Object::findAttribute(name);
     if (!result)
         result = getClass()->findAttribute(name);
-    assert(result);
 //     creating a class method
+    assert(result);
     auto method = std::dynamic_pointer_cast<Callable>(result);
     if (method)
         return ObjPtr(new ClassMethod(method, $this(Instance)));
@@ -31,7 +31,7 @@ Class::ptr Instance::getClass() {
 // Class
 
 Class::Class(const std::string &name, Scope::ptr body, Class::ptr superclass, Scope::ptr closure) :
-        Callable(std::move(closure)), superclass(std::move(superclass)) {
+        Callable(closure), superClass(superclass) {
 //    copy the scope
     for (auto &&attribute : body->attributes)
         setAttribute(attribute.first, attribute.second);
@@ -39,13 +39,9 @@ Class::Class(const std::string &name, Scope::ptr body, Class::ptr superclass, Sc
 
 ObjPtr Class::findAttribute(const std::string &name) {
     auto result = Object::findAttribute(name);
-    if (!result and superclass)
-        return superclass->findAttribute(name);
+    if (!result and superClass)
+        return superClass->findAttribute(name);
     return result;
-}
-
-Class::ptr Class::getSuperClass() {
-    return superclass;
 }
 
 std::string Class::asString() {
@@ -76,4 +72,4 @@ bool Class::checkArguments(int count) {
     return count == 0;
 }
 
-//Class::Class(Class::ptr superclass) : superclass(std::move(superclass)) {}
+Class::Class(Class::ptr superclass) : superClass(superclass) {}

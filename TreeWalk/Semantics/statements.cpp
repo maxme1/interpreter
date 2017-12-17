@@ -18,7 +18,10 @@ void SemanticAnalyser::visit(VariableDefinition *statement) {
 
 void SemanticAnalyser::visit(FunctionDefinition *statement) {
     setVariable(statement->name, true);
-    types.push_back(BlockType::Function);
+    if (!types.empty() and types.back() == BlockType::Class)
+        types.push_back(BlockType::Method);
+    else
+        types.push_back(BlockType::Function);
     statement->body->visit(this);
     types.pop_back();
 }
@@ -26,24 +29,22 @@ void SemanticAnalyser::visit(FunctionDefinition *statement) {
 void SemanticAnalyser::visit(ClassDefinition *statement) {
     setVariable(statement->name, true);
 
+    types.push_back(BlockType::Class);
     if (statement->superclass)
         statement->superclass->visit(this);
 
-    types.push_back(BlockType::Class);
-    statement->body->visit(this);
+    enterScope();
+    if (statement->superclass)
+        setVariable("super", true);
+    visitStatements(statement->body->statements);
+
+    leaveScope();
     types.pop_back();
 }
 
 void SemanticAnalyser::visit(ReturnStatement *statement) {
-    bool found = false;
-    for (auto type = types.rbegin(); type != types.rend(); type++) {
-        assert(*type != BlockType::Class);
-        if (*type == BlockType::Function) {
-            found = true;
-            break;
-        }
-    }
-    assert(found);
+    assert(!types.empty());
+    assert(types.back() == BlockType::Function or types.back() == BlockType::Method);
 
     if (statement->expression)
         statement->expression->visit(this);

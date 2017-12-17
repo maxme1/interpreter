@@ -283,15 +283,19 @@ class Parser {
         return result;
     }
 
+    Expression *superClass() {
+        require({Token::SUPER});
+        require({Token::ATTRIBUTE});
+        return new SuperClass(require({Token::IDENTIFIER}));
+    }
+
     Expression *literal() {
-        if (matches({Token::NUMBER, Token::BOOL, Token::NONE, Token::STRING})) {
-            auto current = advance();
-            return new Literal(current);
-        }
-        if (matches({Token::IDENTIFIER})) {
-            auto current = advance();
-            return new Variable(current);
-        }
+        if (matches({Token::SUPER}))
+            return superClass();
+        if (matches({Token::NUMBER, Token::BOOL, Token::NONE, Token::STRING}))
+            return new Literal(advance());
+        if (matches({Token::IDENTIFIER}))
+            return new Variable(advance());
         auto bracket = require({Token::BRACKET_OPEN});
         auto result = expression();
         require({Token::BRACKET_CLOSE});

@@ -33,6 +33,7 @@ ObjPtr Interpreter::visit(Binary *expression) {
     }
 
     assert(false);
+    return nullptr;
 
 //    default behavior
 //    if (expression->ofType(Token::EQUAL))
@@ -107,14 +108,17 @@ ObjPtr Interpreter::visit(CallExpression *expression) {
 
     auto arguments = evaluateArguments(expression->argsList);
 
-//    TODO: better check if nativeFunction
-    if (callable->closure)
-        addScope(callable->closure);
-    else
-        enterScope();
+    return call(callable, arguments);
+}
 
-    auto result = call(callable, arguments);
-    leaveScope();
+ObjPtr Interpreter::visit(SuperClass *expression) {
+    auto super = getVariable("super", expression->level);
+    auto result = super->getAttribute(expression->token.body);
+    auto method = std::dynamic_pointer_cast<Callable>(result);
+    if (method) {
+        auto instance = getVariable("this", expression->level);
+        return ObjPtr(new ClassMethod(method, std::dynamic_pointer_cast<Instance>(instance)));
+    }
     return result;
 }
 

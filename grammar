@@ -34,7 +34,8 @@ factor = unary ( ('*' | '/') unary )*
 unary = ('+' | '-')? primary
 
 primary = literal suffix*
-literal = NUMBER | '(' expression ')' | IDENTIFIER | BOOL | NONE | STRING
+literal = NUMBER | '(' expression ')' | IDENTIFIER | BOOL | NONE | STRING | superAttr
+superAttr = 'super' '.' IDENTIFIER
 
 suffix = call | attribute | item
 attribute = '.' IDENTIFIER

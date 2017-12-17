@@ -93,6 +93,21 @@ public:
     std::string str() override;
 };
 
+struct SuperClass : public Expression {
+    friend struct walker;
+
+    long level{-1};
+public:
+    ObjPtr visit(TreeWalker *walker) override {
+        return walker->visit(this);
+    }
+
+public:
+    explicit SuperClass(Token attribute);
+    ~SuperClass() override;
+    std::string str() override;
+};
+
 struct GetItem : public Expression {
     friend struct walker;
     friend struct SetItem;
