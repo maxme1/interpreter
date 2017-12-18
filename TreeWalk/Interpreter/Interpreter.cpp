@@ -35,7 +35,13 @@ void Interpreter::interpret(std::string text) {
         return;
     }
 
-    auto sm = SemanticAnalyser(statements);
+    try {
+        auto sm = SemanticAnalyser(statements);
+    } catch (SemanticAnalyser::SyntaxError &e) {
+        std::cout << "\n==========\n" << e.message;
+        return;
+    }
+
 //
 //    try {
     visitStatements(statements);
@@ -98,20 +104,23 @@ void Interpreter::checkArguments(Callable::ptr callable, long count) {
 //        throw Wrap(new ValueError("Number of arguments doesn't match: " + std::to_string(count)));
 }
 
-ObjPtr Interpreter::call(Callable::ptr callable, ArgsList arguments) {
-//    ObjPtr returnObject = nullptr;
-//    try {
+ObjPtr Interpreter::call(ObjPtr object, ArgsList arguments) {
+    auto callable = getCallable(object);
     if (callable->closure)
         addScope(callable->closure);
     else
         enterScope();
 
-    auto returnObject = callable->call(arguments, this);
-
+    ObjPtr returnObject;
+    try {
+        returnObject = callable->call(arguments, this);
+    } catch (ReturnException &e) {
+        returnObject = e.content;
+    } catch (ExceptionWrapper &e) {
+        leaveScope();
+        throw;
+    }
     leaveScope();
-//    } catch (ReturnException &e) {
-//        returnObject = e.content;
-//    }
 
     if (!returnObject)
         return New(None());
@@ -119,7 +128,7 @@ ObjPtr Interpreter::call(Callable::ptr callable, ArgsList arguments) {
 }
 
 ObjPtr Interpreter::callOperator(ObjPtr object, ArgsList arguments) {
-    auto callable = getCallable(std::move(object));
+    auto callable = getCallable(object);
     checkArguments(callable, arguments.size());
     return call(callable, arguments);
 }
@@ -131,21 +140,30 @@ std::vector<ObjPtr> Interpreter::evaluateArguments(const std::vector<Expression 
     return result;
 }
 
-//bool Interpreter::isDerived(ObjPtr derived, Class::ptr base) {
-//    if (base == nullptr)
-//        return false;
-//    auto instance = std::dynamic_pointer_cast<Instance>(derived);
-//    Class::ptr theClass;
-//    if (!instance)
-//        theClass = std::dynamic_pointer_cast<Class>(derived);
-//    else
-//        theClass = instance->getClass();
-//    if (!theClass)
-//        throw Wrap(new ValueError("The object is not a class nor an instance"));
-//    while (theClass != base and theClass != nullptr)
-//        theClass = theClass->getSuperClass();
-//    return theClass.get() == base.get();
-//}
+bool Interpreter::isDerived(ObjPtr derived, ObjPtr base) {
+    assert(base and derived);
+    auto derivedClass = std::dynamic_pointer_cast<Class>(derived);
+    assert(derivedClass);
+    auto baseClass = std::dynamic_pointer_cast<Class>(base);
+    assert(baseClass);
+
+    while (derivedClass != nullptr) {
+        if (derivedClass == baseClass)
+            return true;
+        derivedClass = derivedClass->superClass;
+    }
+    return false;
+}
+
+bool Interpreter::isInstance(ObjPtr instance, ObjPtr base) {
+    assert(base and instance);
+    auto instance_ = std::dynamic_pointer_cast<Instance>(instance);
+    assert(instance_);
+    auto baseClass = std::dynamic_pointer_cast<Class>(base);
+    assert(baseClass);
+
+    return isDerived(instance_->getClass(), baseClass);
+}
 
 bool Interpreter::interpretFile(const std::string &path) {
     std::ifstream source(path);
@@ -160,8 +178,11 @@ bool Interpreter::interpretFile(const std::string &path) {
 
 //Interpreter::ExceptionWrapper::ExceptionWrapper(Object *exception) : ExceptionWrapper(ObjPtr(exception)) {}
 
-//Interpreter::ExceptionWrapper::ExceptionWrapper(const ObjPtr &exception) {
-//    if (!isDerived(exception, Exception::build()))
+Interpreter::ExceptionWrapper::ExceptionWrapper(ObjPtr exception) {
+    if (std::dynamic_pointer_cast<Instance>(exception))
+        assert(isInstance(exception, Exception::build()));
+    else
+        assert(isDerived(exception, Exception::build()));
 //        throw Wrap(new ValueError("Only objects derived from Exception can be raised"));
-//    this->exception = exception;
-//}
+    this->exception = exception;
+}

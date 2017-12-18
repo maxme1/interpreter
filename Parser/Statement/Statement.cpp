@@ -54,11 +54,11 @@ std::string WhileStatement::str() {
     return result;
 }
 
-ControlFlow::ControlFlow(Token::tokenType type, const std::string &body) : type(type), body(body) {}
+ControlFlow::ControlFlow(Token token) : token(token) {}
 
-std::string ControlFlow::str() { return body; }
+std::string ControlFlow::str() { return token.body; }
 
-ReturnStatement::ReturnStatement(Expression *expression) : expression(expression) {}
+ReturnStatement::ReturnStatement(Token token, Expression *expression) : expression(expression), token(token) {}
 
 ReturnStatement::~ReturnStatement() {
 //    delete expression;
@@ -115,7 +115,7 @@ VariableDefinition::VariableDefinition(const std::string &name, Expression *assi
 }
 
 std::string VariableDefinition::str() {
-    return  "var " + name + " = " + assignee->str();
+    return "var " + name + " = " + assignee->str();
 }
 
 ClassDefinition::ClassDefinition(std::string name, Block *body, Expression *superclass)

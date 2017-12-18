@@ -16,6 +16,7 @@ private:
     ptr superClass{nullptr};
 protected:
     bool checkArguments(int count) override;
+    virtual ObjPtr makeInstance(ptr base = nullptr);
     ObjPtr call(const std::vector<ObjPtr> &args, Interpreter *interpreter) override;
 };
 

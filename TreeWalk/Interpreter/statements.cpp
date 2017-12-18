@@ -14,7 +14,9 @@ void Interpreter::visit(ReturnStatement *statement) {
 }
 
 void Interpreter::visit(RaiseStatement *statement) {
-//    throw Wrap(statement->expression->visit(this));
+    assert(statement->expression);
+//    TODO: implement reraising
+    throw ExceptionWrapper(statement->expression->visit(this));
 }
 
 void Interpreter::visit(ImportStatement *statement) {
@@ -84,14 +86,19 @@ void Interpreter::visit(WhileStatement *statement) {
 }
 
 void Interpreter::visit(ControlFlow *statement) {
-    if (statement->type == Token::CONTINUE)
+    if (statement->token.type == Token::CONTINUE)
         throw ContinueException();
     throw BreakException();
 }
 
 void Interpreter::visit(Block *block) {
     enterScope();
-    visitStatements(block->statements);
+    try {
+        visitStatements(block->statements);
+    } catch (BaseException &e) {
+        leaveScope();
+        throw;
+    }
     leaveScope();
 }
 

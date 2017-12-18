@@ -48,8 +48,16 @@ std::string Class::asString() {
     return "<class>";
 }
 
+ObjPtr Class::makeInstance(Class::ptr base) {
+    if (!base)
+        base = $this(Class);
+    if (superClass)
+        return superClass->makeInstance(base);
+    return std::make_shared<Instance>(base);
+}
+
 ObjPtr Class::call(const std::vector<ObjPtr> &args, Interpreter *interpreter) {
-    auto instance = std::make_shared<Instance>($this(Class));
+    auto instance = makeInstance();
     return instance;
 
 //    ObjPtr init;

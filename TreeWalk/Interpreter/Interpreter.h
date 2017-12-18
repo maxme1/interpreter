@@ -62,29 +62,30 @@ public:
 
     ObjPtr callOperator(ObjPtr object, const std::vector<ObjPtr> &arguments);
 
-    ObjPtr call(std::shared_ptr<Callable> callable, const std::vector<ObjPtr> &arguments);
+    ObjPtr call(ObjPtr object, const std::vector<ObjPtr> &arguments);
     std::vector<ObjPtr> evaluateArguments(const std::vector<Expression *> &argsList);
     std::shared_ptr<Callable> getCallable(ObjPtr object);
     void checkArguments(std::shared_ptr<Callable> callable, long count);
 
-    static bool isDerived(ObjPtr derived, std::shared_ptr<Class> base);
-
+    static bool isDerived(ObjPtr derived, ObjPtr base);
+    static bool isInstance(ObjPtr instance, ObjPtr base);
 //    Exceptions
-    struct ExceptionWrapper {
+    struct BaseException {};
+
+    struct ExceptionWrapper : BaseException {
         ObjPtr exception;
-        explicit ExceptionWrapper(Object *exception);
-        explicit ExceptionWrapper(const ObjPtr &exception);
+//        explicit ExceptionWrapper(Object *exception);
+        explicit ExceptionWrapper(ObjPtr exception);
     };
-    struct ReturnException {
+
+    struct ReturnException : BaseException {
         ObjPtr content;
 
-        explicit ReturnException(ObjPtr content = nullptr) : content(std::move(content)) {}
+        explicit ReturnException(ObjPtr content = nullptr) : content(content) {}
     };
-    struct FlowException {
+    struct ContinueException : BaseException {
     };
-    struct ContinueException : FlowException {
-    };
-    struct BreakException : FlowException {
+    struct BreakException : BaseException {
     };
 };
 

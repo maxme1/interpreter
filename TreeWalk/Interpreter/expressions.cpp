@@ -103,7 +103,7 @@ ObjPtr Interpreter::visit(Variable *expression) {
 ObjPtr Interpreter::visit(CallExpression *expression) {
     ObjPtr object = expression->target->visit(this);
 
-    auto callable = getCallable(std::move(object));
+    auto callable = getCallable(object);
     checkArguments(callable, expression->argsList.size());
 
     auto arguments = evaluateArguments(expression->argsList);

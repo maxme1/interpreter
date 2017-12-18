@@ -41,6 +41,14 @@ public:
     void visit(ImportStatement *statement) override;
     void visit(ControlFlow *statement) override;
     void visit(Block *block) override;
+
+    struct SyntaxError {
+        std::string message;
+
+        SyntaxError(const std::string &message, const Token &token) {
+            this->message = message + " at  " + std::to_string(token.line) + ":" + std::to_string(token.column);
+        }
+    };
 };
 
 #endif //INTERPRETER_SEMANTICANALYSIS_H

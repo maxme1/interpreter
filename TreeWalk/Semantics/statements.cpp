@@ -43,8 +43,8 @@ void SemanticAnalyser::visit(ClassDefinition *statement) {
 }
 
 void SemanticAnalyser::visit(ReturnStatement *statement) {
-    assert(!types.empty());
-    assert(types.back() == BlockType::Function or types.back() == BlockType::Method);
+    if (types.empty() or (types.back() != BlockType::Function and types.back() != BlockType::Method))
+        throw SyntaxError("Return outside function or method", statement->token);
 
     if (statement->expression)
         statement->expression->visit(this);
@@ -55,7 +55,9 @@ void SemanticAnalyser::visit(RaiseStatement *statement) {
         statement->expression->visit(this);
 }
 
-void SemanticAnalyser::visit(ImportStatement *statement) {}
+void SemanticAnalyser::visit(ImportStatement *statement) {
+//    TODO: implement
+}
 
 void SemanticAnalyser::visit(ExpressionStatement *statement) {
     statement->expression->visit(this);
@@ -83,6 +85,6 @@ void SemanticAnalyser::visit(WhileStatement *statement) {
 }
 
 void SemanticAnalyser::visit(ControlFlow *statement) {
-    assert(!types.empty());
-    assert(types.back() == BlockType::Loop);
+    if (types.empty() or types.back() != BlockType::Loop)
+        throw SyntaxError("Control flow outside loop", statement->token);
 }

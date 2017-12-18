@@ -28,8 +28,7 @@ $class(String)
         auto method = object->findAttribute("str");
         if (!method)
             return object->asString();
-        return nullptr;
-//        return interpreter->call(method, std::vector<ObjPtr>())->asString();
+        return interpreter->call(method, std::vector<ObjPtr>())->asString();
     }
 
     $method(init, String)

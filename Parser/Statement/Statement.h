@@ -102,28 +102,28 @@ public:
 
 struct ControlFlow : public Statement {
     friend class Interpreter;
-    Token::tokenType type;
-    std::string body;
+    Token token;
 
     void visit(TreeWalker *walker) override {
         walker->visit(this);
     }
 
 public:
-    ControlFlow(Token::tokenType type, const std::string &body);
+    ControlFlow(Token token);
     std::string str() override;
 };
 
 struct ReturnStatement : public Statement {
     friend class Interpreter;
     Expression *expression;
+    Token token;
 
     void visit(TreeWalker *walker) override {
         walker->visit(this);
     }
 
 public:
-    explicit ReturnStatement(Expression *expression = nullptr);
+    explicit ReturnStatement(Token token, Expression *expression = nullptr);
     ~ReturnStatement() override;
     std::string str() override;
 };

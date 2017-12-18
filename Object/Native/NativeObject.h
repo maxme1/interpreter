@@ -3,10 +3,10 @@
 
 #include "Native.h"
 #include "../Class.h"
-
-struct NativeClass : public Class {
-    explicit NativeClass(Class::ptr superclass) : Class(superclass) {}
-};
+//
+//struct NativeClass : public Class {
+//    explicit NativeClass(Class::ptr superclass) : Class(superclass) {}
+//};
 
 struct NoSuperClass {
     static Class::ptr build() {
@@ -17,7 +17,7 @@ struct NoSuperClass {
 template<typename T, typename Base>
 class NativeObject : public Instance {
     friend class Class;
-    struct LocalNative : public NativeClass {
+    struct LocalNative : public Class {
         inline static Class::ptr getClass() {
             static Class::ptr instance = Class::ptr(new LocalNative(Base::build()));
             return instance;
@@ -26,15 +26,14 @@ class NativeObject : public Instance {
         LocalNative(LocalNative const &) = delete;
         void operator=(LocalNative const &)  = delete;
 
-//        Instance::ptr call(const ptr &instanceClass) {
-//            if (instanceClass)
-//                return Instance::ptr(new T(instanceClass));
-//            auto s = getClass();
-//            return Instance::ptr(new T(getClass()));
-//        }
+        ObjPtr makeInstance(Class::ptr base = nullptr) override {
+            if (base)
+                return Instance::ptr(new T(base));
+            return Instance::ptr(new T(getClass()));
+        }
 
     private:
-        explicit LocalNative(Class::ptr superclass) : NativeClass(superclass) {};
+        explicit LocalNative(Class::ptr superclass) : Class(superclass) {};
     };
 
     static bool populated;

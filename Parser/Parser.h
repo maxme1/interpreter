@@ -49,16 +49,16 @@ class Parser {
             return importStatement();
         if (matches({Token::BREAK, Token::CONTINUE})) {
             auto control = advance();
-            return new ControlFlow(control.type, control.body);
+            return new ControlFlow(control);
         }
         return new ExpressionStatement(expression());
     }
 
     Statement *returnStatement() {
-        require({Token::RETURN});
+        auto token = require({Token::RETURN});
         if (!matches({Token::DELIMITER}))
-            return new ReturnStatement(expression());
-        return new ReturnStatement();
+            return new ReturnStatement(token, expression());
+        return new ReturnStatement(token);
     }
 
     Statement *raiseStatement() {
@@ -84,9 +84,9 @@ class Parser {
         auto left = statement();
 //        only left block
         if (!matches({Token::ELSE}))
-            return new IfStatement(condition, nullptr, left);
+            return new IfStatement(condition, left);
 //        both blocks
-        advance();
+        require({Token::ELSE});
         auto right = statement();
         return new IfStatement(condition, left, right);
     }
