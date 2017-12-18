@@ -3,8 +3,9 @@
 
 #include <utility>
 
-#include "../Native/Native.h"
 #include "../Exception.h"
+#include "../Native/Native.h"
+
 
 $class(String)
     std::string string{};

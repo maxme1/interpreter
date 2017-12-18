@@ -18,10 +18,10 @@ ObjPtr print(ArgsList args, Interpreter * interpreter){
 }
 
 void Interpreter::populate() {
-//    setVariable("Int", Int::build());
-//    setVariable("String", String::build());
-//    setVariable("Bool", Bool::build());
-//    setVariable("Array", Array::build());
+    defineVariable("Int", Int::build());
+    defineVariable("String", String::build());
+    defineVariable("Bool", Bool::build());
+    defineVariable("Array", Array::build());
 
 //    TODO: populate the rest of the exceptions
 //    setVariable("Exception", Exception::build());

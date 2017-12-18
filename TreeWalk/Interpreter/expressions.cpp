@@ -60,14 +60,14 @@ ObjPtr Interpreter::visit(Unary *expression) {
 ObjPtr Interpreter::visit(Literal *expression) {
     if (expression->ofType(Token::NUMBER))
         return New(Int(std::stoi(expression->token.body)));
-//    if (expression->ofType(Token::BOOL))
-//        return New(Bool(expression->token.body == "True"));
+    if (expression->ofType(Token::BOOL))
+        return New(Bool(expression->token.body == "True"));
     if (expression->ofType(Token::NONE))
         return New(None());
-//    if (expression->ofType(Token::STRING)) {
-//        auto body = expression->token.body;
-//        return New(String(body.substr(1, body.size() - 2)));
-//    }
+    if (expression->ofType(Token::STRING)) {
+        auto body = expression->token.body;
+        return New(String(body.substr(1, body.size() - 2)));
+    }
     assert(false);
     return nullptr;
 }

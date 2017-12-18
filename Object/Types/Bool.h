@@ -1,6 +1,8 @@
 #ifndef INTERPRETER_BOOL_H
 #define INTERPRETER_BOOL_H
 
+#include "../Native/Native.h"
+
 $class(Bool)
     bool value;
     Bool() = default;

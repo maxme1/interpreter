@@ -5,6 +5,7 @@
 #include <utility>
 #include <cassert>
 #include "../Callable.h"
+#include "../Class.h"
 #include "../../TreeWalk/Interpreter/Interpreter.h"
 
 // macros

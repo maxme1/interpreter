@@ -26,7 +26,7 @@ class NativeObject : public Instance {
         LocalNative(LocalNative const &) = delete;
         void operator=(LocalNative const &)  = delete;
 
-//        Instance::ptr makeInstance(const ptr &instanceClass) {
+//        Instance::ptr call(const ptr &instanceClass) {
 //            if (instanceClass)
 //                return Instance::ptr(new T(instanceClass));
 //            auto s = getClass();
