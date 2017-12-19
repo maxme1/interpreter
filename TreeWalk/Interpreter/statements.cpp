@@ -43,33 +43,28 @@ void Interpreter::visit(IfStatement *statement) {
 }
 
 void Interpreter::visit(TryStatement *statement) {
-//    try {
-//        statement->block->visit(this);
-//    } catch (ExceptionWrapper &e) {
-////        TODO: too many cases:
-//        auto theClass = std::dynamic_pointer_cast<Class>(e.exception);
-//        if (!theClass) {
-//            auto instance = std::dynamic_pointer_cast<Instance>(e.exception);
-//            if (instance)
-//                theClass = instance->getClass();
-//        }
-//        assert(theClass);
-//
-//        for (auto &&item : statement->catches) {
-//            auto variants = evaluateArguments(item->arguments);
-//            for (auto &&variant : variants) {
-////                TODO: throw here
-//                auto arg = std::dynamic_pointer_cast<Class>(variant);
-//                if (arg)
-//                    if (isDerived(theClass, arg)) {
-//                        item->block->visit(this);
-//                        return;
-//                    }
-//            }
-//        }
-//        if (!statement->catches.empty())
-//            throw;
-//    }
+    try {
+        statement->block->visit(this);
+    } catch (ExceptionWrapper &e) {
+        auto theClass = e.exception->getClass();
+        assert(theClass);
+
+        for (auto &&item : statement->catches) {
+            auto exceptions = evaluateArguments(item->arguments);
+            for (auto &&exception : exceptions) {
+                auto exClass = std::dynamic_pointer_cast<Class>(exception);
+//                TODO: throw here
+                assert(exClass);
+                if (isDerived(theClass, exClass)) {
+                    item->block->visit(this);
+                    return;
+                }
+            }
+        }
+//        TODO: add suppressing
+        if (!statement->catches.empty())
+            throw;
+    }
 }
 
 void Interpreter::visit(WhileStatement *statement) {

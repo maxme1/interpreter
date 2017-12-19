@@ -17,7 +17,7 @@ private:
 protected:
     bool checkArguments(int count) override;
     virtual ObjPtr makeInstance(ptr base = nullptr);
-    ObjPtr call(const std::vector<ObjPtr> &args, Interpreter *interpreter) override;
+    ObjPtr call(ArgsList arguments, Interpreter *interpreter) override;
 };
 
 class Instance : public Object {

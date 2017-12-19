@@ -56,24 +56,14 @@ ObjPtr Class::makeInstance(Class::ptr base) {
     return std::make_shared<Instance>(base);
 }
 
-ObjPtr Class::call(const std::vector<ObjPtr> &args, Interpreter *interpreter) {
+ObjPtr Class::call(ArgsList arguments, Interpreter *interpreter) {
     auto instance = makeInstance();
+
+    auto init = instance->findAttribute("init");
+    if (init)
+        interpreter->call(init, arguments);
+
     return instance;
-
-//    ObjPtr init;
-//    addScope(classObject->context);
-//    try {
-//        init = instance->findAttribute("init");
-//        if (init)
-//            callFunction(init, expression->argsList);
-//    } catch (ExceptionWrapper &e) {
-//        deleteScope();
-//        throw;
-//    }
-//    deleteScope();
-//    if (!init and !expression->argsList.empty())
-//        throw Wrap(new Exception("Default constructor does not receive arguments"));
-
 }
 
 bool Class::checkArguments(int count) {

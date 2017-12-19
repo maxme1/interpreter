@@ -2,7 +2,10 @@
 #include "Types/String.h"
 
 ObjPtr Exception::init(ObjPtr _self, ArgsList args, Interpreter *interpreter) {
-    _self->setAttribute("message", args[0]);
+    if (args.empty())
+        _self->setAttribute("message", New(String("")));
+    else
+        _self->setAttribute("message", args[0]);
     return nullptr;
 }
 

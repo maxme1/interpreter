@@ -29,7 +29,7 @@ ObjPtr Interpreter::visit(Binary *expression) {
     if (name != binary.end()) {
         auto method = left->findAttribute(name->second);
         if (method)
-            return callOperator(method, {right});
+            return call(method, {right});
     }
 
     assert(false);
@@ -50,7 +50,7 @@ ObjPtr Interpreter::visit(Unary *expression) {
     if (name != unary.end()) {
         auto method = argument->findAttribute(name->second);
         if (method)
-            return callOperator(method, {});
+            return call(method, {});
     }
     assert(false);
     return nullptr;

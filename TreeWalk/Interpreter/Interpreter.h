@@ -14,6 +14,7 @@ class Object;
 class Expression;
 class Callable;
 class Class;
+class Instance;
 class Interpreter : public TreeWalker {
 public:
     Interpreter();
@@ -60,8 +61,6 @@ public:
     void setVariable(const std::string &name, ObjPtr value, long level);
     void defineVariable(const std::string &name, ObjPtr value);
 
-    ObjPtr callOperator(ObjPtr object, const std::vector<ObjPtr> &arguments);
-
     ObjPtr call(ObjPtr object, const std::vector<ObjPtr> &arguments);
     std::vector<ObjPtr> evaluateArguments(const std::vector<Expression *> &argsList);
     std::shared_ptr<Callable> getCallable(ObjPtr object);
@@ -73,7 +72,7 @@ public:
     struct BaseException {};
 
     struct ExceptionWrapper : BaseException {
-        ObjPtr exception;
+        std::shared_ptr<Instance> exception;
 //        explicit ExceptionWrapper(Object *exception);
         explicit ExceptionWrapper(ObjPtr exception);
     };

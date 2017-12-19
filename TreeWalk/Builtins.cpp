@@ -24,8 +24,8 @@ void Interpreter::populate() {
     defineVariable("Array", Array::build());
 
 //    TODO: populate the rest of the exceptions
-//    setVariable("Exception", Exception::build());
-//    setVariable("AttributeError", AttributeError::build());
+    defineVariable("Exception", Exception::build());
+    defineVariable("AttributeError", AttributeError::build());
 
     addFunction("print", print, 1);
 

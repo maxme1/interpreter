@@ -72,7 +72,14 @@ void SemanticAnalyser::visit(IfStatement *statement) {
 }
 
 void SemanticAnalyser::visit(TryStatement *statement) {
-//    TODO: implement
+    statement->block->visit(this);
+//    TODO: suppressing
+    for (auto &&item : statement->catches) {
+        for (auto &&argument : item->arguments) {
+            argument->visit(this);
+        }
+        item->block->visit(this);
+    }
 }
 
 void SemanticAnalyser::visit(WhileStatement *statement) {

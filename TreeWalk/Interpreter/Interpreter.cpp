@@ -43,11 +43,11 @@ void Interpreter::interpret(std::string text) {
     }
 
 //
-//    try {
-    visitStatements(statements);
-//    } catch (Wrap &e) {
-//        std::cout << "==========\n" << e.exception->asString();
-//    }
+    try {
+        visitStatements(statements);
+    } catch (ExceptionWrapper &e) {
+        std::cout << "==========\n" << e.exception->asString();
+    }
 }
 
 void Interpreter::enterScope() {
@@ -106,6 +106,8 @@ void Interpreter::checkArguments(Callable::ptr callable, long count) {
 
 ObjPtr Interpreter::call(ObjPtr object, ArgsList arguments) {
     auto callable = getCallable(object);
+    checkArguments(callable, arguments.size());
+
     if (callable->closure)
         addScope(callable->closure);
     else
@@ -125,12 +127,6 @@ ObjPtr Interpreter::call(ObjPtr object, ArgsList arguments) {
     if (!returnObject)
         return New(None());
     return returnObject;
-}
-
-ObjPtr Interpreter::callOperator(ObjPtr object, ArgsList arguments) {
-    auto callable = getCallable(object);
-    checkArguments(callable, arguments.size());
-    return call(callable, arguments);
 }
 
 std::vector<ObjPtr> Interpreter::evaluateArguments(const std::vector<Expression *> &argsList) {
@@ -179,10 +175,8 @@ bool Interpreter::interpretFile(const std::string &path) {
 //Interpreter::ExceptionWrapper::ExceptionWrapper(Object *exception) : ExceptionWrapper(ObjPtr(exception)) {}
 
 Interpreter::ExceptionWrapper::ExceptionWrapper(ObjPtr exception) {
-    if (std::dynamic_pointer_cast<Instance>(exception))
-        assert(isInstance(exception, Exception::build()));
-    else
-        assert(isDerived(exception, Exception::build()));
+    assert(std::dynamic_pointer_cast<Instance>(exception));
+    assert(isInstance(exception, Exception::build()));
 //        throw Wrap(new ValueError("Only objects derived from Exception can be raised"));
-    this->exception = exception;
+    this->exception = std::dynamic_pointer_cast<Instance>(exception);
 }
