@@ -73,7 +73,7 @@ public:
 
     struct ExceptionWrapper : BaseException {
         std::shared_ptr<Instance> exception;
-//        explicit ExceptionWrapper(Object *exception);
+        explicit ExceptionWrapper(Object *exception);
         explicit ExceptionWrapper(ObjPtr exception);
     };
 

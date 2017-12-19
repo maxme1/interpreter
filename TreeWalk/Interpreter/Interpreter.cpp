@@ -6,6 +6,7 @@
 #include "../../Parser/Parser.h"
 #include "../../Object/Native/Native.h"
 #include "../../Object/Types/Int.h"
+#include "../../Object/Exception.h"
 #include "../../Object/Types/None.h"
 #include "../Semantics/SemanticAnalyser.h"
 
@@ -28,6 +29,7 @@ void Interpreter::interpret(std::string text) {
         printf("Unrecognized token %s at %li:%li", token.body.c_str(), token.line, token.column);
         return;
     }
+//    TODO: combine errors output
     Parser p = Parser(tokens);
     auto statements = p.build();
     if (p.error) {
@@ -42,10 +44,10 @@ void Interpreter::interpret(std::string text) {
         return;
     }
 
-//
     try {
         visitStatements(statements);
     } catch (ExceptionWrapper &e) {
+//        TODO: add traceback
         std::cout << "==========\n" << e.exception->asString();
     }
 }
@@ -76,15 +78,14 @@ ObjPtr Interpreter::getVariable(const std::string &name, long level) {
     assert(!scopes.empty());
     auto result = scopes.back()->findAttribute(name, level);
     if (!result)
-        printf(name.c_str());
-    assert(result);
+        throw ExceptionWrapper(new VariableError("Variable " + name + " is not declared in this scope"));
     return result;
-//    throw Wrap(new VariableError(name));
 }
 
 void Interpreter::setVariable(const std::string &name, ObjPtr value, long level) {
     assert(!scopes.empty());
-    scopes.back()->setAttribute(name, std::move(value), level);
+    if (!scopes.back()->setAttribute(name, std::move(value), level))
+        throw ExceptionWrapper(new VariableError("Variable " + name + " is not declared in this scope"));
 }
 
 void Interpreter::defineVariable(const std::string &name, ObjPtr value) {
@@ -94,14 +95,14 @@ void Interpreter::defineVariable(const std::string &name, ObjPtr value) {
 
 Callable::ptr Interpreter::getCallable(ObjPtr object) {
     auto callable = std::dynamic_pointer_cast<Callable>(object);
-    assert(callable);
+    if (!callable)
+        throw ExceptionWrapper(new ValueError("Object is not callable"));
     return callable;
-//    throw Wrap(new ValueError("Object is not callable"));
 }
 
 void Interpreter::checkArguments(Callable::ptr callable, long count) {
-//    if (!callable->checkArguments(count))
-//        throw Wrap(new ValueError("Number of arguments doesn't match: " + std::to_string(count)));
+    if (!callable->checkArguments(count))
+        throw ExceptionWrapper(new ValueError("Number of arguments doesn't match: " + std::to_string(count)));
 }
 
 ObjPtr Interpreter::call(ObjPtr object, ArgsList arguments) {
@@ -172,7 +173,7 @@ bool Interpreter::interpretFile(const std::string &path) {
     return true;
 }
 
-//Interpreter::ExceptionWrapper::ExceptionWrapper(Object *exception) : ExceptionWrapper(ObjPtr(exception)) {}
+Interpreter::ExceptionWrapper::ExceptionWrapper(Object *exception) : ExceptionWrapper(ObjPtr(exception)) {}
 
 Interpreter::ExceptionWrapper::ExceptionWrapper(ObjPtr exception) {
     assert(std::dynamic_pointer_cast<Instance>(exception));

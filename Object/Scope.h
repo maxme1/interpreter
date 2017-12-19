@@ -29,17 +29,19 @@ public:
         return upper->findAttribute(name, level - 1);
     }
 
-    void setAttribute(const std::string &name, ObjPtr value, long level) {
+    bool setAttribute(const std::string &name, ObjPtr value, long level) {
         assert(level >= 0);
         if (level == 0) {
-            assert(attributes.count(name) != 0);
+            if (attributes.count(name) == 0)
+                return false;
             attributes[name] = value;
-            return;
+            return true;
         }
-        if (attributes.find(name) != attributes.end())
-            attributes[name] = value;
         assert(upper);
         upper->setAttribute(name, value, level - 1);
+//        unreachable code
+        assert(false);
+        return false;
     }
 
     void defineVariable(const std::string &name, ObjPtr value) {

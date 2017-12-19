@@ -4,7 +4,6 @@
 #include <utility>
 
 #include "Object.h"
-#include "../TreeWalk/API.h"
 #include "Scope.h"
 
 typedef const std::vector<ObjPtr> &ArgsList;

@@ -2,6 +2,7 @@
 
 #include "Native/NativeObject.h"
 #include "Native/Native.h"
+#include "Exception.h"
 
 // Instance
 
@@ -13,8 +14,9 @@ ObjPtr Instance::findAttribute(const std::string &name) {
     auto result = Object::findAttribute(name);
     if (!result)
         result = getClass()->findAttribute(name);
+    if (!result)
+        return nullptr;
 //     creating a class method
-    assert(result);
     auto method = std::dynamic_pointer_cast<Callable>(result);
     if (method)
         return ObjPtr(new ClassMethod(method, $this(Instance)));
@@ -67,7 +69,7 @@ ObjPtr Class::call(ArgsList arguments, Interpreter *interpreter) {
 }
 
 bool Class::checkArguments(int count) {
-    return count == 0;
+    return count == 0 or (bool) findAttribute("init");
 }
 
 Class::Class(Class::ptr superclass) : superClass(superclass) {}

@@ -24,37 +24,31 @@ std::map<Token::tokenType, std::string> unary = {
 };
 
 ObjPtr Interpreter::visit(Binary *expression) {
-    auto left = expression->left->visit(this), right = expression->right->visit(this);
     auto name = binary.find(expression->token.type);
-    if (name != binary.end()) {
-        auto method = left->findAttribute(name->second);
-        if (method)
-            return call(method, {right});
-    }
+    assert(name != binary.end());
 
-    assert(false);
-    return nullptr;
+    auto left = expression->left->visit(this), right = expression->right->visit(this);
+    auto method = left->findAttribute(name->second);
+    if (method)
+        return call(method, {right});
 
 //    default behavior
-//    if (expression->ofType(Token::EQUAL))
-//        return New(Bool(left == right));
-//    if (expression->ofType(Token::NOT_EQUAL))
-//        return New(Bool(left != right));
-//
-//    throw Wrap(new Exception("Operator not defined"));
+    if (expression->ofType(Token::EQUAL))
+        return New(Bool(left == right));
+    if (expression->ofType(Token::NOT_EQUAL))
+        return New(Bool(left != right));
+    throw ExceptionWrapper(new AttributeError("Operator not defined"));
 }
 
 ObjPtr Interpreter::visit(Unary *expression) {
-    ObjPtr argument = expression->argument->visit(this);
     auto name = unary.find(expression->token.type);
-    if (name != unary.end()) {
-        auto method = argument->findAttribute(name->second);
-        if (method)
-            return call(method, {});
-    }
-    assert(false);
-    return nullptr;
-//    throw Wrap(new Exception("Operator not defined"));
+    assert(name != unary.end());
+
+    ObjPtr argument = expression->argument->visit(this);
+    auto method = argument->findAttribute(name->second);
+    if (method)
+        return call(method, {});
+    throw ExceptionWrapper(new AttributeError("Operator not defined"));
 }
 
 ObjPtr Interpreter::visit(Literal *expression) {
@@ -66,6 +60,7 @@ ObjPtr Interpreter::visit(Literal *expression) {
         return New(None());
     if (expression->ofType(Token::STRING)) {
         auto body = expression->token.body;
+//        TODO: make strings smarter
         return New(String(body.substr(1, body.size() - 2)));
     }
     assert(false);

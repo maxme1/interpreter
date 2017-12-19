@@ -46,7 +46,7 @@ public:
         std::string message;
 
         SyntaxError(const std::string &message, const Token &token) {
-            this->message = message + " at  " + std::to_string(token.line) + ":" + std::to_string(token.column);
+            this->message = message + " at " + std::to_string(token.line) + ":" + std::to_string(token.column);
         }
     };
 };

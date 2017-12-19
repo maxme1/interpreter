@@ -17,7 +17,7 @@ ObjPtr Object::findAttribute(const std::string &name) {
 
 ObjPtr Object::getAttribute(const std::string &name) {
     auto result = findAttribute(name);
-    assert(result);
+    if (!result)
+        throw Interpreter::ExceptionWrapper(new AttributeError(name));
     return result;
-//    throw Wrap(new AttributeError(name));
 }

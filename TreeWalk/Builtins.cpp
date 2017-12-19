@@ -4,19 +4,6 @@
 #include "../Object/Types/Array.h"
 #include "../Object/Native/Native.h"
 
-ObjPtr print(ArgsList args, Interpreter * interpreter){
-    bool first = true;
-    for (auto &&arg : args) {
-        if (not first) {
-            std::cout << " ";
-        } else
-            first = false;
-        std::cout << arg->asString();
-    }
-    std::cout << std::endl;
-    return nullptr;
-}
-
 void Interpreter::populate() {
     defineVariable("Int", Int::build());
     defineVariable("String", String::build());
@@ -27,20 +14,18 @@ void Interpreter::populate() {
     defineVariable("Exception", Exception::build());
     defineVariable("AttributeError", AttributeError::build());
 
-    addFunction("print", print, 1);
-
-//    addFunction("print", $lambda {
-//        bool first = true;
-//        for (auto &&arg : args) {
-//            if (not first) {
-//                std::cout << " ";
-//            } else
-//                first = false;
-//            std::cout << arg->asString();
-//        }
-//        std::cout << std::endl;
-//        return nullptr;
-//    }, 1);
+    addFunction("print", $lambda {
+        bool first = true;
+        for (auto &&arg : args) {
+            if (not first)
+                std::cout << " ";
+            else
+                first = false;
+            std::cout << String::toString(arg, interpreter);
+        }
+        std::cout << std::endl;
+        return nullptr;
+    }, 1);
 //    addFunction("input", $lambda {
 //        std::string input;
 //        std::cin >> input;
