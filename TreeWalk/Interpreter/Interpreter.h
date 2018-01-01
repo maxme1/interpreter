@@ -48,7 +48,7 @@ public:
     void visit(Block *block) override;
 
     void populate();
-    void addFunction(const std::string &name, ObjPtr(*function)(const std::vector<ObjPtr> &, Interpreter *),
+    void addFunction(const std::string &name, ObjPtr(*function)(Interpreter *, const std::vector<ObjPtr> &),
                      int argumentsCount, bool unlimited = false);
 
     std::vector<Scope::ptr> scopes;
@@ -61,15 +61,17 @@ public:
     void setVariable(const std::string &name, ObjPtr value, long level);
     void defineVariable(const std::string &name, ObjPtr value);
 
-    ObjPtr call(ObjPtr object, const std::vector<ObjPtr> &arguments);
+    ObjPtr call(ObjPtr object, const std::vector<ObjPtr> &positional,
+                const std::map<std::string, ObjPtr> &keyword = std::map<std::string, ObjPtr>());
     std::vector<ObjPtr> evaluateArguments(const std::vector<Expression *> &argsList);
     std::shared_ptr<Callable> getCallable(ObjPtr object);
-    void checkArguments(std::shared_ptr<Callable> callable, long count);
+//    void checkArguments(std::shared_ptr<Callable> callable, long count);
 
     static bool isDerived(ObjPtr derived, ObjPtr base);
     static bool isInstance(ObjPtr instance, ObjPtr base);
 //    Exceptions
-    struct BaseException {};
+    struct BaseException {
+    };
 
     struct ExceptionWrapper : BaseException {
         std::shared_ptr<Instance> exception;

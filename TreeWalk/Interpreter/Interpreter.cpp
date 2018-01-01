@@ -100,14 +100,9 @@ Callable::ptr Interpreter::getCallable(ObjPtr object) {
     return callable;
 }
 
-void Interpreter::checkArguments(Callable::ptr callable, long count) {
-    if (!callable->checkArguments(count))
-        throw ExceptionWrapper(new ValueError("Number of arguments doesn't match: " + std::to_string(count)));
-}
-
-ObjPtr Interpreter::call(ObjPtr object, ArgsList arguments) {
+ObjPtr Interpreter::call(ObjPtr object, ArgsList positional, KwargsList keyword) {
     auto callable = getCallable(object);
-    checkArguments(callable, arguments.size());
+    callable->checkArguments(positional, keyword);
 
     if (callable->closure)
         addScope(callable->closure);
@@ -116,7 +111,7 @@ ObjPtr Interpreter::call(ObjPtr object, ArgsList arguments) {
 
     ObjPtr returnObject;
     try {
-        returnObject = callable->call(arguments, this);
+        returnObject = callable->call(this, positional, keyword);
     } catch (ReturnException &e) {
         returnObject = e.content;
     } catch (ExceptionWrapper &e) {

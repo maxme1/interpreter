@@ -53,9 +53,10 @@ ObjPtr SemanticAnalyser::visit(SetVariable *expression) {
 
 ObjPtr SemanticAnalyser::visit(CallExpression *expression) {
     expression->target->visit(this);
-    for (auto &&argument : expression->argsList) {
+    for (auto &&argument : expression->argsList)
         argument->visit(this);
-    }
+    for (auto &&kwarg : expression->kwargs)
+        kwarg->value->visit(this);
     return nullptr;
 }
 

@@ -15,9 +15,9 @@ public:
 private:
     ptr superClass{nullptr};
 protected:
-    bool checkArguments(int count) override;
     virtual ObjPtr makeInstance(ptr base = nullptr);
-    ObjPtr call(ArgsList arguments, Interpreter *interpreter) override;
+    bool checkArguments(ArgsList positional, KwargsList keyword) override;
+    ObjPtr call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) override;
 };
 
 class Instance : public Object {

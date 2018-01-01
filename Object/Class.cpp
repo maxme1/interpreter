@@ -58,18 +58,18 @@ ObjPtr Class::makeInstance(Class::ptr base) {
     return std::make_shared<Instance>(base);
 }
 
-ObjPtr Class::call(ArgsList arguments, Interpreter *interpreter) {
+ObjPtr Class::call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) {
     auto instance = makeInstance();
 
     auto init = instance->findAttribute("init");
     if (init)
-        interpreter->call(init, arguments);
+        interpreter->call(init, positional, keyword);
 
     return instance;
 }
 
-bool Class::checkArguments(int count) {
-    return count == 0 or (bool) findAttribute("init");
+bool Class::checkArguments(ArgsList positional, KwargsList keyword) {
+    return (positional.empty() and keyword.empty()) or (bool) findAttribute("init");
 }
 
 Class::Class(Class::ptr superclass) : superClass(superclass) {}

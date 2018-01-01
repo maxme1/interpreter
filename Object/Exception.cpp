@@ -1,7 +1,7 @@
 #include "Exception.h"
 #include "Types/String.h"
 
-ObjPtr Exception::init(ObjPtr _self, ArgsList args, Interpreter *interpreter) {
+ObjPtr Exception::init(Interpreter *interpreter, ObjPtr _self, ArgsList args) {
     if (args.empty())
         _self->setAttribute("message", New(String("")));
     else
@@ -9,7 +9,7 @@ ObjPtr Exception::init(ObjPtr _self, ArgsList args, Interpreter *interpreter) {
     return nullptr;
 }
 
-ObjPtr Exception::str(ObjPtr _self, ArgsList args, Interpreter *interpreter) {
+ObjPtr Exception::str(Interpreter *interpreter, ObjPtr _self, ArgsList args) {
     return New(String(Exception::getString(_self)));
 }
 

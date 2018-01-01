@@ -18,14 +18,14 @@
 #define $class(ClassName) $subclass(ClassName, NoSuperClass)
 
 #define $method(name, type) \
-static ObjPtr (name)(ObjPtr _self, ArgsList args, Interpreter *interpreter) { \
+static ObjPtr (name)(Interpreter * interpreter, ObjPtr _self, ArgsList args) { \
     auto self = type::cast(_self, true);
 
-#define $lambda [](ArgsList args, Interpreter *interpreter) -> ObjPtr
+#define $lambda [](Interpreter *interpreter, ArgsList args) -> ObjPtr
 
 // types
-typedef ObjPtr(*nativeFunction)(ArgsList, Interpreter *);
-typedef ObjPtr(*nativeMethod)(ObjPtr, ArgsList, Interpreter *);
+typedef ObjPtr(*nativeFunction)(Interpreter *, ArgsList);
+typedef ObjPtr(*nativeMethod)(Interpreter *, ObjPtr, ArgsList);
 
 // callables
 template<typename T>
@@ -34,11 +34,11 @@ class NativeCallable : public Callable {
     int argumentsCount;
     bool unlimited;
 protected:
-    bool checkArguments(int count) override;
+    bool checkArguments(ArgsList positional, KwargsList keyword) override;
 
 public:
     explicit NativeCallable(T function, int argumentsCount, bool unlimited = false);
-    ObjPtr call(ArgsList args, Interpreter *interpreter) override;
+    ObjPtr call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) override;
 };
 
 typedef NativeCallable<nativeFunction> NativeFunction;

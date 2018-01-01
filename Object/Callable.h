@@ -7,6 +7,7 @@
 #include "Scope.h"
 
 typedef const std::vector<ObjPtr> &ArgsList;
+typedef const std::map<std::string, ObjPtr> &KwargsList;
 
 class Interpreter;
 struct Callable : public Object {
@@ -14,8 +15,8 @@ struct Callable : public Object {
     friend class ClassMethod;
     Scope::ptr closure = nullptr;
 protected:
-    virtual bool checkArguments(int count) = 0;
-    virtual ObjPtr call(ArgsList args, Interpreter *interpreter) = 0;
+    virtual bool checkArguments(ArgsList positional, KwargsList keyword) = 0;
+    virtual ObjPtr call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) = 0;
 public:
     Callable();
     explicit Callable(Scope::ptr closure);
@@ -31,8 +32,8 @@ class Function : public Callable {
     std::map<std::string, ObjPtr> defaults;
 
 protected:
-    bool checkArguments(int count) override;
-    ObjPtr call(ArgsList args, Interpreter *interpreter) override;
+    bool checkArguments(ArgsList positional, KwargsList keyword) override ;
+    ObjPtr call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) override;
 
 public:
     explicit Function(Statement *body, Scope::ptr closure, std::vector<std::string> &arguments,
@@ -45,8 +46,8 @@ class ClassMethod : public Callable {
     Callable::ptr function;
     std::shared_ptr<Instance> instance;
 protected:
-    bool checkArguments(int count) override;
-    ObjPtr call(ArgsList args, Interpreter *interpreter) override;
+    bool checkArguments(ArgsList positional, KwargsList keyword) override ;
+    ObjPtr call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) override;
 
 public:
     ClassMethod(Callable::ptr function, std::shared_ptr<Instance> instance);
