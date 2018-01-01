@@ -90,9 +90,14 @@ std::string ImportStatement::str() {
     return "import " + path;
 }
 
-FunctionDefinition::FunctionDefinition(const std::string &name, const std::vector<std::string> &arguments,
-                                       Statement *body, bool unlimited) :
-        body(body), arguments(arguments), name(name), unlimited(unlimited) {}
+FunctionDefinition::FunctionDefinition(const std::string &name, Statement *body, const std::vector<std::string> &arguments,
+                                       const std::vector<SetVariable *> &kwargs) :
+        body(body), arguments(arguments), name(name){
+    for (auto &&kwarg : kwargs) {
+        this->arguments.push_back(kwarg->name);
+        defaults[kwarg->name] = kwarg->value;
+    }
+}
 
 std::string FunctionDefinition::str() {
     std::string result = "def " + name + "(";

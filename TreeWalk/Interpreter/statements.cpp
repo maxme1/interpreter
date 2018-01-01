@@ -98,8 +98,12 @@ void Interpreter::visit(Block *block) {
 }
 
 void Interpreter::visit(FunctionDefinition *statement) {
+    std::map<std::string, ObjPtr> defaults;
+    for (auto &&item :statement->defaults)
+        defaults[item.first] = item.second->visit(this);
+
     defineVariable(statement->name,
-                   New(Function(statement->arguments, statement->body, statement->unlimited, getClosure())));
+                   New(Function(statement->body, getClosure(), statement->arguments, defaults)));
 }
 
 void Interpreter::visit(VariableDefinition *statement) {

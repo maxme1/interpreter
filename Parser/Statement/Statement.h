@@ -159,16 +159,17 @@ struct FunctionDefinition : public Statement {
     friend class Interpreter;
     Statement *body;
     std::vector<std::string> arguments;
+    std::map<std::string, Expression *> defaults;
     std::string name;
-    bool unlimited;
+//    bool unlimited;
 
     void visit(TreeWalker *walker) override {
         walker->visit(this);
     }
 
 public:
-    FunctionDefinition(const std::string &name, const std::vector<std::string> &arguments, Statement *body,
-                       bool unlimited);
+    FunctionDefinition(const std::string &name, Statement *body, const std::vector<std::string> &arguments,
+                       const std::vector<SetVariable *> &kwargs);
     ~FunctionDefinition() override;
     std::string str() override;
 };

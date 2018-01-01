@@ -28,14 +28,15 @@ class Function : public Callable {
     friend class Interpreter;
     Statement *body = nullptr;
     std::vector<std::string> arguments;
-    bool unlimited;
+    std::map<std::string, ObjPtr> defaults;
 
 protected:
     bool checkArguments(int count) override;
     ObjPtr call(ArgsList args, Interpreter *interpreter) override;
 
 public:
-    explicit Function(std::vector<std::string> &arguments, Statement *body, bool unlimited, Scope::ptr closure);
+    explicit Function(Statement *body, Scope::ptr closure, std::vector<std::string> &arguments,
+                      std::map<std::string, ObjPtr> defaults);
 };
 
 class Instance;

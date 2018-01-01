@@ -12,11 +12,12 @@ Callable::Callable(Scope::ptr closure) : closure(closure) {
     assert(closure);
 }
 
-Function::Function(std::vector<std::string> &arguments, Statement *body, bool unlimited, Scope::ptr closure) :
-        Callable(std::move(closure)), body(body), arguments(arguments), unlimited(unlimited) {}
+Function::Function(Statement *body, Scope::ptr closure, std::vector<std::string> &arguments,
+                   std::map<std::string, ObjPtr> defaults) :
+        Callable(std::move(closure)), body(body), arguments(arguments), defaults(defaults) {}
 
 bool Function::checkArguments(int count) {
-    return arguments.size() == count;
+    return count <= arguments.size() and count >= arguments.size() - defaults.size();
 //    auto size = arguments.size();
 //    if (unlimited)
 //        size--;
@@ -24,16 +25,13 @@ bool Function::checkArguments(int count) {
 }
 
 ObjPtr Function::call(ArgsList args, Interpreter *interpreter) {
-//        populating with arguments
-    long size = arguments.size(), i;
-//    if (unlimited)
-//        size--;
+    long size = args.size(), i;
     for (i = 0; i < size; ++i)
         interpreter->defineVariable(arguments[i], args[i]);
-//    if (unlimited) {
-//        auto last = std::vector<ObjPtr>(args.begin() + size, args.end());
-//        interpreter->setVariable(arguments[size], New(Array(last)));
-//    }
+
+    for (; i < arguments.size(); ++i)
+//        TODO: optimize
+        interpreter->defineVariable(arguments[i], defaults[arguments[i]]);
     body->visit(interpreter);
     return nullptr;
 }

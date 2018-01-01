@@ -1,4 +1,5 @@
 #include <iostream>
+#include <set>
 #include "SemanticAnalyser.h"
 #include "../../Parser/Parser.h"
 
@@ -17,11 +18,20 @@ void SemanticAnalyser::visit(VariableDefinition *statement) {
 }
 
 void SemanticAnalyser::visit(FunctionDefinition *statement) {
+//    testing duplicates
+    if (std::set<std::string>(statement->arguments.begin(), statement->arguments.end()).size() <
+        statement->arguments.size())
+//        TODO: !!!
+        throw SyntaxError("Duplicate arguments", Token(Token::SEPARATOR, "x"));
+
     setVariable(statement->name, true);
     if (!types.empty() and types.back() == BlockType::Class)
         types.push_back(BlockType::Method);
     else
         types.push_back(BlockType::Function);
+
+    for (auto &&item : statement->defaults)
+        item.second->visit(this);
     statement->body->visit(this);
     types.pop_back();
 }

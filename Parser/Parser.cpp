@@ -4,12 +4,13 @@ Parser::Parser(const std::vector<Token> &tokens) : tokens(tokens) {
     position = this->tokens.begin();
 }
 
-bool Parser::matches(std::initializer_list<Token::tokenType> types) {
-    if (position == tokens.end())
+bool Parser::matches(std::initializer_list<Token::tokenType> types, int shift) {
+    auto pos = position + shift;
+    if (pos == tokens.end())
         throw ProgramEnd();
 
     for (auto type : types)
-        if (type == position->type)
+        if (type == pos->type)
             return true;
     return false;
 }

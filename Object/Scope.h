@@ -48,18 +48,9 @@ public:
         attributes[name] = value;
     }
 
-    ptr getUpper() {
-        assert(upper);
-        return upper;
-    }
-
     void setUpper(ptr scope) {
         assert(!upper);
         upper = std::move(scope);
-    }
-
-    bool hasUpper() {
-        return bool(upper);
     }
 
 private:

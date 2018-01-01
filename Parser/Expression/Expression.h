@@ -87,8 +87,10 @@ public:
 
     Expression *target;
     std::vector<Expression *> argsList;
+    std::vector<SetVariable *> kwargs;
 public:
-    CallExpression(Token token, Expression *target, std::vector<Expression *> argsList);
+    CallExpression(Token token, Expression *target, std::vector<Expression *> argsList,
+                   std::vector<SetVariable *> kwargs);
     ~CallExpression() override;
     std::string str() override;
 };

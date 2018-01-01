@@ -15,7 +15,7 @@ class Parser {
 
     std::vector<Token> tokens;
 
-    bool matches(TokenTypes types);
+    bool matches(TokenTypes types, int shift = 0);
     Token advance();
     Token require(TokenTypes types);
 
@@ -97,7 +97,9 @@ class Parser {
         auto catches = std::vector<TryStatement::CatchStatement *>();
         while (matches({Token::CATCH})) {
             advance();
-            auto args = arguments();
+            require({Token::BRACKET_OPEN});
+            auto args = positional();
+            require({Token::BRACKET_CLOSE});
             auto body = block();
             catches.push_back(new TryStatement::CatchStatement(args, body));
         }
@@ -124,30 +126,20 @@ class Parser {
         auto name = require({Token::IDENTIFIER}).body;
         require({Token::BRACKET_OPEN});
         auto arguments = std::vector<std::string>();
-        bool first = true, unlimited = false;
+//        positional
         while (!matches({Token::BRACKET_CLOSE})) {
-            if (!first)
-                require({Token::SEPARATOR});
-            if (matches({Token::MUL})) {
-//                unlimited arguments
-                advance();
-                unlimited = true;
-            }
-            auto local = require({Token::IDENTIFIER});
-            //        checking uniqueness
-            for (auto &argument : arguments) {
-                if (argument == local.body)
-                    throw "Duplicate argument";
-            }
-
-            arguments.push_back(local.body);
-            if (unlimited)
+//            if kwarg
+            if (matches({Token::IDENTIFIER}) and matches({Token::ASSIGNMENT}, 1))
                 break;
-            first = false;
+            auto argName = require({Token::IDENTIFIER});
+            arguments.push_back(argName.body);
+            if (!matches({Token::BRACKET_CLOSE}))
+                require({Token::SEPARATOR});
         }
+        auto kw = kwargs();
         require({Token::BRACKET_CLOSE});
         auto body = block();
-        return new FunctionDefinition(name, arguments, body, unlimited);
+        return new FunctionDefinition(name, body, arguments, kw);
     }
 
     Statement *classDefinition() {
@@ -255,8 +247,11 @@ class Parser {
         while (matches({Token::BRACKET_OPEN, Token::ATTRIBUTE, Token::ITEM_OPEN})) {
             if (matches({Token::BRACKET_OPEN})) {
                 auto token = *position;
-                auto args = arguments();
-                left = new CallExpression(token, left, args);
+                require({Token::BRACKET_OPEN});
+                auto args = positional();
+                auto kw = kwargs();
+                require({Token::BRACKET_CLOSE});
+                left = new CallExpression(token, left, args, kw);
             } else if (matches({Token::ATTRIBUTE})) {
                 auto token = advance();
                 auto name = require({Token::IDENTIFIER}).body;
@@ -271,15 +266,29 @@ class Parser {
         return left;
     }
 
-    std::vector<Expression *> arguments() {
-        require({Token::BRACKET_OPEN});
+    std::vector<Expression *> positional() {
         auto result = std::vector<Expression *>();
         while (!matches({Token::BRACKET_CLOSE})) {
+//            if kwarg
+            if (matches({Token::IDENTIFIER}) and matches({Token::ASSIGNMENT}, 1))
+                break;
+
             result.push_back(expression());
             if (!matches({Token::BRACKET_CLOSE}))
                 require({Token::SEPARATOR});
         }
-        advance();
+        return result;
+    }
+
+    std::vector<SetVariable *> kwargs() {
+        auto result = std::vector<SetVariable *>();
+        while (!matches({Token::BRACKET_CLOSE})) {
+            auto token = require({Token::IDENTIFIER});
+            require({Token::ASSIGNMENT});
+            result.push_back(new SetVariable(token, token.body, expression()));
+            if (!matches({Token::BRACKET_CLOSE}))
+                require({Token::SEPARATOR});
+        }
         return result;
     }
 

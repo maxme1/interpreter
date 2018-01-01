@@ -12,8 +12,10 @@ ifStmt = 'if' '(' expression ')' (statement ('else' statement)? )?
 whileStmt = 'while' '(' expression ')' statement
 block = '{' statement* '}'
 
-funcDef = 'def' IDENTIFIER '(' argsList? ')' block
+funcDef = 'def' IDENTIFIER '(' argsList? (SEPARATOR if argsList) kwargs? ')' block
 argsList = IDENTIFIER (SEPARATOR IDENTIFIER)*
+kwargs = kwarg (SEPARATOR kwarg)*
+kwarg = IDENTIFIER = expression
 
 classDef = 'class' IDENTIFIER superclass? block
 superclass = '(' expression? ')'
@@ -40,8 +42,8 @@ superAttr = 'super' '.' IDENTIFIER
 suffix = call | attribute | item
 attribute = '.' IDENTIFIER
 item = '[' expression ']'
-call = '(' argsValues? ')'
-argsValues = expression (SEPARATOR expression)*
+call = '(' positional? (SEPARATOR if positional) kwargs? ')'
+positional = expression (SEPARATOR expression)*
 
 -- base definitions --
 

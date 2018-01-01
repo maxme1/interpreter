@@ -25,8 +25,9 @@ Unary::~Unary() {
 //    delete argument;
 }
 
-CallExpression::CallExpression(Token token, Expression *target, std::vector<Expression *> argsList) :
-        Expression(std::move(token)), target(target), argsList(std::move(argsList)) {}
+CallExpression::CallExpression(Token token, Expression *target, std::vector<Expression *> argsList,
+                               std::vector<SetVariable *> kwargs)
+        : Expression(std::move(token)), target(target), argsList(std::move(argsList)), kwargs(kwargs) {}
 
 std::string CallExpression::str() {
     std::string result = target->str() + "(";
