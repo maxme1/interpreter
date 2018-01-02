@@ -1,7 +1,8 @@
 #include "Statement.h"
 #include "../Expression/Expression.h"
 
-ExpressionStatement::ExpressionStatement(Expression *expression) : expression(expression) {}
+ExpressionStatement::ExpressionStatement(Expression *expression) :
+        Statement(expression->token), expression(expression) {}
 
 std::string ExpressionStatement::str() {
     return expression->str() + ";";
@@ -11,8 +12,8 @@ ExpressionStatement::~ExpressionStatement() {
 //    delete expression;
 }
 
-IfStatement::IfStatement(Expression *condition, Statement *left, Statement *right) : condition(condition), left(left),
-                                                                                     right(right) {}
+IfStatement::IfStatement(Token token, Expression *condition, Statement *left, Statement *right) :
+        Statement(token), condition(condition), left(left), right(right) {}
 
 IfStatement::~IfStatement() {
 //    delete condition, left, right;
@@ -28,7 +29,7 @@ std::string IfStatement::str() {
 }
 
 TryStatement::TryStatement(const std::vector<TryStatement::CatchStatement *> &catches, Statement *block) :
-        catches(catches), block(block) {}
+        Statement(block->token), catches(catches), block(block) {}
 
 TryStatement::~TryStatement() {
 //    delete block;
@@ -41,7 +42,8 @@ std::string TryStatement::str() {
     return "try - catch. i'm too lazy";
 }
 
-WhileStatement::WhileStatement(Expression *condition, Statement *body) : condition(condition), body(body) {}
+WhileStatement::WhileStatement(Expression *condition, Statement *body) :
+        Statement(body->token), condition(condition), body(body) {}
 
 WhileStatement::~WhileStatement() {
 //    delete condition, body;
@@ -54,11 +56,11 @@ std::string WhileStatement::str() {
     return result;
 }
 
-ControlFlow::ControlFlow(Token token) : token(token) {}
+ControlFlow::ControlFlow(Token token) : Statement(token) {}
 
 std::string ControlFlow::str() { return token.body; }
 
-ReturnStatement::ReturnStatement(Token token, Expression *expression) : expression(expression), token(token) {}
+ReturnStatement::ReturnStatement(Token token, Expression *expression) : Statement(token), expression(expression) {}
 
 ReturnStatement::~ReturnStatement() {
 //    delete expression;
@@ -71,7 +73,7 @@ std::string ReturnStatement::str() {
     return result;
 }
 
-RaiseStatement::RaiseStatement(Expression *expression) : expression(expression) {}
+RaiseStatement::RaiseStatement(Expression *expression) : Statement(expression->token), expression(expression) {}
 
 RaiseStatement::~RaiseStatement() {
 //    delete expression;
@@ -84,15 +86,17 @@ std::string RaiseStatement::str() {
     return result;
 }
 
-ImportStatement::ImportStatement(std::string path) : path(std::move(path)) {}
+ImportStatement::ImportStatement(Token token, std::string path) : Statement(token), path(std::move(path)) {}
 
 std::string ImportStatement::str() {
     return "import " + path;
 }
 
-FunctionDefinition::FunctionDefinition(const std::string &name, Statement *body, const std::vector<std::string> &arguments,
+//TODO provide proper tokens
+FunctionDefinition::FunctionDefinition(const std::string &name, Statement *body,
+                                       const std::vector<std::string> &arguments,
                                        const std::vector<SetVariable *> &kwargs) :
-        body(body), arguments(arguments), name(name){
+        Statement(body->token), body(body), arguments(arguments), name(name) {
     for (auto &&kwarg : kwargs) {
         this->arguments.push_back(kwarg->name);
         defaults[kwarg->name] = kwarg->value;
@@ -115,16 +119,15 @@ FunctionDefinition::~FunctionDefinition() {
 //    delete body;
 }
 
-VariableDefinition::VariableDefinition(const std::string &name, Expression *assignee) : name(name), assignee(assignee) {
-
-}
+VariableDefinition::VariableDefinition(const std::string &name, Expression *assignee) :
+        Statement(assignee->token), name(name), assignee(assignee) {}
 
 std::string VariableDefinition::str() {
     return "var " + name + " = " + assignee->str();
 }
 
 ClassDefinition::ClassDefinition(std::string name, Block *body, Expression *superclass)
-        : body(body), name(std::move(name)), superclass(superclass) {}
+        : Statement(body->token), body(body), name(std::move(name)), superclass(superclass) {}
 
 std::string ClassDefinition::str() {
     return "class " + name + body->str();
@@ -134,7 +137,7 @@ ClassDefinition::~ClassDefinition() {
 //    delete body, superclass;
 }
 
-Block::Block(const std::vector<Statement *> &statements) : statements(statements) {}
+Block::Block(Token token, const std::vector<Statement *> &statements) : Statement(token), statements(statements) {}
 
 std::string Block::str() {
     std::string result = "{\n";

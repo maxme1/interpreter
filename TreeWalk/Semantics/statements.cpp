@@ -21,8 +21,7 @@ void SemanticAnalyser::visit(FunctionDefinition *statement) {
 //    testing duplicates
     if (std::set<std::string>(statement->arguments.begin(), statement->arguments.end()).size() <
         statement->arguments.size())
-//        TODO: !!!
-        throw SyntaxError("Duplicate arguments", Token(Token::SEPARATOR, "x"));
+        throw SyntaxError("Duplicate argument names");
 
     setVariable(statement->name, true);
     if (!types.empty() and types.back() == BlockType::Class)
@@ -54,7 +53,7 @@ void SemanticAnalyser::visit(ClassDefinition *statement) {
 
 void SemanticAnalyser::visit(ReturnStatement *statement) {
     if (types.empty() or (types.back() != BlockType::Function and types.back() != BlockType::Method))
-        throw SyntaxError("Return outside function or method", statement->token);
+        throw SyntaxError("Return outside function or method");
 
     if (statement->expression)
         statement->expression->visit(this);
@@ -103,5 +102,5 @@ void SemanticAnalyser::visit(WhileStatement *statement) {
 
 void SemanticAnalyser::visit(ControlFlow *statement) {
     if (types.empty() or types.back() != BlockType::Loop)
-        throw SyntaxError("Control flow outside loop", statement->token);
+        throw SyntaxError("Control flow outside loop");
 }

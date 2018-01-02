@@ -4,11 +4,15 @@
 #include <string>
 #include "../../TreeWalk/Interpreter/Interpreter.h"
 #include "../../Tokenizer/Token.h"
+#include "../../ExceptionWrapper.h"
 
 class Expression;
 
 struct Statement {
+    Token token;
 public:
+    explicit Statement(Token token) : token(token) {};
+
     virtual void visit(TreeWalker *walker) = 0;
     virtual ~Statement() = default;
     virtual std::string str() = 0;
@@ -20,11 +24,16 @@ struct Block : public Statement {
     std::vector<Statement *> statements;
 
     void visit(TreeWalker *walker) override {
-        walker->visit(this);
+        try {
+            walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
 public:
-    explicit Block(const std::vector<Statement *> &statements);
+    explicit Block(Token token, const std::vector<Statement *> &statements);
     ~Block() override;
     std::string str() override;
 };
@@ -35,7 +44,12 @@ struct ExpressionStatement : public Statement {
     Expression *expression;
 
     void visit(TreeWalker *walker) override {
-        walker->visit(this);
+        try {
+            walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
 public:
@@ -51,11 +65,16 @@ struct IfStatement : public Statement {
     Statement *left, *right;
 
     void visit(TreeWalker *walker) override {
-        walker->visit(this);
+        try {
+            walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
 public:
-    explicit IfStatement(Expression *condition, Statement *left = nullptr, Statement *right = nullptr);
+    explicit IfStatement(Token token, Expression *condition, Statement *left = nullptr, Statement *right = nullptr);
     ~IfStatement() override;
     std::string str() override;
 };
@@ -76,7 +95,12 @@ struct TryStatement : public Statement {
     Statement *block;
 
     void visit(TreeWalker *walker) override {
-        walker->visit(this);
+        try {
+            walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
     TryStatement(const std::vector<CatchStatement *> &catches, Statement *block);
@@ -91,7 +115,12 @@ struct WhileStatement : public Statement {
     Statement *body;
 
     void visit(TreeWalker *walker) override {
-        walker->visit(this);
+        try {
+            walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
 public:
@@ -102,10 +131,14 @@ public:
 
 struct ControlFlow : public Statement {
     friend class Interpreter;
-    Token token;
 
     void visit(TreeWalker *walker) override {
-        walker->visit(this);
+        try {
+            walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
 public:
@@ -116,10 +149,14 @@ public:
 struct ReturnStatement : public Statement {
     friend class Interpreter;
     Expression *expression;
-    Token token;
 
     void visit(TreeWalker *walker) override {
-        walker->visit(this);
+        try {
+            walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
 public:
@@ -133,7 +170,12 @@ struct RaiseStatement : public Statement {
     Expression *expression;
 
     void visit(TreeWalker *walker) override {
-        walker->visit(this);
+        try {
+            walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
 public:
@@ -147,11 +189,16 @@ class ImportStatement : public Statement {
     std::string path;
 
     void visit(TreeWalker *walker) override {
-        walker->visit(this);
+        try {
+            walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
 public:
-    explicit ImportStatement(std::string path);
+    explicit ImportStatement(Token token, std::string path);
     std::string str() override;
 };
 
@@ -164,7 +211,12 @@ struct FunctionDefinition : public Statement {
 //    bool unlimited;
 
     void visit(TreeWalker *walker) override {
-        walker->visit(this);
+        try {
+            walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
 public:
@@ -180,7 +232,12 @@ struct VariableDefinition : public Statement {
     std::string name;
 
     void visit(TreeWalker *walker) override {
-        walker->visit(this);
+        try {
+            walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
 public:
@@ -195,7 +252,12 @@ struct ClassDefinition : public Statement {
     std::string name;
 
     void visit(TreeWalker *walker) override {
-        walker->visit(this);
+        try {
+            walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
 public:

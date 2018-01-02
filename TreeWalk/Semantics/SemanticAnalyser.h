@@ -2,6 +2,7 @@
 #define INTERPRETER_SEMANTICANALYSIS_H
 
 #include "../../Parser/Statement/Statement.h"
+#include "../../ExceptionWrapper.h"
 
 class SemanticAnalyser : public TreeWalker {
     enum BlockType {
@@ -42,12 +43,10 @@ public:
     void visit(ControlFlow *statement) override;
     void visit(Block *block) override;
 
-    struct SyntaxError {
+    struct SyntaxError : public BaseExceptionWrapper {
         std::string message;
 
-        SyntaxError(const std::string &message, const Token &token) {
-            this->message = message + " at " + std::to_string(token.line) + ":" + std::to_string(token.column);
-        }
+        explicit SyntaxError(const std::string &message) : message(message) {}
     };
 };
 

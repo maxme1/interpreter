@@ -67,28 +67,28 @@ class Parser {
     }
 
     Statement *importStatement() {
-        require({Token::IMPORT});
-        return new ImportStatement(require({Token::IDENTIFIER}).body);
+        auto token = require({Token::IMPORT});
+        return new ImportStatement(token, require({Token::IDENTIFIER}).body);
     }
 
     Statement *ifStatement() {
-        require({Token::IF});
+        auto token = require({Token::IF});
         require({Token::BRACKET_OPEN});
         auto condition = expression();
         require({Token::BRACKET_CLOSE});
 //        empty if
         if (matches({Token::DELIMITER})) {
             advance();
-            return new IfStatement(condition);
+            return new IfStatement(token, condition);
         }
         auto left = statement();
 //        only left block
         if (!matches({Token::ELSE}))
-            return new IfStatement(condition, left);
+            return new IfStatement(token, condition, left);
 //        both blocks
         require({Token::ELSE});
         auto right = statement();
-        return new IfStatement(condition, left, right);
+        return new IfStatement(token, condition, left, right);
     }
 
     Statement *tryStatement() {
@@ -168,12 +168,12 @@ class Parser {
     }
 
     Block *block() {
-        require({Token::BLOCK_OPEN});
+        auto token = require({Token::BLOCK_OPEN});
         auto statements = std::vector<Statement *>();
         while (!matches({Token::BLOCK_CLOSE}))
             statements.push_back(statement());
         require({Token::BLOCK_CLOSE});
-        return new Block(statements);
+        return new Block(token, statements);
     };
 
     Expression *expression() {

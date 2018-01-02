@@ -13,7 +13,7 @@ ObjPtr SemanticAnalyser::visit(Variable *expression) {
             }
             level++;
         }
-        throw SyntaxError("No method to bind 'this'", expression->token);
+        throw SyntaxError("No method to bind 'this'");
     }
 
     for (int i = 0; i < scopes.size(); ++i) {
@@ -25,7 +25,7 @@ ObjPtr SemanticAnalyser::visit(Variable *expression) {
                 expression->level = i;
                 return nullptr;
             } else
-                throw SyntaxError("Variable '" + expression->name + "' not found", expression->token);
+                throw SyntaxError("Variable '" + expression->name + "' not found");
     }
     expression->level = scopes.size() - 1;
     return nullptr;
@@ -44,7 +44,7 @@ ObjPtr SemanticAnalyser::visit(SetVariable *expression) {
                 expression->level = i;
                 break;
             } else
-                throw SyntaxError("Variable '" + expression->name + "' not found", expression->token);
+                throw SyntaxError("Variable '" + expression->name + "' not found");
     }
     expression->level = scopes.size() - 1;
     expression->value->visit(this);
@@ -70,7 +70,7 @@ ObjPtr SemanticAnalyser::visit(SuperClass *expression) {
         }
         level++;
     }
-    throw SyntaxError("No method to bind 'super'", expression->token);
+    throw SyntaxError("No method to bind 'super'");
 }
 
 ObjPtr SemanticAnalyser::visit(Binary *expression) {

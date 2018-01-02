@@ -67,7 +67,6 @@ public:
                 const std::map<std::string, ObjPtr> &keyword = std::map<std::string, ObjPtr>());
     std::vector<ObjPtr> evaluateArguments(const std::vector<Expression *> &argsList);
     std::shared_ptr<Callable> getCallable(ObjPtr object);
-//    void checkArguments(std::shared_ptr<Callable> callable, long count);
 
     static bool isDerived(ObjPtr derived, ObjPtr base);
     static bool isInstance(ObjPtr instance, ObjPtr base);

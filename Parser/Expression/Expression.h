@@ -8,6 +8,7 @@
 #include "../../Tokenizer/Token.h"
 #include "../../TreeWalk/Interpreter/Interpreter.h"
 #include "../Statement/Statement.h"
+#include "../../ExceptionWrapper.h"
 
 struct Object;
 struct Expression {
@@ -29,7 +30,12 @@ struct Binary : public Expression {
 public:
 
     ObjPtr visit(TreeWalker *walker) override {
-        return walker->visit(this);
+        try {
+            return walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
     Binary(Token token, Expression *left, Expression *right);
@@ -42,7 +48,12 @@ struct Unary : public Expression {
 
 public:
     ObjPtr visit(TreeWalker *walker) override {
-        return walker->visit(this);
+        try {
+            return walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
     Expression *argument;
@@ -57,7 +68,12 @@ struct Literal : public Expression {
 private:
 public:
     ObjPtr visit(TreeWalker *walker) override {
-        return walker->visit(this);
+        try {
+            return walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
 public:
@@ -68,7 +84,12 @@ struct Variable : public Expression {
     long level{-1};
 public:
     ObjPtr visit(TreeWalker *walker) override {
-        return walker->visit(this);
+        try {
+            return walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
 public:
@@ -82,7 +103,12 @@ struct CallExpression : public Expression {
 
 public:
     ObjPtr visit(TreeWalker *walker) override {
-        return walker->visit(this);
+        try {
+            return walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
     Expression *target;
@@ -101,7 +127,12 @@ struct SuperClass : public Expression {
     long level{-1};
 public:
     ObjPtr visit(TreeWalker *walker) override {
-        return walker->visit(this);
+        try {
+            return walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
 public:
@@ -116,7 +147,12 @@ struct GetItem : public Expression {
 
 public:
     ObjPtr visit(TreeWalker *walker) override {
-        return walker->visit(this);
+        try {
+            return walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
     Expression *target;
@@ -133,7 +169,12 @@ struct GetAttribute : public Expression {
 
 public:
     ObjPtr visit(TreeWalker *walker) override {
-        return walker->visit(this);
+        try {
+            return walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
     Expression *target;
@@ -150,7 +191,12 @@ struct SetVariable : public Expression {
 
 public:
     ObjPtr visit(TreeWalker *walker) override {
-        return walker->visit(this);
+        try {
+            return walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
     std::string name;
@@ -167,7 +213,12 @@ struct SetAttribute : public Expression {
 
 public:
     ObjPtr visit(TreeWalker *walker) override {
-        return walker->visit(this);
+        try {
+            return walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
     Expression *value;
@@ -184,7 +235,12 @@ struct SetItem : public Expression {
 
 public:
     ObjPtr visit(TreeWalker *walker) override {
-        return walker->visit(this);
+        try {
+            return walker->visit(this);
+        } catch (BaseExceptionWrapper &e) {
+            e.push(this->token);
+            throw;
+        }
     }
 
     Expression *value;
