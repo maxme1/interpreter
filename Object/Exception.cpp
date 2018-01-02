@@ -1,15 +1,16 @@
 #include "Exception.h"
 #include "Types/String.h"
 
-ObjPtr Exception::init(Interpreter *interpreter, ObjPtr _self, ArgsList args) {
-    if (args.empty())
+ObjPtr Exception::init(Interpreter *interpreter, ObjPtr _self, ArgsList positional, KwargsList keyword) {
+//    TODO: add defaults
+    if (positional.empty())
         _self->setAttribute("message", New(String("")));
     else
-        _self->setAttribute("message", args[0]);
+        _self->setAttribute("message", positional[0]);
     return nullptr;
 }
 
-ObjPtr Exception::str(Interpreter *interpreter, ObjPtr _self, ArgsList args) {
+ObjPtr Exception::str(Interpreter *interpreter, ObjPtr _self, ArgsList positional, KwargsList keyword) {
     return New(String(Exception::getString(_self)));
 }
 

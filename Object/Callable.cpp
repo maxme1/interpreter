@@ -12,21 +12,32 @@ Callable::Callable(Scope::ptr closure) : closure(closure) {
     assert(closure);
 }
 
+FunctionPrototype::FunctionPrototype(std::vector<std::string> &arguments, std::map<std::string, ObjPtr> defaults) :
+        Callable(), arguments(arguments), defaults(defaults) {}
+
+void FunctionPrototype::checkArguments(ArgsList positional, KwargsList keyword) {
+    auto count = positional.size() + keyword.size(), required = arguments.size() - defaults.size();
+    if (not(count <= arguments.size() and count >= required)) {
+        std::string message = "This function takes ";
+        if (arguments.size() != required)
+            message += "from " + std::to_string(required) + " to ";
+        throw Interpreter::ExceptionWrapper(new ValueError(
+                message + std::to_string(arguments.size()) + " arguments, but " + std::to_string(count) + " provided")
+        );
+    }
+    for (auto i = 0; i < positional.size(); ++i)
+        if (keyword.count(arguments[i]) > 0)
+            throw Interpreter::ExceptionWrapper(new ValueError("Duplicate argument " + arguments[i]));
+    for (auto i = positional.size(); i < required; ++i)
+        if (keyword.count(arguments[i]) == 0)
+            throw Interpreter::ExceptionWrapper(new ValueError("Argument " + arguments[i] + " is not set"));
+}
+
 Function::Function(Statement *body, Scope::ptr closure, std::vector<std::string> &arguments,
                    std::map<std::string, ObjPtr> defaults) :
-        Callable(std::move(closure)), body(body), arguments(arguments), defaults(defaults) {}
-
-bool Function::checkArguments(ArgsList positional, KwargsList keyword) {
-    auto count = positional.size();
-    auto result = count <= arguments.size() and count >= arguments.size() - defaults.size();
-//    TODO: optimize
-    if (not result)
-        throw Interpreter::ExceptionWrapper(new ValueError("bad args count"));
-    return result;
-//    auto size = arguments.size();
-//    if (unlimited)
-//        size--;
-//    return size == count or (arguments.size() <= count and unlimited);
+        FunctionPrototype(arguments, defaults), body(body) {
+    assert(closure);
+    this->closure = closure;
 }
 
 ObjPtr Function::call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) {
@@ -45,7 +56,7 @@ ObjPtr Function::call(Interpreter *interpreter, ArgsList positional, KwargsList 
     return nullptr;
 }
 
-bool ClassMethod::checkArguments(ArgsList positional, KwargsList keyword) {
+void ClassMethod::checkArguments(ArgsList positional, KwargsList keyword) {
     return function->checkArguments(positional, keyword);
 }
 

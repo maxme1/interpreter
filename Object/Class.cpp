@@ -68,8 +68,11 @@ ObjPtr Class::call(Interpreter *interpreter, ArgsList positional, KwargsList key
     return instance;
 }
 
-bool Class::checkArguments(ArgsList positional, KwargsList keyword) {
-    return (positional.empty() and keyword.empty()) or (bool) findAttribute("init");
+void Class::checkArguments(ArgsList positional, KwargsList keyword) {
+    if (findAttribute("init"))
+        return;
+    if (!positional.empty() or !keyword.empty())
+        throw Interpreter::ExceptionWrapper(new ValueError("Default constructor takes no arguments"));
 }
 
 Class::Class(Class::ptr superclass) : superClass(superclass) {}

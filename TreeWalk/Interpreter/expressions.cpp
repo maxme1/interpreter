@@ -99,7 +99,12 @@ ObjPtr Interpreter::visit(CallExpression *expression) {
     ObjPtr object = expression->target->visit(this);
     auto callable = getCallable(object);
     auto positional = evaluateArguments(expression->argsList);
-    return call(callable, positional);
+
+    std::map<std::string, ObjPtr> keyword;
+    for (auto &&item :expression->kwargs)
+        keyword[item->name] = item->value->visit(this);
+
+    return call(callable, positional, keyword);
 }
 
 ObjPtr Interpreter::visit(SuperClass *expression) {

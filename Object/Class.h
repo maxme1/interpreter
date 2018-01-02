@@ -16,7 +16,7 @@ private:
     ptr superClass{nullptr};
 protected:
     virtual ObjPtr makeInstance(ptr base = nullptr);
-    bool checkArguments(ArgsList positional, KwargsList keyword) override;
+    void checkArguments(ArgsList positional, KwargsList keyword) override;
     ObjPtr call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) override;
 };
 

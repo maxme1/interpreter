@@ -22,8 +22,8 @@ $class(Exception)
         Exception::setMessage(this, body);
     }
 
-    static ObjPtr init(Interpreter *interpreter, ObjPtr _self, ArgsList args);
-    static ObjPtr str(Interpreter *interpreter, ObjPtr _self, ArgsList args);
+    static ObjPtr init(Interpreter *interpreter, ObjPtr _self, ArgsList positional, KwargsList keyword);
+    static ObjPtr str(Interpreter *interpreter, ObjPtr _self, ArgsList positional, KwargsList keyword);
     std::string asString() override;
 
     static void setMessage(Object *target, const std::string &message);

@@ -38,10 +38,18 @@ class NativeObject : public Instance {
 
     static bool populated;
 protected:
-    static void addMethod(const std::string &name, nativeMethod method, int argumentsCount = 0,
-                          bool unlimited = false) {
-        LocalNative::getClass()->setAttribute(name, New(NativeMethod(method, argumentsCount, unlimited)));
+    static void addMethod(const std::string &name, nativeMethod method, int argumentsCount = 0) {
+        auto args = std::vector<std::string>();
+        for (int i = 0; i < argumentsCount; ++i)
+            args.push_back("arg" + std::to_string(i));
+        LocalNative::getClass()->setAttribute(name, New(NativeMethod(method, args,
+                                                                     std::map<std::string, ObjPtr>())));
     }
+
+//    static void addMethod(const std::string &name, nativeMethod method, std::vector<std::string> &arguments,
+//                          std::map<std::string, ObjPtr> &defaults) {
+//        LocalNative::getClass()->setAttribute(name, New(NativeMethod(method, arguments, defaults)));
+//    }
 
 public:
     explicit NativeObject(Class::ptr classPtr) : Instance(classPtr) {}

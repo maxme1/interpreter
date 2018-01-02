@@ -22,7 +22,7 @@ $class(Bool)
     }
 
     $method(init, Bool)
-        self->value = Bool::toBool(args[0], interpreter);
+        self->value = Bool::toBool(positional[0], interpreter);
         return nullptr;
     }
 

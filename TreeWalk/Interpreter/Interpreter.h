@@ -48,8 +48,10 @@ public:
     void visit(Block *block) override;
 
     void populate();
-    void addFunction(const std::string &name, ObjPtr(*function)(Interpreter *, const std::vector<ObjPtr> &),
-                     int argumentsCount, bool unlimited = false);
+
+    void addFunction(const std::string &name, ObjPtr(*function)(Interpreter *, const std::vector<ObjPtr> &,
+                                                                const std::map<std::string, ObjPtr> &),
+                     int argumentsCount = 0);
 
     std::vector<Scope::ptr> scopes;
     void enterScope();

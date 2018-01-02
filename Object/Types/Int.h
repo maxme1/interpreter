@@ -25,12 +25,12 @@ $class(Int)
     }
 
     $method(init, Int)
-        if (cast(args[0]))
-            self->value = Int::getValue(args[0]);
-        else if (String::cast(args[0]))
-            self->value = std::stoi(args[0]->asString());
-        else if (Bool::cast(args[0]))
-            self->value = (int) args[0]->asBool();
+        if (cast(positional[0]))
+            self->value = Int::getValue(positional[0]);
+        else if (String::cast(positional[0]))
+            self->value = std::stoi(positional[0]->asString());
+        else if (Bool::cast(positional[0]))
+            self->value = (int) positional[0]->asBool();
         else
             assert(false);
 //            throw Wrap(new ValueError("Could not convert to Int"));
@@ -42,11 +42,11 @@ $class(Int)
     }
 
     $method(add, Int)
-        return New(Int(self->value + Int::getValue(args[0])));
+        return New(Int(self->value + Int::getValue(positional[0])));
     }
 
     $method(divide, Int)
-        int val = Int::getValue(args[0]);
+        int val = Int::getValue(positional[0]);
         assert (val != 0);
 //            throw Wrap(new Exception("Division by zero"));
         return New(Int(self->value / val));
@@ -61,41 +61,41 @@ $class(Int)
     }
 
     $method(multiply, Int)
-        return New(Int(self->value * Int::getValue(args[0])));
+        return New(Int(self->value * Int::getValue(positional[0])));
     }
 
     $method(subtract, Int)
-        return New(Int(self->value - Int::getValue(args[0])));
+        return New(Int(self->value - Int::getValue(positional[0])));
     }
 
     $method(equal, Int)
-        auto other = Int::cast(args[0]);
+        auto other = Int::cast(positional[0]);
         if (other)
             return New(Bool(self->value == other->value));
         return New(Bool(false));
     }
 
     $method(not_equal, Int)
-        auto other = Int::cast(args[0]);
+        auto other = Int::cast(positional[0]);
         if (other)
             return New(Bool(self->value != other->value));
         return New(Bool(false));
     }
 
     $method(greater, Int)
-        return New(Int(self->value > Int::getValue(args[0])));
+        return New(Int(self->value > Int::getValue(positional[0])));
     }
 
     $method(less, Int)
-        return New(Int(self->value < Int::getValue(args[0])));
+        return New(Int(self->value < Int::getValue(positional[0])));
     }
 
     $method(greater_or_equal, Int)
-        return New(Int(self->value >= Int::getValue(args[0])));
+        return New(Int(self->value >= Int::getValue(positional[0])));
     }
 
     $method(less_or_equal, Int)
-        return New(Int(self->value <= Int::getValue(args[0])));
+        return New(Int(self->value <= Int::getValue(positional[0])));
     }
 
     static void populate() {

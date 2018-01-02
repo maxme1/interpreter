@@ -16,7 +16,7 @@ void Interpreter::populate() {
 
     addFunction("print", $lambda {
         bool first = true;
-        for (auto &&arg : args) {
+        for (auto &&arg : positional) {
             if (not first)
                 std::cout << " ";
             else
@@ -33,6 +33,9 @@ void Interpreter::populate() {
 //    });
 }
 
-void Interpreter::addFunction(const std::string &name, nativeFunction function, int argumentsCount, bool unlimited) {
-    defineVariable(name, New(NativeFunction(function, argumentsCount, unlimited)));
+void Interpreter::addFunction(const std::string &name, nativeFunction function, int argumentsCount) {
+    auto args = std::vector<std::string>();
+    for (int i = 0; i < argumentsCount; ++i)
+        args.push_back("arg" + std::to_string(i));
+    defineVariable(name, New(NativeFunction(function, args, std::map<std::string, ObjPtr>())));
 }

@@ -32,12 +32,12 @@ $class(String)
     }
 
     $method(init, String)
-        self->string = toString(args[0], interpreter);
+        self->string = toString(positional[0], interpreter);
         return nullptr;
     }
 
     $method(add, String)
-        auto that = cast(args[0], true);
+        auto that = cast(positional[0], true);
         return New(String(self->string + that->string));
     }
 

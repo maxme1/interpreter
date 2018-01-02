@@ -15,7 +15,7 @@ struct Callable : public Object {
     friend class ClassMethod;
     Scope::ptr closure = nullptr;
 protected:
-    virtual bool checkArguments(ArgsList positional, KwargsList keyword) = 0;
+    virtual void checkArguments(ArgsList positional, KwargsList keyword) = 0;
     virtual ObjPtr call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) = 0;
 public:
     Callable();
@@ -24,15 +24,24 @@ public:
     typedef std::shared_ptr<Callable> ptr;
 };
 
-class Statement;
-class Function : public Callable {
+class FunctionPrototype : public Callable {
     friend class Interpreter;
-    Statement *body = nullptr;
-    std::vector<std::string> arguments;
-    std::map<std::string, ObjPtr> defaults;
 
 protected:
-    bool checkArguments(ArgsList positional, KwargsList keyword) override ;
+    std::vector<std::string> arguments;
+    std::map<std::string, ObjPtr> defaults;
+    void checkArguments(ArgsList positional, KwargsList keyword) override;
+
+public:
+    explicit FunctionPrototype(std::vector<std::string> &arguments, std::map<std::string, ObjPtr> defaults);
+};
+
+class Statement;
+class Function : public FunctionPrototype {
+    friend class Interpreter;
+    Statement *body = nullptr;
+
+protected:
     ObjPtr call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) override;
 
 public:
@@ -46,7 +55,7 @@ class ClassMethod : public Callable {
     Callable::ptr function;
     std::shared_ptr<Instance> instance;
 protected:
-    bool checkArguments(ArgsList positional, KwargsList keyword) override ;
+    void checkArguments(ArgsList positional, KwargsList keyword) override;
     ObjPtr call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) override;
 
 public:

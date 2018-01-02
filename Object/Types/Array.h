@@ -15,18 +15,18 @@ $class(Array)
     }
 
     $method(init, Array)
-        for (auto &&arg : args)
+        for (auto &&arg : positional)
             self->array.push_back(arg);
         return nullptr;
     }
 
     $method(push, Array)
-        self->array.push_back(args[0]);
+        self->array.push_back(positional[0]);
         return nullptr;
     }
 
     $method(getItem, Array)
-        auto idx = Int::getValue(args[0]);
+        auto idx = Int::getValue(positional[0]);
         if (idx >= self->array.size())
             assert(false);
 //            throw Wrap(new IndexError(std::to_string(idx)));
@@ -34,12 +34,12 @@ $class(Array)
     }
 
     $method(setItem, Array)
-        auto idx = Int::getValue(args[0]);
+        auto idx = Int::getValue(positional[0]);
         if (idx >= self->array.size())
             assert(false);
 //            throw Wrap(new IndexError(std::to_string(idx)));
 
-        return self->array[idx] = args[1];
+        return self->array[idx] = positional[1];
     }
 
     $method(str, Array)
@@ -56,7 +56,7 @@ $class(Array)
     }
 
     static void populate() {
-        addMethod("init", init, 0, -1);
+        addMethod("init", init, 0);
         addMethod("str", str, 0);
         addMethod("push", push, 1);
         addMethod("setitem", setItem, 2);
