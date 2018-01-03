@@ -23,9 +23,11 @@ std::vector<Token> Tokenizer::tokenize() {
             while (*position == ' ' or *position == '\r')
                 position++;
 //           comment
-            if (*position == '#')
+            if (*position == '#'){
                 while (*position != '\n')
                     position++;
+                continue;
+            }
 
             auto column = 1 + std::distance(begin, position);
             auto token = nextToken();

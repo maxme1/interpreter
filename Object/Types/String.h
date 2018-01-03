@@ -43,7 +43,7 @@ $class(String)
 
     static void populate() {
         addMethod("init", init, 1);
-        addMethod("add", add, 1);
+        addMethod("plus", add, 1);
     }
 };
 

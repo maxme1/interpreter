@@ -6,21 +6,21 @@
 #include "../../Object/Native/Native.h"
 
 std::map<Token::tokenType, std::string> binary = {
-        {Token::ADD,              "add"},
-        {Token::SUB,              "sub"},
-        {Token::MUL,              "mul"},
-        {Token::DIV,              "div"},
-        {Token::EQUAL,            "eq"},
-        {Token::GREATER,          "gr"},
-        {Token::GREATER_OR_EQUAL, "geq"},
-        {Token::LESS,             "ls"},
-        {Token::LESS_OR_EQUAL,    "leq"},
-        {Token::NOT_EQUAL,        "neq"}
+        {Token::ADD,              "plus"},
+        {Token::SUB,              "minus"},
+        {Token::MUL,              "multiply"},
+        {Token::DIV,              "divide"},
+        {Token::GREATER,          "greater"},
+        {Token::LESS,             "less"},
+        {Token::LESS_OR_EQUAL,    "lessEqual"},
+        {Token::GREATER_OR_EQUAL, "greaterEqual"},
+        {Token::EQUAL,            "equal"},
+        {Token::NOT_EQUAL,        "notEqual"}
 };
 
 std::map<Token::tokenType, std::string> unary = {
-        {Token::ADD, "uadd"},
-        {Token::SUB, "usub"},
+        {Token::ADD, "plusUnary"},
+        {Token::SUB, "minusUnary"},
 };
 
 ObjPtr Interpreter::visit(Binary *expression) {
@@ -41,6 +41,8 @@ ObjPtr Interpreter::visit(Binary *expression) {
 }
 
 ObjPtr Interpreter::visit(Unary *expression) {
+    if (expression->token.type == Token::BRACKET_OPEN)
+        return expression->argument->visit(this);
     auto name = unary.find(expression->token.type);
     assert(name != unary.end());
 

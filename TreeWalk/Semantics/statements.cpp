@@ -31,6 +31,9 @@ void SemanticAnalyser::visit(FunctionDefinition *statement) {
 
     for (auto &&item : statement->defaults)
         item.second->visit(this);
+    for (auto &&argument : statement->arguments)
+        setVariable(argument, true);
+
     statement->body->visit(this);
     types.pop_back();
 }

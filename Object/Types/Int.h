@@ -41,7 +41,7 @@ $class(Int)
         return New(String(self->asString()));
     }
 
-    $method(add, Int)
+    $method(plus, Int)
         return New(Int(self->value + Int::getValue(positional[0])));
     }
 
@@ -99,14 +99,21 @@ $class(Int)
     }
 
     static void populate() {
-//        TODO: populate
         addMethod("init", init, 1);
         addMethod("str", str, 0);
-        addMethod("add", add, 1);
-        addMethod("sub", subtract, 1);
-        addMethod("div", divide, 1);
-        addMethod("eq", equal, 1);
-        addMethod("gr", greater, 1);
+
+        addMethod("plus", plus, 1);
+        addMethod("minus", subtract, 1);
+        addMethod("plusUnary", unary_add, 1);
+        addMethod("minusUnary", unary_subtract, 1);
+        addMethod("multiply", multiply, 1);
+        addMethod("divide", divide, 1);
+        addMethod("greater", greater, 1);
+        addMethod("less", less, 1);
+        addMethod("lessEqual", less_or_equal, 1);
+        addMethod("greaterEqual", greater_or_equal, 1);
+        addMethod("equal", equal, 1);
+        addMethod("not_equal", not_equal, 1);
     }
 };
 

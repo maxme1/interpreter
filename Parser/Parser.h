@@ -125,7 +125,6 @@ class Parser {
         return new WhileStatement(condition, body);
     }
 
-//    TODO: this function got too large
     Statement *functionDefinition() {
         require({Token::FUNCTION});
         auto name = require({Token::IDENTIFIER}).body;
@@ -317,15 +316,12 @@ class Parser {
     }
 
 public:
-    bool error = false;
-    std::string message{};
     std::vector<Token>::iterator position;
 
     explicit Parser(const std::vector<Token> &tokens);
 
 //    TODO: no memory is being freed whatsoever
 //    TODO: combine build and block
-//    TODO: get rid of traceback
     std::vector<Statement *> build() {
         auto statements = std::vector<Statement *>();
         try {
