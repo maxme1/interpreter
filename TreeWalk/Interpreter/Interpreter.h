@@ -9,6 +9,7 @@
 #include <iostream>
 #include "../../Object/Scope.h"
 #include "../TreeWalker.h"
+#include "../../ExceptionWrapper.h"
 
 class Object;
 class Expression;
@@ -20,6 +21,7 @@ public:
     Interpreter();
     ~Interpreter();
     void interpret(std::string text);
+    void _interpret(std::string text);
     bool interpretFile(const std::string &path);
 
     ObjPtr visit(Binary *expression) override;
@@ -71,23 +73,23 @@ public:
     static bool isDerived(ObjPtr derived, ObjPtr base);
     static bool isInstance(ObjPtr instance, ObjPtr base);
 //    Exceptions
-    struct BaseException {
-    };
 
-    struct ExceptionWrapper : BaseException {
+    struct ExceptionWrapper : public BaseExceptionWrapper {
         std::shared_ptr<Instance> exception;
         explicit ExceptionWrapper(Object *exception);
         explicit ExceptionWrapper(ObjPtr exception);
     };
 
-    struct ReturnException : BaseException {
+    struct FlowException {
+    };
+    struct ReturnException : FlowException {
         ObjPtr content;
 
         explicit ReturnException(ObjPtr content = nullptr) : content(content) {}
     };
-    struct ContinueException : BaseException {
+    struct ContinueException : FlowException {
     };
-    struct BreakException : BaseException {
+    struct BreakException : FlowException {
     };
 };
 

@@ -5,9 +5,15 @@
 #include "Tokenizer/Token.h"
 
 class BaseExceptionWrapper {
-    std::vector<Token> traceback;
 
 public:
+    std::vector<Token> traceback{};
+//    TODO: maybe add method getMessage
+    std::string message{};
+    BaseExceptionWrapper() = default;
+
+    explicit BaseExceptionWrapper(const std::string &message) : message(message) {}
+
     void push(Token token) {
         traceback.push_back(token);
     }

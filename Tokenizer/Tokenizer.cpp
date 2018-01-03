@@ -6,8 +6,8 @@
 #define tk(a) Token(a, std::string(begin, position))
 
 Tokenizer::Tokenizer(std::string text) : text(std::move(text)) {
-//    if (text.back() != '\n')
-//        text.push_back('\n');
+    if (this->text.back() != '\n')
+        this->text.push_back('\n');
     position = this->text.begin();
 }
 
@@ -31,10 +31,8 @@ std::vector<Token> Tokenizer::tokenize() {
             auto token = nextToken();
             token.set_position(line, column);
             result.push_back(token);
-            if (token.type == Token::ERROR) {
-                this->error = true;
-                return result;
-            }
+            if (token.type == Token::ERROR)
+                throw SyntaxError(token);
         }
         position++;
         line++;

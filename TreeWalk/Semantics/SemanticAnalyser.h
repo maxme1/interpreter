@@ -44,9 +44,7 @@ public:
     void visit(Block *block) override;
 
     struct SyntaxError : public BaseExceptionWrapper {
-        std::string message;
-
-        explicit SyntaxError(const std::string &message) : message(message) {}
+        explicit SyntaxError(const std::string &message) : BaseExceptionWrapper(message) {}
     };
 };
 

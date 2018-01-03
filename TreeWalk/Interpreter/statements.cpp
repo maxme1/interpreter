@@ -90,7 +90,10 @@ void Interpreter::visit(Block *block) {
     enterScope();
     try {
         visitStatements(block->statements);
-    } catch (BaseException &e) {
+    } catch (ExceptionWrapper &e) {
+        leaveScope();
+        throw;
+    } catch (FlowException &e) {
         leaveScope();
         throw;
     }

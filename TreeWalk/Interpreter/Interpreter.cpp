@@ -11,45 +11,31 @@
 #include "../Semantics/SemanticAnalyser.h"
 
 Interpreter::Interpreter() {
-//    api = new API(this);
     enterScope();
     populate();
 }
 
 Interpreter::~Interpreter() {
 //    deleteScope();
-//    delete api;
 }
 
 void Interpreter::interpret(std::string text) {
+    try {
+        _interpret(text);
+    } catch (BaseExceptionWrapper &e) {
+        std::cout << "==========\n" << e.message;
+        if (!e.traceback.empty())
+            printf(" at %li:%li", e.traceback[0].line, e.traceback[0].column);
+    }
+}
+
+void Interpreter::_interpret(std::string text) {
     Tokenizer t = Tokenizer(text);
     auto tokens = t.tokenize();
-    if (t.error) {
-        auto token = tokens.back();
-        printf("Unrecognized token %s at %li:%li", token.body.c_str(), token.line, token.column);
-        return;
-    }
-//    TODO: combine errors output
     Parser p = Parser(tokens);
     auto statements = p.build();
-    if (p.error) {
-        std::cout << "\n==========\n" << p.message;
-        return;
-    }
-
-    try {
-        auto sm = SemanticAnalyser(statements);
-    } catch (SemanticAnalyser::SyntaxError &e) {
-        std::cout << "\n==========\n" << e.message;
-        return;
-    }
-
-    try {
-        visitStatements(statements);
-    } catch (ExceptionWrapper &e) {
-//        TODO: add traceback
-        std::cout << "==========\n" << e.exception->asString();
-    }
+    auto sm = SemanticAnalyser(statements);
+    visitStatements(statements);
 }
 
 void Interpreter::enterScope() {
@@ -175,4 +161,5 @@ Interpreter::ExceptionWrapper::ExceptionWrapper(ObjPtr exception) {
     assert(isInstance(exception, Exception::build()));
 //        throw Wrap(new ValueError("Only objects derived from Exception can be raised"));
     this->exception = std::dynamic_pointer_cast<Instance>(exception);
+    message = this->exception->asString();
 }

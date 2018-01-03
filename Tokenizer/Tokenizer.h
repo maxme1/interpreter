@@ -3,8 +3,16 @@
 
 #include <vector>
 #include "Token.h"
+#include "../ExceptionWrapper.h"
 
 class Tokenizer {
+    struct SyntaxError : public BaseExceptionWrapper {
+        explicit SyntaxError(Token token) {
+            message = "Unrecognized token " + token.body;
+            push(token);
+        }
+    };
+
 public:
     explicit Tokenizer(std::string text);
 

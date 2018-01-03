@@ -6,6 +6,7 @@ StmtBody = expression | 'break' | 'continue' | returnStmt | raiseStmt | importSt
 returnStmt = 'return' expression?
 raiseStmt = 'raise' expression?
 
+// TODO: too early for imports
 importStmt = 'import' IDENTIFIER
 tryStmt = 'try' block ('catch' '(' argsValues ')' block)*
 ifStmt = 'if' '(' expression ')' (statement ('else' statement)? )?

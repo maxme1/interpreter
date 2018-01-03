@@ -20,6 +20,7 @@ void Exception::setMessage(Object *target, const std::string &message) {
 
 std::string Exception::getString(ObjPtr target) {
     auto message = target->getAttribute("message")->asString();
+//    TODO: move name somewhere else
     auto name = target->getAttribute("@name")->asString();
     return name + ": " + message;
 }

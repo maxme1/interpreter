@@ -6,11 +6,16 @@
 #include <iostream>
 #include <cassert>
 #include "Expression/Expression.h"
+#include "../Object/Exception.h"
 
 class Parser {
     typedef std::initializer_list<Token::tokenType> TokenTypes;
 //    exceptions
     class ProgramEnd {
+    };
+
+    struct SyntaxError : public BaseExceptionWrapper {
+        explicit SyntaxError(const std::string &message): BaseExceptionWrapper(message) {}
     };
 
     std::vector<Token> tokens;
@@ -320,18 +325,18 @@ public:
 
 //    TODO: no memory is being freed whatsoever
 //    TODO: combine build and block
+//    TODO: get rid of traceback
     std::vector<Statement *> build() {
         auto statements = std::vector<Statement *>();
         try {
             while (position != tokens.end())
                 statements.push_back(statement());
         } catch (ProgramEnd &e) {
-            error = true;
-            message = "Unexpected end of file";
+            throw SyntaxError("Unexpected end of file");
         } catch (Token &token) {
-            error = true;
-            message = "Unexpected token \"" + token.body + "\" at  " +
-                      std::to_string(token.line) + ":" + std::to_string(token.column);
+            auto err = SyntaxError("Unexpected token \"" + token.body + "\"");
+            err.push(token);
+            throw err;
         }
         return statements;
     };

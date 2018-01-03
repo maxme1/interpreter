@@ -44,6 +44,5 @@ $exception(IndexError, AccessError)
 
 $exception(ImportError, Exception)
 $exception(ValueError, Exception)
-$exception(SyntaxError, Exception)
 
 #endif //INTERPRETER_EXCEPTION_H

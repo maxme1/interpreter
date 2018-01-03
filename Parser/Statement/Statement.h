@@ -208,7 +208,6 @@ struct FunctionDefinition : public Statement {
     std::vector<std::string> arguments;
     std::map<std::string, Expression *> defaults;
     std::string name;
-//    bool unlimited;
 
     void visit(TreeWalker *walker) override {
         try {
