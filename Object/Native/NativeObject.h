@@ -38,12 +38,11 @@ class NativeObject : public Instance {
 
     static bool populated;
 protected:
-    static void addMethod(const std::string &name, nativeMethod method, int argumentsCount = 0) {
-        auto args = std::vector<std::string>();
+    static void addMethod(const std::string &name, nativeMethod method, int argumentsCount = 0, bool variable = false) {
+        auto arguments = std::vector<FunctionPrototype::Argument>();
         for (int i = 0; i < argumentsCount; ++i)
-            args.push_back("arg" + std::to_string(i));
-        LocalNative::getClass()->setAttribute(name, New(NativeMethod(method, args,
-                                                                     std::map<std::string, ObjPtr>())));
+            arguments.emplace_back("arg" + std::to_string(i), nullptr, true, variable and i == argumentsCount - 1);
+        LocalNative::getClass()->setAttribute(name, New(NativeMethod(method, arguments)));
     }
 
 //    static void addMethod(const std::string &name, nativeMethod method, std::vector<std::string> &arguments,
@@ -56,7 +55,7 @@ public:
 
     NativeObject() : Instance(build()) {}
 
-    static std::shared_ptr<T> cast(ObjPtr object, bool strict = false) {
+    static std::shared_ptr<T> cast(ObjPtr object, bool strict = true) {
         auto result = std::dynamic_pointer_cast<T>(object);
         assert(not strict or (result != nullptr));
         return result;

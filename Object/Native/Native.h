@@ -33,7 +33,7 @@ class NativeCallable : public FunctionPrototype {
     T function;
 
 public:
-    explicit NativeCallable(T function, std::vector<std::string> &arguments, std::map<std::string, ObjPtr> defaults);
+    explicit NativeCallable(T function, std::vector<FunctionPrototype::Argument> &arguments);
     ObjPtr call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) override;
 };
 

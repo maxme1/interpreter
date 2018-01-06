@@ -203,11 +203,18 @@ public:
 };
 
 struct FunctionDefinition : public Statement {
-    friend class Interpreter;
-    Statement *body;
-    std::vector<std::string> arguments;
-    std::map<std::string, Expression *> defaults;
+    struct Argument {
+        std::string name;
+        Expression *defaultValue;
+        bool positional, variable;
+
+        Argument(const std::string &name, Expression *defaultValue, bool positional, bool variable) :
+                name(name), defaultValue(defaultValue), positional(positional), variable(variable) {}
+    };
+
     std::string name;
+    Statement *body;
+    std::vector<Argument> arguments;
 
     void visit(TreeWalker *walker) override {
         try {
@@ -219,8 +226,7 @@ struct FunctionDefinition : public Statement {
     }
 
 public:
-    FunctionDefinition(const std::string &name, Statement *body, const std::vector<std::string> &arguments,
-                       const std::vector<SetVariable *> &kwargs);
+    FunctionDefinition(const std::string &name, Statement *body, const std::vector<Argument> &arguments);
     ~FunctionDefinition() override;
     std::string str() override;
 };

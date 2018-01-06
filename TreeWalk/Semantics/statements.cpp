@@ -19,21 +19,32 @@ void SemanticAnalyser::visit(VariableDefinition *statement) {
 
 void SemanticAnalyser::visit(FunctionDefinition *statement) {
 //    testing duplicates
-    if (std::set<std::string>(statement->arguments.begin(), statement->arguments.end()).size() <
-        statement->arguments.size())
-        throw SyntaxError("Duplicate argument names");
+    auto uniques = std::set<std::string>();
+    bool variable = false;
+    for (auto &&argument : statement->arguments) {
+        if (uniques.count(argument.name) > 0)
+            throw SyntaxError("Duplicate argument " + argument.name);
+//        TODO: split
+        if (variable and (argument.positional or argument.variable))
+            throw SyntaxError("A function can have only one variable argument");
+
+        uniques.insert(argument.name);
+        if (argument.variable)
+            variable = true;
+    }
 
     setVariable(statement->name, true);
+
+    for (auto &&argument : statement->arguments)
+        if (argument.defaultValue != nullptr)
+            argument.defaultValue->visit(this);
+    for (auto &&argument : statement->arguments)
+        setVariable(argument.name, true);
+
     if (!types.empty() and types.back() == BlockType::Class)
         types.push_back(BlockType::Method);
     else
         types.push_back(BlockType::Function);
-
-    for (auto &&item : statement->defaults)
-        item.second->visit(this);
-    for (auto &&argument : statement->arguments)
-        setVariable(argument, true);
-
     statement->body->visit(this);
     types.pop_back();
 }

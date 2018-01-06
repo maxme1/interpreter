@@ -13,8 +13,9 @@ ifStmt = 'if' '(' expression ')' (statement ('else' statement)? )?
 whileStmt = 'while' '(' expression ')' statement
 block = '{' statement* '}'
 
-funcDef = 'def' IDENTIFIER '(' argsList? (SEPARATOR if argsList) kwargs? ')' block
+funcDef = 'def' IDENTIFIER '(' argsList? varPositional? kwargs? ')' block
 argsList = IDENTIFIER (SEPARATOR IDENTIFIER)*
+varPositional = '*' identifier
 kwargs = kwarg (SEPARATOR kwarg)*
 kwarg = IDENTIFIER = expression
 
@@ -44,7 +45,8 @@ suffix = call | attribute | item
 attribute = '.' IDENTIFIER
 item = '[' expression ']'
 call = '(' positional? (SEPARATOR if positional) kwargs? ')'
-positional = expression (SEPARATOR expression)*
+positional = posArg (SEPARATOR posArg)*
+posArg = '*'? expression
 
 -- base definitions --
 

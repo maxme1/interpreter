@@ -94,14 +94,8 @@ std::string ImportStatement::str() {
 
 //TODO provide proper tokens
 FunctionDefinition::FunctionDefinition(const std::string &name, Statement *body,
-                                       const std::vector<std::string> &arguments,
-                                       const std::vector<SetVariable *> &kwargs) :
-        Statement(body->token), body(body), arguments(arguments), name(name) {
-    for (auto &&kwarg : kwargs) {
-        this->arguments.push_back(kwarg->name);
-        defaults[kwarg->name] = kwarg->value;
-    }
-}
+                                       const std::vector<Argument> &arguments) :
+        Statement(body->token), body(body), arguments(arguments), name(name) {}
 
 std::string FunctionDefinition::str() {
     std::string result = "def " + name + "(";
@@ -109,7 +103,7 @@ std::string FunctionDefinition::str() {
     for (auto &&argument : arguments) {
         if (!first)
             result += ", ";
-        result += argument;
+//        result += argument;
         first = false;
     }
     return result + ")" + body->str();

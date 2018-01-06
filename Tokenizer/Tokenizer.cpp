@@ -45,7 +45,7 @@ std::vector<Token> Tokenizer::tokenize() {
 std::map<char, Token::tokenType> one_symbol = {
         {'-', Token::SUB},
         {'+', Token::ADD},
-        {'*', Token::MUL},
+        {'*', Token::ASTERISK},
         {'/', Token::DIV},
         {'=', Token::ASSIGNMENT},
         {';', Token::DELIMITER},

@@ -47,8 +47,8 @@ $class(Int)
 
     $method(divide, Int)
         int val = Int::getValue(positional[0]);
-        assert (val != 0);
-//            throw Wrap(new Exception("Division by zero"));
+        if (val == 0)
+            throw Interpreter::ExceptionWrapper(new ArithmeticError("Division by zero"));
         return New(Int(self->value / val));
     }
 
@@ -79,23 +79,23 @@ $class(Int)
         auto other = Int::cast(positional[0]);
         if (other)
             return New(Bool(self->value != other->value));
-        return New(Bool(false));
+        return New(Bool(true));
     }
 
     $method(greater, Int)
-        return New(Int(self->value > Int::getValue(positional[0])));
+        return New(Bool(self->value > Int::getValue(positional[0])));
     }
 
     $method(less, Int)
-        return New(Int(self->value < Int::getValue(positional[0])));
+        return New(Bool(self->value < Int::getValue(positional[0])));
     }
 
     $method(greater_or_equal, Int)
-        return New(Int(self->value >= Int::getValue(positional[0])));
+        return New(Bool(self->value >= Int::getValue(positional[0])));
     }
 
     $method(less_or_equal, Int)
-        return New(Int(self->value <= Int::getValue(positional[0])));
+        return New(Bool(self->value <= Int::getValue(positional[0])));
     }
 
     static void populate() {
@@ -104,8 +104,8 @@ $class(Int)
 
         addMethod("plus", plus, 1);
         addMethod("minus", subtract, 1);
-        addMethod("plusUnary", unary_add, 1);
-        addMethod("minusUnary", unary_subtract, 1);
+        addMethod("unaryPlus", unary_add, 0);
+        addMethod("unaryMinus", unary_subtract, 0);
         addMethod("multiply", multiply, 1);
         addMethod("divide", divide, 1);
         addMethod("greater", greater, 1);
@@ -113,7 +113,7 @@ $class(Int)
         addMethod("lessEqual", less_or_equal, 1);
         addMethod("greaterEqual", greater_or_equal, 1);
         addMethod("equal", equal, 1);
-        addMethod("not_equal", not_equal, 1);
+        addMethod("notEqual", not_equal, 1);
     }
 };
 

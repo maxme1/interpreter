@@ -25,7 +25,7 @@ void Interpreter::populate() {
         }
         std::cout << std::endl;
         return nullptr;
-    }, 1);
+    }, 1, true);
 //    addFunction("input", $lambda {
 //        std::string input;
 //        std::cin >> input;
@@ -33,9 +33,9 @@ void Interpreter::populate() {
 //    });
 }
 
-void Interpreter::addFunction(const std::string &name, nativeFunction function, int argumentsCount) {
-    auto args = std::vector<std::string>();
+void Interpreter::addFunction(const std::string &name, nativeFunction function, int argumentsCount, bool variable) {
+    auto arguments = std::vector<FunctionPrototype::Argument>();
     for (int i = 0; i < argumentsCount; ++i)
-        args.push_back("arg" + std::to_string(i));
-    defineVariable(name, New(NativeFunction(function, args, std::map<std::string, ObjPtr>())));
+        arguments.emplace_back("arg" + std::to_string(i), nullptr, true, variable and i == argumentsCount - 1);
+    defineVariable(name, New(NativeFunction(function, arguments)));
 }

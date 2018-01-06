@@ -1,9 +1,8 @@
 #include "Native.h"
 
 template<typename T>
-NativeCallable<T>::NativeCallable(T function, std::vector<std::string> &arguments,
-                                  std::map<std::string, ObjPtr> defaults) :
-       FunctionPrototype(arguments, defaults), function(function) {}
+NativeCallable<T>::NativeCallable(T function, std::vector<FunctionPrototype::Argument> &arguments) :
+        FunctionPrototype(arguments), function(function) {}
 
 template<typename T>
 ObjPtr NativeCallable<T>::call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) {

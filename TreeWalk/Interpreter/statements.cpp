@@ -101,12 +101,16 @@ void Interpreter::visit(Block *block) {
 }
 
 void Interpreter::visit(FunctionDefinition *statement) {
-    std::map<std::string, ObjPtr> defaults;
-    for (auto &&item :statement->defaults)
-        defaults[item.first] = item.second->visit(this);
+    std::vector<FunctionPrototype::Argument> arguments;
+    for (auto &&argument :statement->arguments){
+        ObjPtr default_ = nullptr;
+        if (argument.defaultValue != nullptr)
+            default_= argument.defaultValue->visit(this);
+        arguments.emplace_back(argument.name, default_, argument.positional, argument.variable);
+    }
 
     defineVariable(statement->name,
-                   New(Function(statement->body, getClosure(), statement->arguments, defaults)));
+                   New(Function(statement->body, getClosure(), arguments)));
 }
 
 void Interpreter::visit(VariableDefinition *statement) {

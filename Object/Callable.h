@@ -27,13 +27,21 @@ public:
 class FunctionPrototype : public Callable {
     friend class Interpreter;
 
-protected:
-    std::vector<std::string> arguments;
-    std::map<std::string, ObjPtr> defaults;
-    void checkArguments(ArgsList positional, KwargsList keyword) override;
-
 public:
-    explicit FunctionPrototype(std::vector<std::string> &arguments, std::map<std::string, ObjPtr> defaults);
+    struct Argument {
+        std::string name;
+        ObjPtr defaultValue;
+        bool positional, variable;
+
+        Argument(const std::string &name, ObjPtr defaultValue, bool positional, bool variable) :
+                name(name), defaultValue(defaultValue), positional(positional), variable(variable) {}
+    };
+    explicit FunctionPrototype(std::vector<Argument> &arguments);
+protected:
+    std::vector<Argument> arguments;
+    int required;
+    bool variable;
+    void checkArguments(ArgsList positional, KwargsList keyword) override;
 };
 
 class Statement;
@@ -45,8 +53,7 @@ protected:
     ObjPtr call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) override;
 
 public:
-    explicit Function(Statement *body, Scope::ptr closure, std::vector<std::string> &arguments,
-                      std::map<std::string, ObjPtr> defaults);
+    explicit Function(Statement *body, Scope::ptr closure, std::vector<FunctionPrototype::Argument> &arguments);
 };
 
 class Instance;

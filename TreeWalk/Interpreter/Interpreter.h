@@ -53,7 +53,7 @@ public:
 
     void addFunction(const std::string &name, ObjPtr(*function)(Interpreter *, const std::vector<ObjPtr> &,
                                                                 const std::map<std::string, ObjPtr> &),
-                     int argumentsCount = 0);
+                     int argumentsCount = 0, bool variable = false);
 
     std::vector<Scope::ptr> scopes;
     void enterScope();
@@ -65,7 +65,7 @@ public:
     void setVariable(const std::string &name, ObjPtr value, long level);
     void defineVariable(const std::string &name, ObjPtr value);
 
-    ObjPtr call(ObjPtr object, const std::vector<ObjPtr> &positional,
+    ObjPtr call(ObjPtr object, const std::vector<ObjPtr> &positional = std::vector<ObjPtr>(),
                 const std::map<std::string, ObjPtr> &keyword = std::map<std::string, ObjPtr>());
     std::vector<ObjPtr> evaluateArguments(const std::vector<Expression *> &argsList);
     std::shared_ptr<Callable> getCallable(ObjPtr object);

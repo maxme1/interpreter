@@ -8,19 +8,19 @@
 std::map<Token::tokenType, std::string> binary = {
         {Token::ADD,              "plus"},
         {Token::SUB,              "minus"},
-        {Token::MUL,              "multiply"},
+        {Token::ASTERISK,              "multiply"},
         {Token::DIV,              "divide"},
         {Token::GREATER,          "greater"},
         {Token::LESS,             "less"},
         {Token::LESS_OR_EQUAL,    "lessEqual"},
         {Token::GREATER_OR_EQUAL, "greaterEqual"},
         {Token::EQUAL,            "equal"},
-        {Token::NOT_EQUAL,        "notEqual"}
+        {Token::NOT_EQUAL,        "notEqual"},
 };
 
 std::map<Token::tokenType, std::string> unary = {
-        {Token::ADD, "plusUnary"},
-        {Token::SUB, "minusUnary"},
+        {Token::ADD, "unaryPlus"},
+        {Token::SUB, "unaryMinus"},
 };
 
 ObjPtr Interpreter::visit(Binary *expression) {

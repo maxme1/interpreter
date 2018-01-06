@@ -7,7 +7,7 @@ Parser::Parser(const std::vector<Token> &tokens) : tokens(tokens) {
 bool Parser::matches(std::initializer_list<Token::tokenType> types, int shift) {
     auto pos = position + shift;
     if (pos == tokens.end())
-        throw ProgramEnd();
+        throw SyntaxError("Unexpected end of file");
 
     for (auto type : types)
         if (type == pos->type)
@@ -22,8 +22,10 @@ Token Parser::advance() {
 }
 
 Token Parser::require(std::initializer_list<Token::tokenType> types) {
-    if (!matches(types))
-        throw Token(*position);
-
+    if (!matches(types)) {
+        auto err = SyntaxError("Unexpected token \"" + position->body + "\"");
+        err.push(*position);
+        throw err;
+    }
     return advance();
 }

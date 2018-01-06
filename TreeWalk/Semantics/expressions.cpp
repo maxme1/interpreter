@@ -1,4 +1,5 @@
 #include <iostream>
+#include <set>
 #include "SemanticAnalyser.h"
 #include "../../Parser/Parser.h"
 
@@ -55,8 +56,13 @@ ObjPtr SemanticAnalyser::visit(CallExpression *expression) {
     expression->target->visit(this);
     for (auto &&argument : expression->argsList)
         argument->visit(this);
-    for (auto &&kwarg : expression->kwargs)
+    auto uniques = std::set<std::string>();
+    for (auto &&kwarg : expression->kwargs) {
+        if (uniques.count(kwarg->name) > 0)
+            throw SyntaxError("Duplicate argument " + kwarg->name);
         kwarg->value->visit(this);
+        uniques.insert(kwarg->name);
+    }
     return nullptr;
 }
 

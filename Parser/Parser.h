@@ -10,12 +10,8 @@
 
 class Parser {
     typedef std::initializer_list<Token::tokenType> TokenTypes;
-//    exceptions
-    class ProgramEnd {
-    };
-
     struct SyntaxError : public BaseExceptionWrapper {
-        explicit SyntaxError(const std::string &message): BaseExceptionWrapper(message) {}
+        explicit SyntaxError(const std::string &message) : BaseExceptionWrapper(message) {}
     };
 
     std::vector<Token> tokens;
@@ -129,21 +125,33 @@ class Parser {
         require({Token::FUNCTION});
         auto name = require({Token::IDENTIFIER}).body;
         require({Token::BRACKET_OPEN});
-        auto arguments = std::vector<std::string>();
+        auto arguments = std::vector<FunctionDefinition::Argument>();
 //        positional
+        bool positional = true;
         while (!matches({Token::BRACKET_CLOSE})) {
 //            if kwarg
             if (matches({Token::IDENTIFIER}) and matches({Token::ASSIGNMENT}, 1))
                 break;
-            auto argName = require({Token::IDENTIFIER});
-            arguments.push_back(argName.body);
+            bool variable = false;
+            if (matches({Token::ASTERISK})) {
+                variable = true;
+                advance();
+            }
+            auto argName = require({Token::IDENTIFIER}).body;
+            arguments.emplace_back(argName, nullptr, positional, variable);
+            if (variable)
+                positional = false;
             if (!matches({Token::BRACKET_CLOSE}))
                 require({Token::SEPARATOR});
         }
+
         auto kw = kwargs();
+        for (auto &&argument : kw)
+            arguments.emplace_back(argument->name, argument->value, positional, false);
+
         require({Token::BRACKET_CLOSE});
         auto body = block();
-        return new FunctionDefinition(name, body, arguments, kw);
+        return new FunctionDefinition(name, body, arguments);
     }
 
     Statement *classDefinition() {
@@ -230,7 +238,7 @@ class Parser {
 
     Expression *factor() {
         auto left = unary();
-        while (matches({Token::MUL, Token::DIV})) {
+        while (matches({Token::ASTERISK, Token::DIV})) {
             auto current = advance();
             auto right = unary();
             left = new Binary(current, left, right);
@@ -324,16 +332,8 @@ public:
 //    TODO: combine build and block
     std::vector<Statement *> build() {
         auto statements = std::vector<Statement *>();
-        try {
-            while (position != tokens.end())
-                statements.push_back(statement());
-        } catch (ProgramEnd &e) {
-            throw SyntaxError("Unexpected end of file");
-        } catch (Token &token) {
-            auto err = SyntaxError("Unexpected token \"" + token.body + "\"");
-            err.push(token);
-            throw err;
-        }
+        while (position != tokens.end())
+            statements.push_back(statement());
         return statements;
     };
 };
