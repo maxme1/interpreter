@@ -56,7 +56,7 @@ public:
     virtual void visit(ControlFlow *statement)=0;
     virtual void visit(Block *block)=0;
 
-    void visitStatements(std::vector<Statement *> &statements);
+    void visitStatements(std::vector<shared(Statement) > &statements);
 };
 
 #endif //INTERPRETER_TREEWALKER_H

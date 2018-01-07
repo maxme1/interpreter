@@ -14,14 +14,14 @@ public:
     explicit Statement(Token token) : token(token) {};
 
     virtual void visit(TreeWalker *walker) = 0;
-    virtual ~Statement() = default;
     virtual std::string str() = 0;
+    typedef shared(Statement) ptr;
 };
 
 struct Block : public Statement {
     friend class Interpreter;
 
-    std::vector<Statement *> statements;
+    std::vector<shared(Statement) > statements;
 
     void visit(TreeWalker *walker) override {
         try {
@@ -33,15 +33,14 @@ struct Block : public Statement {
     }
 
 public:
-    explicit Block(Token token, const std::vector<Statement *> &statements);
-    ~Block() override;
+    explicit Block(Token token, const std::vector<shared(Statement) > &statements);
     std::string str() override;
 };
 
 struct ExpressionStatement : public Statement {
     friend class Interpreter;
 
-    Expression *expression;
+    shared(Expression) expression;
 
     void visit(TreeWalker *walker) override {
         try {
@@ -53,16 +52,15 @@ struct ExpressionStatement : public Statement {
     }
 
 public:
-    explicit ExpressionStatement(Expression *expression);
-    ~ExpressionStatement() override;
+    explicit ExpressionStatement(shared(Expression) expression);
     std::string str() override;
 };
 
 struct IfStatement : public Statement {
     friend class Interpreter;
 
-    Expression *condition;
-    Statement *left, *right;
+    shared(Expression) condition;
+    shared(Statement) left, right;
 
     void visit(TreeWalker *walker) override {
         try {
@@ -74,8 +72,8 @@ struct IfStatement : public Statement {
     }
 
 public:
-    explicit IfStatement(Token token, Expression *condition, Statement *left = nullptr, Statement *right = nullptr);
-    ~IfStatement() override;
+    explicit IfStatement(Token token, shared(Expression) condition, shared(Statement) left = nullptr,
+                         shared(Statement) right = nullptr);
     std::string str() override;
 };
 
@@ -83,16 +81,15 @@ struct TryStatement : public Statement {
     friend class Interpreter;
 
     struct CatchStatement {
-        std::vector<Expression *> arguments;
-        Statement *block;
+        std::vector<shared(Expression) > arguments;
+        shared(Statement) block;
 
-        CatchStatement(std::vector<Expression *> &arguments, Statement *block) : block(block), arguments(arguments) {};
-
-        ~CatchStatement();
+        CatchStatement(std::vector<shared(Expression) > &arguments, shared(Statement) block) : block(block),
+                                                                                               arguments(arguments) {};
     };
-    std::vector<CatchStatement *> catches;
+    std::vector<shared(CatchStatement) > catches;
 
-    Statement *block;
+    shared(Statement) block;
 
     void visit(TreeWalker *walker) override {
         try {
@@ -103,16 +100,15 @@ struct TryStatement : public Statement {
         }
     }
 
-    TryStatement(const std::vector<CatchStatement *> &catches, Statement *block);
-    ~TryStatement() override;
+    TryStatement(const std::vector<shared(CatchStatement) > &catches, shared(Statement) block);
     std::string str() override;
 };
 
 struct WhileStatement : public Statement {
     friend class Interpreter;
 
-    Expression *condition;
-    Statement *body;
+    shared(Expression) condition;
+    shared(Statement) body;
 
     void visit(TreeWalker *walker) override {
         try {
@@ -124,8 +120,7 @@ struct WhileStatement : public Statement {
     }
 
 public:
-    explicit WhileStatement(Expression *condition, Statement *body = nullptr);
-    ~WhileStatement() override;
+    explicit WhileStatement(shared(Expression) condition, shared(Statement) body = nullptr);
     std::string str() override;
 };
 
@@ -148,7 +143,7 @@ public:
 
 struct ReturnStatement : public Statement {
     friend class Interpreter;
-    Expression *expression;
+    shared(Expression) expression;
 
     void visit(TreeWalker *walker) override {
         try {
@@ -160,14 +155,13 @@ struct ReturnStatement : public Statement {
     }
 
 public:
-    explicit ReturnStatement(Token token, Expression *expression = nullptr);
-    ~ReturnStatement() override;
+    explicit ReturnStatement(Token token, shared(Expression) expression = nullptr);
     std::string str() override;
 };
 
 struct RaiseStatement : public Statement {
     friend class Interpreter;
-    Expression *expression;
+    shared(Expression) expression;
 
     void visit(TreeWalker *walker) override {
         try {
@@ -179,8 +173,7 @@ struct RaiseStatement : public Statement {
     }
 
 public:
-    explicit RaiseStatement(Expression *expression);
-    ~RaiseStatement() override;
+    explicit RaiseStatement(shared(Expression) expression);
     std::string str() override;
 };
 
@@ -205,15 +198,15 @@ public:
 struct FunctionDefinition : public Statement {
     struct Argument {
         std::string name;
-        Expression *defaultValue;
+        shared(Expression) defaultValue;
         bool positional, variable;
 
-        Argument(const std::string &name, Expression *defaultValue, bool positional, bool variable) :
+        Argument(const std::string &name, shared(Expression) defaultValue, bool positional, bool variable) :
                 name(name), defaultValue(defaultValue), positional(positional), variable(variable) {}
     };
 
     std::string name;
-    Statement *body;
+    shared(Statement) body;
     std::vector<Argument> arguments;
 
     void visit(TreeWalker *walker) override {
@@ -226,14 +219,13 @@ struct FunctionDefinition : public Statement {
     }
 
 public:
-    FunctionDefinition(const std::string &name, Statement *body, const std::vector<Argument> &arguments);
-    ~FunctionDefinition() override;
+    FunctionDefinition(const std::string &name, shared(Statement) body, const std::vector<Argument> &arguments);
     std::string str() override;
 };
 
 struct VariableDefinition : public Statement {
     friend class Interpreter;
-    Expression *assignee;
+    shared(Expression) assignee;
     std::string name;
 
     void visit(TreeWalker *walker) override {
@@ -246,14 +238,14 @@ struct VariableDefinition : public Statement {
     }
 
 public:
-    VariableDefinition(const std::string &name, Expression *assignee);
+    VariableDefinition(const std::string &name, shared(Expression) assignee);
     std::string str() override;
 };
 
 struct ClassDefinition : public Statement {
     friend class Interpreter;
-    Block *body;
-    Expression *superclass;
+    shared(Block) body;
+    shared(Expression) superclass;
     std::string name;
 
     void visit(TreeWalker *walker) override {
@@ -266,8 +258,7 @@ struct ClassDefinition : public Statement {
     }
 
 public:
-    ClassDefinition(std::string name, Block *body, Expression *superclass);
-    ~ClassDefinition() override;
+    ClassDefinition(std::string name, shared(Block) body, shared(Expression) superclass);
     std::string str() override;
 };
 

@@ -46,7 +46,7 @@ void FunctionPrototype::checkArguments(ArgsList positional, KwargsList keyword) 
             throw Interpreter::ExceptionWrapper(new ValueError("Argument " + arguments[i].name + " is not set"));
 }
 
-Function::Function(Statement *body, Scope::ptr closure, std::vector<FunctionPrototype::Argument> &arguments) :
+Function::Function(Statement::ptr body, Scope::ptr closure, std::vector<FunctionPrototype::Argument> &arguments) :
         FunctionPrototype(arguments), body(body) {
     assert(closure);
     this->closure = closure;

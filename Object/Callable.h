@@ -47,13 +47,13 @@ protected:
 class Statement;
 class Function : public FunctionPrototype {
     friend class Interpreter;
-    Statement *body = nullptr;
+    shared(Statement) body = nullptr;
 
 protected:
     ObjPtr call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) override;
 
 public:
-    explicit Function(Statement *body, Scope::ptr closure, std::vector<FunctionPrototype::Argument> &arguments);
+    explicit Function(shared(Statement) body, Scope::ptr closure, std::vector<FunctionPrototype::Argument> &arguments);
 };
 
 class Instance;

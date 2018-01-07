@@ -16,7 +16,8 @@ Interpreter::Interpreter() {
 }
 
 Interpreter::~Interpreter() {
-//    deleteScope();
+    while (!scopes.empty())
+        leaveScope();
 }
 
 void Interpreter::interpret(std::string text) {
@@ -111,7 +112,7 @@ ObjPtr Interpreter::call(ObjPtr object, ArgsList positional, KwargsList keyword)
     return returnObject;
 }
 
-std::vector<ObjPtr> Interpreter::evaluateArguments(const std::vector<Expression *> &argsList) {
+std::vector<ObjPtr> Interpreter::evaluateArguments(const std::vector<Expression::ptr> &argsList) {
     auto result = std::vector<ObjPtr>();
     for (auto &&argument : argsList)
         result.push_back(argument->visit(this));

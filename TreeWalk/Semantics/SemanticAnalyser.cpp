@@ -1,7 +1,7 @@
 #include "SemanticAnalyser.h"
 #include "../../Parser/Statement/Statement.h"
 
-SemanticAnalyser::SemanticAnalyser(std::vector<Statement *> statements) {
+SemanticAnalyser::SemanticAnalyser(std::vector<Statement::ptr> statements) {
     scopes = std::vector<std::map<std::string, bool>>();
     enterScope();
     visitStatements(statements);

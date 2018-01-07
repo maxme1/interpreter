@@ -1,23 +1,15 @@
 #include "Statement.h"
 #include "../Expression/Expression.h"
 
-ExpressionStatement::ExpressionStatement(Expression *expression) :
+ExpressionStatement::ExpressionStatement(shared(Expression) expression) :
         Statement(expression->token), expression(expression) {}
 
 std::string ExpressionStatement::str() {
     return expression->str() + ";";
 }
 
-ExpressionStatement::~ExpressionStatement() {
-//    delete expression;
-}
-
-IfStatement::IfStatement(Token token, Expression *condition, Statement *left, Statement *right) :
+IfStatement::IfStatement(Token token, shared(Expression) condition, shared(Statement) left, shared(Statement) right) :
         Statement(token), condition(condition), left(left), right(right) {}
-
-IfStatement::~IfStatement() {
-//    delete condition, left, right;
-}
 
 std::string IfStatement::str() {
     std::string result = "if(" + condition->str() + ")";
@@ -28,26 +20,15 @@ std::string IfStatement::str() {
     return result;
 }
 
-TryStatement::TryStatement(const std::vector<TryStatement::CatchStatement *> &catches, Statement *block) :
+TryStatement::TryStatement(const std::vector<shared(TryStatement::CatchStatement) > &catches, shared(Statement) block) :
         Statement(block->token), catches(catches), block(block) {}
-
-TryStatement::~TryStatement() {
-//    delete block;
-//    for (auto &&item : catches) {
-//        delete item;
-//    }
-}
 
 std::string TryStatement::str() {
     return "try - catch. i'm too lazy";
 }
 
-WhileStatement::WhileStatement(Expression *condition, Statement *body) :
+WhileStatement::WhileStatement(shared(Expression) condition, shared(Statement) body) :
         Statement(body->token), condition(condition), body(body) {}
-
-WhileStatement::~WhileStatement() {
-//    delete condition, body;
-}
 
 std::string WhileStatement::str() {
     std::string result = "while(" + condition->str() + ")";
@@ -60,11 +41,8 @@ ControlFlow::ControlFlow(Token token) : Statement(token) {}
 
 std::string ControlFlow::str() { return token.body; }
 
-ReturnStatement::ReturnStatement(Token token, Expression *expression) : Statement(token), expression(expression) {}
-
-ReturnStatement::~ReturnStatement() {
-//    delete expression;
-}
+ReturnStatement::ReturnStatement(Token token, shared(Expression) expression) :
+        Statement(token), expression(expression) {}
 
 std::string ReturnStatement::str() {
     std::string result = "return";
@@ -73,11 +51,7 @@ std::string ReturnStatement::str() {
     return result;
 }
 
-RaiseStatement::RaiseStatement(Expression *expression) : Statement(expression->token), expression(expression) {}
-
-RaiseStatement::~RaiseStatement() {
-//    delete expression;
-}
+RaiseStatement::RaiseStatement(shared(Expression) expression) : Statement(expression->token), expression(expression) {}
 
 std::string RaiseStatement::str() {
     std::string result = "raise";
@@ -93,7 +67,7 @@ std::string ImportStatement::str() {
 }
 
 //TODO provide proper tokens
-FunctionDefinition::FunctionDefinition(const std::string &name, Statement *body,
+FunctionDefinition::FunctionDefinition(const std::string &name, shared(Statement) body,
                                        const std::vector<Argument> &arguments) :
         Statement(body->token), body(body), arguments(arguments), name(name) {}
 
@@ -109,29 +83,22 @@ std::string FunctionDefinition::str() {
     return result + ")" + body->str();
 }
 
-FunctionDefinition::~FunctionDefinition() {
-//    delete body;
-}
-
-VariableDefinition::VariableDefinition(const std::string &name, Expression *assignee) :
+VariableDefinition::VariableDefinition(const std::string &name, shared(Expression) assignee) :
         Statement(assignee->token), name(name), assignee(assignee) {}
 
 std::string VariableDefinition::str() {
     return "var " + name + " = " + assignee->str();
 }
 
-ClassDefinition::ClassDefinition(std::string name, Block *body, Expression *superclass)
+ClassDefinition::ClassDefinition(std::string name, shared(Block) body, shared(Expression) superclass)
         : Statement(body->token), body(body), name(std::move(name)), superclass(superclass) {}
 
 std::string ClassDefinition::str() {
     return "class " + name + body->str();
 }
 
-ClassDefinition::~ClassDefinition() {
-//    delete body, superclass;
-}
-
-Block::Block(Token token, const std::vector<Statement *> &statements) : Statement(token), statements(statements) {}
+Block::Block(Token token, const std::vector<shared(Statement) > &statements) : Statement(token),
+                                                                               statements(statements) {}
 
 std::string Block::str() {
     std::string result = "{\n";
@@ -139,14 +106,4 @@ std::string Block::str() {
         result += "    " + statement->str() + "\n";
     }
     return result + "}\n";
-}
-
-Block::~Block() {
-    statements.clear();
-}
-
-TryStatement::CatchStatement::~CatchStatement() {
-//    for (auto argument : arguments)
-//        delete argument;
-//    delete block;
 }

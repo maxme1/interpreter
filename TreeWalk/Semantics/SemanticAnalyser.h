@@ -15,10 +15,10 @@ class SemanticAnalyser : public TreeWalker {
     void leaveScope();
     void setVariable(const std::string &name, bool value);
 public:
-    explicit SemanticAnalyser(std::vector<Statement *> statements);
+    explicit SemanticAnalyser(std::vector<Statement::ptr> statements);
     ~SemanticAnalyser();
 
-    ObjPtr visit(Binary *expression) override;
+    ObjPtr visit(Binary* expression) override;
     ObjPtr visit(Unary *expression) override;
     ObjPtr visit(Literal *expression) override;
     ObjPtr visit(SetVariable *expression) override;

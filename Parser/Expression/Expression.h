@@ -14,19 +14,18 @@ struct Object;
 struct Expression {
     Token token;
 public:
-public:
     virtual ObjPtr visit(TreeWalker *walker) = 0;
 
     explicit Expression(Token token) : token(std::move(token)) {};
-    virtual ~Expression() = default;
 
     bool ofType(Token::tokenType type) { return type == token.type; }
 
     virtual std::string str() { return token.body; };
+    typedef shared(Expression) ptr;
 };
 
 struct Binary : public Expression {
-    Expression *left, *right;
+    shared(Expression) left, right;
 public:
 
     ObjPtr visit(TreeWalker *walker) override {
@@ -38,8 +37,7 @@ public:
         }
     }
 
-    Binary(Token token, Expression *left, Expression *right);
-    ~Binary() override;
+    Binary(Token token, shared(Expression) left, shared(Expression) right);
     std::string str() override;
 };
 
@@ -56,10 +54,9 @@ public:
         }
     }
 
-    Expression *argument;
+    shared(Expression) argument;
 public:
-    Unary(Token token, Expression *argument);
-    ~Unary() override;
+    Unary(Token token, shared(Expression) argument);
     std::string str() override;
 };
 
@@ -111,13 +108,12 @@ public:
         }
     }
 
-    Expression *target;
-    std::vector<Expression *> argsList;
-    std::vector<SetVariable *> kwargs;
+    shared(Expression) target;
+    std::vector<shared(Expression) > argsList;
+    std::vector<shared(SetVariable) > kwargs;
 public:
-    CallExpression(Token token, Expression *target, std::vector<Expression *> argsList,
-                   std::vector<SetVariable *> kwargs);
-    ~CallExpression() override;
+    CallExpression(Token token, shared(Expression) target, std::vector<shared(Expression) > argsList,
+                   std::vector<shared(SetVariable) > kwargs);
     std::string str() override;
 };
 
@@ -137,7 +133,6 @@ public:
 
 public:
     explicit SuperClass(Token attribute);
-    ~SuperClass() override;
     std::string str() override;
 };
 
@@ -155,11 +150,9 @@ public:
         }
     }
 
-    Expression *target;
-    Expression *argument;
+    shared(Expression) target, argument;
 public:
-    GetItem(Token token, Expression *target, Expression *argument);
-    ~GetItem() override;
+    GetItem(Token token, shared(Expression) target, shared(Expression) argument);
     std::string str() override;
 };
 
@@ -177,11 +170,10 @@ public:
         }
     }
 
-    Expression *target;
+    shared(Expression) target;
     std::string name;
 public:
-    GetAttribute(Token token, Expression *target, std::string name);
-    ~GetAttribute() override;
+    GetAttribute(Token token, shared(Expression) target, std::string name);
     std::string str() override;
 };
 
@@ -200,11 +192,10 @@ public:
     }
 
     std::string name;
-    Expression *value;
+    shared(Expression) value;
 
 public:
-    SetVariable(Token token, std::string name, Expression *value);
-    ~SetVariable() override;
+    SetVariable(Token token, std::string name, shared(Expression) value);
     std::string str() override;
 };
 
@@ -221,12 +212,11 @@ public:
         }
     }
 
-    Expression *value;
-    GetAttribute *target;
+    shared(Expression) value;
+    shared(GetAttribute) target;
 
 public:
-    SetAttribute(const Token &token, GetAttribute *target, Expression *value);
-    ~SetAttribute() override;
+    SetAttribute(const Token &token, shared(GetAttribute) target, shared(Expression) value);
     std::string str() override;
 };
 
@@ -243,12 +233,11 @@ public:
         }
     }
 
-    Expression *value;
-    GetItem *target;
+    shared(Expression) value;
+    shared(GetItem) target;
 
 public:
-    SetItem(const Token &token, GetItem *target, Expression *value);
-    ~SetItem() override;
+    SetItem(const Token &token, shared(GetItem) target, shared(Expression) value);
     std::string str() override;
 };
 

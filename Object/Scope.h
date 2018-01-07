@@ -5,7 +5,8 @@
 #include <cassert>
 #include "Object.h"
 
-class Scope : public Object {
+class Scope {
+    std::map<std::string, shared(Object) > attributes;
 public:
     typedef std::shared_ptr<Scope> ptr;
 
@@ -22,9 +23,12 @@ public:
 
     ObjPtr findAttribute(const std::string &name, long level) {
         assert(level >= 0);
-        auto result = Object::findAttribute(name);
-        if (level == 0)
-            return result;
+        if (level == 0) {
+            auto value = attributes.find(name);
+            if (value != attributes.end())
+                return value->second;
+            return nullptr;
+        }
         assert(upper);
         return upper->findAttribute(name, level - 1);
     }

@@ -10,6 +10,7 @@
 #include "../../Object/Scope.h"
 #include "../TreeWalker.h"
 #include "../../ExceptionWrapper.h"
+#include "../../Parser/Expression/Expression.h"
 
 class Object;
 class Expression;
@@ -67,7 +68,7 @@ public:
 
     ObjPtr call(ObjPtr object, const std::vector<ObjPtr> &positional = std::vector<ObjPtr>(),
                 const std::map<std::string, ObjPtr> &keyword = std::map<std::string, ObjPtr>());
-    std::vector<ObjPtr> evaluateArguments(const std::vector<Expression *> &argsList);
+    std::vector<ObjPtr> evaluateArguments(const std::vector<shared(Expression)> &argsList);
     std::shared_ptr<Callable> getCallable(ObjPtr object);
 
     static bool isDerived(ObjPtr derived, ObjPtr base);
