@@ -24,3 +24,16 @@ void SemanticAnalyser::setVariable(const std::string &name, bool value) {
     assert(!scopes.empty());
     scopes.back()[name] = value;
 }
+
+int SemanticAnalyser::findVariableLevel(const std::string &name) {
+    for (int i = 0; i < scopes.size(); ++i) {
+        auto scope = scopes[scopes.size() - i - 1];
+        auto find = scope.find(name);
+        if (find != scope.end())
+            if (find->second)
+                return i;
+            else
+                throw SyntaxError("Variable '" + name + "' not found");
+    }
+    return scopes.size() - 1;
+}

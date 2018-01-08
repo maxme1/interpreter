@@ -11,8 +11,8 @@ void Object::setAttribute(const std::string &name, ObjPtr value) {
 ObjPtr Object::findAttribute(const std::string &name) {
     auto value = attributes.find(name);
     if (value != attributes.end()) {
-        assert(!value->second.expired());
-        return value->second.lock();
+//        assert(!value->second.expired());
+        return value->second;
     }
     return nullptr;
 }

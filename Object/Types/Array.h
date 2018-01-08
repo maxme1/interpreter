@@ -26,7 +26,7 @@ $class(Array)
     }
 
     $method(getItem, Array)
-        auto idx = Int::getValue(positional[0]);
+        auto idx = Int::toInt(positional[0]);
         if (idx >= self->array.size())
             assert(false);
 //            throw Wrap(new IndexError(std::to_string(idx)));
@@ -34,7 +34,7 @@ $class(Array)
     }
 
     $method(setItem, Array)
-        auto idx = Int::getValue(positional[0]);
+        auto idx = Int::toInt(positional[0]);
         if (idx >= self->array.size())
             assert(false);
 //            throw Wrap(new IndexError(std::to_string(idx)));
@@ -50,7 +50,7 @@ $class(Array)
                 result += ", ";
             else
                 first = false;
-            result += String::toString(item, interpreter);
+            result += String::str(item, interpreter)->string;
         }
         return New(String(result + "]"));
     }

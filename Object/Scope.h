@@ -6,7 +6,9 @@
 #include "Object.h"
 
 class Scope {
+    friend class Class;
     std::map<std::string, shared(Object) > attributes;
+    shared(Scope) upper{nullptr};
 public:
     typedef std::shared_ptr<Scope> ptr;
 
@@ -56,11 +58,6 @@ public:
         assert(!upper);
         upper = std::move(scope);
     }
-
-private:
-    friend class Class;
-
-    ptr upper{nullptr};
 };
 
 #endif //INTERPRETER_SCOPE_H

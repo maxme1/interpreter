@@ -19,7 +19,7 @@ class NativeObject : public Instance {
     friend class Class;
     struct LocalNative : public Class {
         inline static Class::ptr getClass() {
-            static Class::ptr instance = Class::ptr(new LocalNative(Base::build()));
+            static Class::ptr instance = Class::ptr(new LocalNative(T::getName(), Base::build()));
             return instance;
         }
 
@@ -33,7 +33,7 @@ class NativeObject : public Instance {
         }
 
     private:
-        explicit LocalNative(Class::ptr superclass) : Class(superclass) {};
+        explicit LocalNative(const std::string &name, Class::ptr superclass) : Class(name, superclass) {};
     };
 
     static bool populated;
@@ -44,11 +44,6 @@ protected:
             arguments.emplace_back("arg" + std::to_string(i), nullptr, true, variable and i == argumentsCount - 1);
         LocalNative::getClass()->setAttribute(name, New(NativeMethod(method, arguments)));
     }
-
-//    static void addMethod(const std::string &name, nativeMethod method, std::vector<std::string> &arguments,
-//                          std::map<std::string, ObjPtr> &defaults) {
-//        LocalNative::getClass()->setAttribute(name, New(NativeMethod(method, arguments, defaults)));
-//    }
 
 public:
     explicit NativeObject(Class::ptr classPtr) : Instance(classPtr) {}
@@ -63,6 +58,10 @@ public:
 
     static void populate() {}
 
+    static std::string getName(){
+        return "";
+    };
+
     static Class::ptr build() {
         auto result = LocalNative::getClass();
         if (!populated) {
@@ -71,6 +70,8 @@ public:
         }
         return result;
     }
+
+    typedef shared(T) ptr;
 };
 
 template<typename T, typename Base>

@@ -328,9 +328,7 @@ public:
 
     explicit Parser(const std::vector<Token> &tokens);
 
-//    TODO: no memory is being freed whatsoever
-//    TODO: combine build and block
-    std::vector<Statement::ptr> build() {
+    std::vector<Statement::ptr> getStatements() {
         auto statements = std::vector<Statement::ptr>();
         while (position != tokens.end())
             statements.push_back(statement());

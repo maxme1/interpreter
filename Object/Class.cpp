@@ -7,7 +7,7 @@
 // Instance
 
 std::string Instance::asString() {
-    return "<" + getClass()->asString() + " instance>";
+    return "<instance of " + getClass()->getName() + ">";
 }
 
 ObjPtr Instance::findAttribute(const std::string &name) {
@@ -33,7 +33,7 @@ Class::ptr Instance::getClass() {
 // Class
 
 Class::Class(const std::string &name, Scope::ptr body, Class::ptr superclass, Scope::ptr closure) :
-        Callable(closure), superClass(superclass) {
+        Callable(closure), superClass(superclass), name(name) {
 //    copy the scope
     for (auto &&attribute : body->attributes)
         setAttribute(attribute.first, attribute.second);
@@ -47,7 +47,7 @@ ObjPtr Class::findAttribute(const std::string &name) {
 }
 
 std::string Class::asString() {
-    return "<class>";
+    return "<class " + name + ">";
 }
 
 ObjPtr Class::makeInstance(Class::ptr base) {
@@ -59,7 +59,7 @@ ObjPtr Class::makeInstance(Class::ptr base) {
 }
 
 ObjPtr Class::call(Interpreter *interpreter, ArgsList positional, KwargsList keyword) {
-    auto instance = makeInstance();
+    auto instance = makeInstance(nullptr);
 
     auto init = instance->findAttribute("init");
     if (init)
@@ -75,4 +75,8 @@ void Class::checkArguments(ArgsList positional, KwargsList keyword) {
         throw Interpreter::ExceptionWrapper(new ValueError("Default constructor takes no arguments"));
 }
 
-Class::Class(Class::ptr superclass) : superClass(superclass) {}
+Class::Class(const std::string &name, Class::ptr superclass) : superClass(superclass), name(name) {}
+
+std::string Class::getName() {
+    return name;
+}

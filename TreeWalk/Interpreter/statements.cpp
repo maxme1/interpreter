@@ -53,8 +53,8 @@ void Interpreter::visit(TryStatement *statement) {
             auto exceptions = evaluateArguments(item->arguments);
             for (auto &&exception : exceptions) {
                 auto exClass = std::dynamic_pointer_cast<Class>(exception);
-//                TODO: throw here
-                assert(exClass);
+                if (exClass == nullptr)
+                    throw ExceptionWrapper(new ValueError("Trying to catch something different from a class"));
                 if (isDerived(theClass, exClass)) {
                     item->block->visit(this);
                     return;
@@ -102,19 +102,17 @@ void Interpreter::visit(Block *block) {
 
 void Interpreter::visit(FunctionDefinition *statement) {
     std::vector<FunctionPrototype::Argument> arguments;
-    for (auto &&argument :statement->arguments){
+    for (auto &&argument :statement->arguments) {
         ObjPtr default_ = nullptr;
         if (argument.defaultValue != nullptr)
-            default_= argument.defaultValue->visit(this);
+            default_ = argument.defaultValue->visit(this);
         arguments.emplace_back(argument.name, default_, argument.positional, argument.variable);
     }
 
-    defineVariable(statement->name,
-                   New(Function(statement->body, getClosure(), arguments)));
+    defineVariable(statement->name, New(Function(statement->body, getClosure(), arguments)));
 }
 
 void Interpreter::visit(VariableDefinition *statement) {
-//    TODO: simplify
     if (statement->assignee)
         defineVariable(statement->name, statement->assignee->visit(this));
     else
@@ -126,8 +124,8 @@ void Interpreter::visit(ClassDefinition *statement) {
     if (statement->superclass) {
         auto temp = statement->superclass->visit(this);
         superclass = std::dynamic_pointer_cast<Class>(temp);
-        assert(superclass);
-//            throw Wrap(new ValueError("Cannot subclass instances"));
+        if (not superclass)
+            throw ExceptionWrapper(new ValueError("The provided superclass is not a class"));
     }
     auto closure = getClosure();
     enterScope();

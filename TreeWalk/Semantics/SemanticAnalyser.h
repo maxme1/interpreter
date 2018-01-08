@@ -14,6 +14,7 @@ class SemanticAnalyser : public TreeWalker {
     void enterScope();
     void leaveScope();
     void setVariable(const std::string &name, bool value);
+    int findVariableLevel(const std::string &name);
 public:
     explicit SemanticAnalyser(std::vector<Statement::ptr> statements);
     ~SemanticAnalyser();

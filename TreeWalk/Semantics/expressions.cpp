@@ -14,40 +14,19 @@ ObjPtr SemanticAnalyser::visit(Variable *expression) {
             }
             level++;
         }
-        throw SyntaxError("No method to bind 'this'");
+        throw SyntaxError("No method to bind 'this' to.");
     }
 
-    for (int i = 0; i < scopes.size(); ++i) {
-        auto scope = scopes[scopes.size() - i - 1];
-        auto find = scope.find(expression->name);
-        if (find != scope.end())
-            if (find->second) {
-//            TODO: setter?
-                expression->level = i;
-                return nullptr;
-            } else
-                throw SyntaxError("Variable '" + expression->name + "' not found");
-    }
-    expression->level = scopes.size() - 1;
+    expression->level = findVariableLevel(expression->name);
     return nullptr;
 }
 
 ObjPtr SemanticAnalyser::visit(SetVariable *expression) {
-    assert(expression->name != "this" and expression->name != "super");
-//    TODO: combine
+    if (expression->name == "this" or expression->name == "super")
+        throw SyntaxError("\"" + expression->name + "\" is not assignable");
+
     assert(expression->level == -1);
-    for (int i = 0; i < scopes.size(); ++i) {
-        auto scope = scopes[scopes.size() - i - 1];
-        auto find = scope.find(expression->name);
-        if (find != scope.end())
-            if (find->second) {
-//            TODO: setter?
-                expression->level = i;
-                break;
-            } else
-                throw SyntaxError("Variable '" + expression->name + "' not found");
-    }
-    expression->level = scopes.size() - 1;
+    expression->level = findVariableLevel(expression->name);
     expression->value->visit(this);
     return nullptr;
 }

@@ -1,7 +1,6 @@
 #ifndef INTERPRETER_NONE_H
 #define INTERPRETER_NONE_H
 
-
 #include "../Native/Native.h"
 
 $class(None)
@@ -11,6 +10,5 @@ $class(None)
 
     std::string asString() override { return "None"; }
 };
-
 
 #endif //INTERPRETER_NONE_H

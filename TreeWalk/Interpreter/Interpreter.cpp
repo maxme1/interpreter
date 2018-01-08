@@ -34,7 +34,7 @@ void Interpreter::_interpret(std::string text) {
     Tokenizer t = Tokenizer(text);
     auto tokens = t.tokenize();
     Parser p = Parser(tokens);
-    auto statements = p.build();
+    auto statements = p.getStatements();
     auto sm = SemanticAnalyser(statements);
     visitStatements(statements);
 }
@@ -158,9 +158,9 @@ bool Interpreter::interpretFile(const std::string &path) {
 Interpreter::ExceptionWrapper::ExceptionWrapper(Object *exception) : ExceptionWrapper(ObjPtr(exception)) {}
 
 Interpreter::ExceptionWrapper::ExceptionWrapper(ObjPtr exception) {
-    assert(std::dynamic_pointer_cast<Instance>(exception));
-    assert(isInstance(exception, Exception::build()));
-//        throw Wrap(new ValueError("Only objects derived from Exception can be raised"));
-    this->exception = std::dynamic_pointer_cast<Instance>(exception);
-    message = this->exception->asString();
+    auto instance = std::dynamic_pointer_cast<Instance>(exception);
+    if (instance == nullptr or not isInstance(exception, Exception::build()))
+        throw ExceptionWrapper(new ValueError("Only instances derived from Exception can be raised"));
+    this->exception = instance;
+    message = String::cast(this->exception->getAttribute("body"))->string;
 }

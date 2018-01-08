@@ -6,33 +6,33 @@
 #include "../Exception.h"
 #include "../Native/Native.h"
 
-
 $class(String)
+
     std::string string{};
     String() = default;
 
     explicit String(std::string string) : string(std::move(string)) {}
-
-    std::string asString() override {
-        return string;
-    }
 
     bool asBool() override {
         return !string.empty();
     }
 
     static std::string toString(ObjPtr object, Interpreter *interpreter) {
-        auto aClass = std::dynamic_pointer_cast<Class>(object);
-        if (aClass)
-            return aClass->asString();
+        return str(object, interpreter)->string;
+    }
+
+    static ptr str(ObjPtr object, Interpreter *interpreter) {
         auto method = object->findAttribute("str");
-        if (!method)
-            return object->asString();
-        return interpreter->call(method, {})->asString();
+        if (method)
+            return cast(interpreter->call(method, {}));
+        auto string = cast(object, false);
+        if (string)
+            return string;
+        return ptr(new String(object->asString()));
     }
 
     $method(init, String)
-        self->string = toString(positional[0], interpreter);
+        self->string = str(positional[0], interpreter)->string;
         return nullptr;
     }
 

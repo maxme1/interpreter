@@ -4,6 +4,7 @@
 #include "../Native/Native.h"
 
 $class(Bool)
+
     bool value;
     Bool() = default;
 
@@ -15,10 +16,9 @@ $class(Bool)
 
     static bool toBool(ObjPtr object, Interpreter *interpreter) {
         auto method = object->findAttribute("bool");
-        if (!method)
-            return object->asBool();
-        return false;
-//        return interpreter->call(method, {})->asBool();
+        if (method)
+            return interpreter->call(method, {})->asBool();
+        return object->asBool();
     }
 
     $method(init, Bool)

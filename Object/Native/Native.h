@@ -13,7 +13,8 @@
 #define $this(ClassName) std::static_pointer_cast<ClassName>(shared_from_this())
 
 #define $subclass(ClassName, Base) struct ClassName : public NativeObject<ClassName, Base> {\
-    explicit ClassName(Class::ptr classPtr) : NativeObject(classPtr) {};
+    explicit ClassName(Class::ptr classPtr) : NativeObject(classPtr) {}; \
+    static std::string getName() {return #ClassName;}
 
 #define $class(ClassName) $subclass(ClassName, NoSuperClass)
 
