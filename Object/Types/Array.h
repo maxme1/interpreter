@@ -5,6 +5,7 @@
 #include "Int.h"
 
 $class(Array)
+
     std::vector<ObjPtr> array;
     Array() = default;
 
@@ -28,16 +29,14 @@ $class(Array)
     $method(getItem, Array)
         auto idx = Int::toInt(positional[0]);
         if (idx >= self->array.size())
-            assert(false);
-//            throw Wrap(new IndexError(std::to_string(idx)));
+            throw Interpreter::ExceptionWrapper(new IndexError(std::to_string(idx)));
         return self->array[idx];
     }
 
     $method(setItem, Array)
         auto idx = Int::toInt(positional[0]);
         if (idx >= self->array.size())
-            assert(false);
-//            throw Wrap(new IndexError(std::to_string(idx)));
+            throw Interpreter::ExceptionWrapper(new IndexError(std::to_string(idx)));
 
         return self->array[idx] = positional[1];
     }
@@ -56,11 +55,11 @@ $class(Array)
     }
 
     static void populate() {
-        addMethod("init", init, 0);
+        addMethod("init", init, 1, true);
         addMethod("str", str, 0);
         addMethod("push", push, 1);
-        addMethod("setitem", setItem, 2);
-        addMethod("getitem", getItem, 1);
+        addMethod("setItem", setItem, 2);
+        addMethod("getItem", getItem, 1);
     }
 };
 

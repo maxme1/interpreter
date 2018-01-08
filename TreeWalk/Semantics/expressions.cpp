@@ -74,14 +74,12 @@ ObjPtr SemanticAnalyser::visit(Literal *expression) {
 }
 
 ObjPtr SemanticAnalyser::visit(SetAttribute *expression) {
-//    TODO: also looks bad
     expression->target->target->visit(this);
     expression->value->visit(this);
     return nullptr;
 }
 
 ObjPtr SemanticAnalyser::visit(SetItem *expression) {
-//    TODO: also looks bad
     expression->target->target->visit(this);
     expression->target->argument->visit(this);
     expression->value->visit(this);

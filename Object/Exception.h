@@ -34,7 +34,6 @@ $exception(IndexError, AccessError)
 
 $exception(ArithmeticError, Exception)
 $exception(ImportError, Exception)
-//TODO: get rid
 $exception(ValueError, Exception)
 
 #endif //INTERPRETER_EXCEPTION_H

@@ -8,7 +8,7 @@
 std::map<Token::tokenType, std::string> binary = {
         {Token::ADD,              "plus"},
         {Token::SUB,              "minus"},
-        {Token::ASTERISK,              "multiply"},
+        {Token::ASTERISK,         "multiply"},
         {Token::DIV,              "divide"},
         {Token::GREATER,          "greater"},
         {Token::LESS,             "less"},
@@ -76,21 +76,17 @@ ObjPtr Interpreter::visit(SetVariable *expression) {
 }
 
 ObjPtr Interpreter::visit(SetAttribute *expression) {
-//    TODO: also looks bad
     auto value = expression->value->visit(this), target = expression->target->target->visit(this);
     target->setAttribute(expression->target->name, value);
     return value;
 }
 
 ObjPtr Interpreter::visit(SetItem *expression) {
-//    TODO: also looks bad
     auto target = expression->target->target->visit(this);
     auto argument = expression->target->argument->visit(this);
     auto value = expression->value->visit(this);
-    //  TODO:  user-defined method
-//    auto method = target->getAttribute("setitem");
-//    return callOperator(method, {argument, value});
-    return nullptr;
+    auto method = target->getAttribute("setItem");
+    return call(method, {argument, value});
 }
 
 ObjPtr Interpreter::visit(Variable *expression) {
@@ -123,10 +119,8 @@ ObjPtr Interpreter::visit(SuperClass *expression) {
 ObjPtr Interpreter::visit(GetItem *expression) {
     auto target = expression->target->visit(this);
     auto argument = expression->argument->visit(this);
-    //  TODO:  user-defined method
-//    auto method = target->getAttribute("getitem");
-//    return callOperator(method, {argument});
-    return nullptr;
+    auto method = target->getAttribute("getItem");
+    return call(method, {argument});
 }
 
 ObjPtr Interpreter::visit(GetAttribute *expression) {

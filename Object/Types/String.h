@@ -17,6 +17,10 @@ $class(String)
         return !string.empty();
     }
 
+    std::string asString() override {
+        return string;
+    }
+
     static std::string toString(ObjPtr object, Interpreter *interpreter) {
         return str(object, interpreter)->string;
     }
@@ -25,9 +29,6 @@ $class(String)
         auto method = object->findAttribute("str");
         if (method)
             return cast(interpreter->call(method, {}));
-        auto string = cast(object, false);
-        if (string)
-            return string;
         return ptr(new String(object->asString()));
     }
 

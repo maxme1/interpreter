@@ -10,7 +10,9 @@ void SemanticAnalyser::visit(Block *block) {
 }
 
 void SemanticAnalyser::visit(VariableDefinition *statement) {
-//    TODO: throw if defined?
+    assert(!scopes.empty());
+    if (scopes.back().count(statement->name) > 0)
+        throw SyntaxError("Variable \"" + statement->name + "\" is already defined in this scope");
     setVariable(statement->name, false);
     if (statement->assignee)
         statement->assignee->visit(this);

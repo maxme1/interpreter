@@ -3,10 +3,6 @@
 
 #include "Native.h"
 #include "../Class.h"
-//
-//struct NativeClass : public Class {
-//    explicit NativeClass(Class::ptr superclass) : Class(superclass) {}
-//};
 
 struct NoSuperClass {
     static Class::ptr build() {
@@ -14,9 +10,13 @@ struct NoSuperClass {
     }
 };
 
+//simple workaround
+void thr(std::string name);
+
 template<typename T, typename Base>
 class NativeObject : public Instance {
     friend class Class;
+
     struct LocalNative : public Class {
         inline static Class::ptr getClass() {
             static Class::ptr instance = Class::ptr(new LocalNative(T::getName(), Base::build()));
@@ -26,7 +26,7 @@ class NativeObject : public Instance {
         LocalNative(LocalNative const &) = delete;
         void operator=(LocalNative const &)  = delete;
 
-        ObjPtr makeInstance(Class::ptr base = nullptr) override {
+        ObjPtr makeInstance(Class::ptr base) override {
             if (base)
                 return Instance::ptr(new T(base));
             return Instance::ptr(new T(getClass()));
@@ -52,13 +52,14 @@ public:
 
     static std::shared_ptr<T> cast(ObjPtr object, bool strict = true) {
         auto result = std::dynamic_pointer_cast<T>(object);
-        assert(not strict or (result != nullptr));
+        if (strict and result == nullptr)
+            thr(getName());
         return result;
     }
 
     static void populate() {}
 
-    static std::string getName(){
+    static std::string getName() {
         return "";
     };
 

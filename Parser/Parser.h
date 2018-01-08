@@ -209,9 +209,7 @@ class Parser {
             }
 
             assert(false);
-//            throw "Bad assignment";
         }
-//        here may be a leak
         return left;
     }
 

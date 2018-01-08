@@ -5,6 +5,7 @@
 
 class Class : public Callable {
     friend class Interpreter;
+
 private:
     shared(Class) superClass;
     std::string name;

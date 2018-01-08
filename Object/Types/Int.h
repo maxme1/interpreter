@@ -22,14 +22,12 @@ $class(Int)
     }
 
     $method(init, Int)
-        if (cast(positional[0]))
-            self->value = Int::toInt(positional[0]);
-        else if (String::cast(positional[0]))
-            self->value = std::stoi(String::toString(positional[0], interpreter));
-        else if (Bool::cast(positional[0]))
+        if (String::cast(positional[0], false))
+            self->value = std::stoi(String::cast(positional[0])->string);
+        else if (Bool::cast(positional[0], false))
             self->value = (int) positional[0]->asBool();
         else
-            throw Interpreter::ExceptionWrapper(new ValueError("Could not convert object to Int"));
+            self->value = Int::toInt(positional[0]);
         return nullptr;
     }
 
